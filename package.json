@@ -17,6 +17,7 @@
     "db:down": "docker stop skill-graph-db",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx scripts/db-migrate.mts",
+    "db:seed": "tsx scripts/db-seed.mts",
     "db:reset": "tsx scripts/db-reset.mts",
     "db:studio": "drizzle-kit studio",
     "test:db": "vitest run -c vitest.db.config.mts"

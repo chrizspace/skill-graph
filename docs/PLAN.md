@@ -136,9 +136,9 @@ The first Microsoft sign-in creates an Employee. Emails listed in `ADMIN_EMAILS`
   - A **Table view** tab shows the same data. Target is WCAG 2.2 AA.
 - **Below 768px**: the table/list view is the default and the graph is opt-in. All other pages are responsive.
 
-## 6. Seed data (`src/db/seed/`, idempotent upsert by slug, fictional people only)
+## 6. Seed data (`src/db/seed/`, fictional people only)
 
-About 15 roles, 60 skills and 40 technologies (Microsoft-heavy: Azure, Fabric, Power BI, ADF, Azure OpenAI, Copilot Studio, Azure DevOps, GitHub Actions…). The scenario-critical requirements are fixed exactly:
+17 roles, 62 skills and 42 technologies, 283 links (Microsoft-heavy: Azure, Fabric, Power BI, ADF, Azure OpenAI, Copilot Studio, Azure DevOps, GitHub Actions…). The scenario-critical requirements are fixed exactly:
 
 - **Frontend Developer**
   - Critical: JavaScript, TypeScript, React, HTML & CSS, Problem Solving
@@ -158,20 +158,22 @@ About 15 roles, 60 skills and 40 technologies (Microsoft-heavy: Azure, Fabric, P
   - Important: Account Management, Commercial Awareness, Risk Management
   - Nice: Agile
 - **Full-stack Developer**: Frontend core + Node.js (I) + REST APIs (I) + SQL (N). This makes it _reachable_ for the Frontend Developer at 76% coverage.
-- **`next_step` links**: Frontend → Full-stack; Data Analyst / Backend → Data Engineer; Data Engineer → AI Engineer and Architect; Business Analyst → Project Manager; Project Manager → Delivery Manager; DevOps → Cloud Engineer → Architect.
-- **Users**:
-  - Alex Rivera: Frontend Developer; declares JS, TS, React
-  - Sam Patel: Project Manager
-  - Morgan Lee: Manager of Alex and Sam
-  - Jordan Kim: Admin
-- **Tests that guard the seed**: database tests assert that Scenarios 1 and 2 return exactly the brief's lists.
+- **Analytics Engineer** and **Engineering Manager** exist so that ADF, Snowflake, Negotiation and Coaching & Mentoring have a home without touching the scenario roles.
+- **`next_step` links**: Frontend → Full-stack; Data Analyst / Analytics Engineer / Backend → Data Engineer; Data Engineer → AI Engineer and Solution Architect; Business Analyst → Project Manager; Project Manager → Delivery Manager; DevOps → Cloud Engineer → Solution Architect (19 in total).
+- **Users** (`@example.com`):
+  - Alex Rivera: Frontend Developer, employee; declares JavaScript, TypeScript, React
+  - Sam Patel: Project Manager, employee; declares Jira
+  - Morgan Lee: Engineering Manager, manager of Alex and Sam
+  - Jordan Kim: Solution Architect, admin
+- **When it runs**: `pnpm db:seed` runs before every Vercel build, after the migrations. It only adds what's missing (never overwrites). In **production** it seeds the graph once into an empty database and never adds demo people, so it can't undo admin edits. Locally and on previews it runs in full, so demo sign-in always has its people.
+- **Tests that guard the seed** (`src/db/seed/seed.db.test.ts`): the scenario roles' exact requirements, Scenarios 1 and 2 as set operations (M2 replaces them with the domain functions), link type rules, no `builds_on` cycles, no unconnected skills or technologies, idempotency.
 
 ## 7. Milestones (each split into small feature PRs)
 
 | #   | Scope                                                                                                                   | Done when                                                                                   | Status |
 | --- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ------ |
 | M0  | Scaffold, public repo, ruleset, CI, Claude workflow config, `pnpm check`, Vercel + Neon link, `docs/PLAN.md`, README    | A PR auto-merges after passing CI, and its preview deploy loads                             | Done   |
-| M1  | Schema, migrations, local Postgres in Docker, seed, DB tests                                                            | `pnpm db:reset && pnpm test:db` passes; seed invariants hold                                | To do  |
+| M1  | Schema, migrations, local Postgres in Docker, seed, DB tests                                                            | `pnpm db:reset && pnpm test:db` passes; seed invariants hold                                | Done   |
 | M2  | Domain functions (TDD)                                                                                                  | Scenario 1 and 2 unit tests match exactly; ≥90% coverage on `src/domain`                    | To do  |
 | M3  | Better Auth (Microsoft + demo), profiles, `authorize()`, app shell and navigation                                       | Sign in as each seeded user locally; denial tests pass                                      | To do  |
 | M4  | Role browser + skill and technology detail pages                                                                        | Search and filter work; role detail is grouped by priority                                  | To do  |

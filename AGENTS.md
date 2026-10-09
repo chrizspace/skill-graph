@@ -31,7 +31,8 @@ An internal tool that shows roles, skills and technologies as a graph, so people
 ## Database rules
 
 - Every schema change ships with its generated migration (`pnpm db:generate`); CI fails if they drift apart. Never edit a migration that has been merged: add a new one.
-- Migrations run automatically before each Vercel build. Preview deploys use their own Neon branch; production uses the main branch. Migrations must be backwards compatible with the code currently in production.
+- Migrations and the seed run automatically before each Vercel build. Preview deploys use their own Neon branch; production uses the main branch. Migrations must be backwards compatible with the code currently in production.
+- The requirements of the scenario roles in `src/db/seed/data.ts` are fixed by the brief; the seed tests fail if they change.
 
 ## Commands
 

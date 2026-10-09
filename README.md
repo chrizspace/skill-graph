@@ -26,11 +26,13 @@ Requirements: Node 24+, pnpm (the version is pinned in `package.json`), Docker (
 pnpm install
 cp .env.example .env.local   # local database connection
 pnpm db:up                   # Postgres 17 in Docker on port 5433
-pnpm db:reset                # build the schema from the migrations
+pnpm db:reset                # build the schema and seed the demo graph and people
 pnpm dev
 ```
 
 Open http://localhost:3000.
+
+The seed holds 17 roles, 62 skills and 42 technologies, plus four fictional people (`@example.com`): Alex Rivera (Frontend Developer), Sam Patel (Project Manager), Morgan Lee (their manager) and Jordan Kim (admin). Production gets the graph but never the demo people.
 
 ## Commands
 
@@ -43,6 +45,7 @@ Open http://localhost:3000.
 | `pnpm db:up`, `pnpm db:down`               | Start / stop the local Postgres                                                   |
 | `pnpm db:reset`                            | Rebuild the local database from the migrations (refuses any non-local database)   |
 | `pnpm db:generate`                         | Write a migration after changing `src/db/schema.ts`                               |
+| `pnpm db:seed`                             | Add the seed graph and demo people (idempotent)                                   |
 | `pnpm test:db`                             | Database tests on PGlite (in-process Postgres, no Docker needed)                  |
 | `pnpm build`                               | Production build                                                                  |
 
