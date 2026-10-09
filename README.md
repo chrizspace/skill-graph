@@ -20,10 +20,13 @@ The plan, data model and milestones are in [docs/PLAN.md](docs/PLAN.md).
 
 ## Getting started
 
-Requirements: Node 24+, pnpm (the version is pinned in `package.json`), Docker (for the local database, from M1).
+Requirements: Node 24+, pnpm (the version is pinned in `package.json`), Docker (Colima, OrbStack or Docker Desktop) for the local database.
 
 ```bash
 pnpm install
+cp .env.example .env.local   # local database connection
+pnpm db:up                   # Postgres 17 in Docker on port 5433
+pnpm db:reset                # build the schema from the migrations
 pnpm dev
 ```
 
@@ -37,6 +40,10 @@ Open http://localhost:3000.
 | `pnpm check`                               | Only the checks that matter for what changed; `pnpm check --full` runs everything |
 | `pnpm lint`, `pnpm typecheck`, `pnpm test` | ESLint, `next typegen` + `tsc`, Vitest                                            |
 | `pnpm format`                              | Prettier                                                                          |
+| `pnpm db:up`, `pnpm db:down`               | Start / stop the local Postgres                                                   |
+| `pnpm db:reset`                            | Rebuild the local database from the migrations (refuses any non-local database)   |
+| `pnpm db:generate`                         | Write a migration after changing `src/db/schema.ts`                               |
+| `pnpm test:db`                             | Database tests on PGlite (in-process Postgres, no Docker needed)                  |
 | `pnpm build`                               | Production build                                                                  |
 
 ## How changes reach `main`

@@ -12,19 +12,30 @@
     "test:watch": "vitest",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "tsx scripts/check.mts"
+    "check": "tsx scripts/check.mts",
+    "db:up": "tsx scripts/db-up.mts",
+    "db:down": "docker stop skill-graph-db",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx scripts/db-migrate.mts",
+    "db:reset": "tsx scripts/db-reset.mts",
+    "db:studio": "drizzle-kit studio",
+    "test:db": "vitest run -c vitest.db.config.mts"
   },
   "dependencies": {
+    "drizzle-orm": "^0.45.4",
     "next": "16.4.0",
+    "postgres": "^3.4.9",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitest/coverage-v8": "^5.0.3",
+    "drizzle-kit": "^0.31.11",
     "eslint": "^9",
     "eslint-config-next": "16.4.0",
     "prettier": "^3.9.9",
