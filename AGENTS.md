@@ -16,6 +16,7 @@ An internal tool that shows roles (with specialisations) and what they require (
 
 - **Never commit, merge or push on `main`.** `main` changes only through pull requests that pass CI; a ruleset on GitHub and the hook in `.claude/hooks/guard-main.mjs` both enforce it.
 - **One branch per feature**, from an up-to-date `main`: `feat|fix|chore|docs/<milestone>-<slug>`, e.g. `feat/m4-role-browser`. Use the `/feature <slug>` skill to start one.
+- `docs/*` (and Dependabot) branches get **no Vercel preview and no Neon database branch** (`vercel.json` → `git.deploymentEnabled`): use `docs/` only for changes to documentation. The free Neon plan has 10 branches, one per preview.
 - Keep PRs small: a milestone is usually several PRs. Commit messages and PR titles use Conventional Commits (`feat: …`, `fix: …`); the PR title becomes the squash commit on `main`.
 - **Ship with the `/ship` skill**: `pnpm check` passes → push → open the PR with the template → `gh pr merge --auto --squash --delete-branch`. GitHub merges it once the `ci` check is green. If CI fails, fix it on the same branch. After the merge, switch back to `main` and pull before starting the next branch.
 - Never use `--force`, `--no-verify` or `gh pr merge --admin`. Never change the ruleset to get a PR through.
