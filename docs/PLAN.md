@@ -17,7 +17,7 @@ Decisions made at the start: hosting on **Vercel**, **Neon Postgres + Drizzle**,
 
 - One **site** per installation, led by a **Site Lead**. The Site Lead replaces the "admin" and oversees several practices. The database is ready for more sites later.
 - **Practices** are focused departments, e.g. Frontend Practice or Delivery Management. Each has one or more **Practice Leads** who control it: its roles, specialisations, requirements and development paths.
-- A role can have **specialisations**: a shared core plus extra requirements, e.g. Frontend Developer: React / Angular.
+- A role has a **core** set of requirements and optional **specialisations** that add their own, e.g. Frontend Developer: React / Angular, or Scrum Master: SAFe / Management 3.0. Each role page also suggests **similar roles** with an overlapping skillset, e.g. Scrum Master ↔ Project Manager.
 - **Managers** work within a practice. They see their direct reports' profiles, **recommend** development steps to them, and send the Practice Lead **change requests**: feedback on roles and paths, and proposals for new roles or specialisations.
 - **Who sees named profiles**: the person, their manager, and the Practice Leads of the person's practice. The Site Lead sees aggregates only.
 - **Catalogue**: three item types: **technical skills** (including tools and platforms), **soft skills** and **certifications**.
@@ -57,12 +57,31 @@ Another example: in Delivery Management, a manager has a Business Analyst, a Pro
 - **Practice**: a department of related roles, e.g. Frontend Practice, Delivery Management, Data & AI.
   - It has one or more **Practice Leads**, and its **members** are the people whose home practice it is.
   - Practice Leads control the practice: its roles, their specialisations, requirements and development paths.
-- **Role** (job role): a named position in a practice, e.g. Frontend Developer or Scrum Master.
-  - It has a description, its practice, a **core requirement profile**, optional **specialisations** and **paths** to other roles.
-  - Not to be confused with what someone may do in the app: that's their **user type** (below).
-- **Specialisation**: a variant of a role that adds requirements on top of the role's core, e.g. Frontend Developer: React, or Frontend Developer: Angular.
-  - Its **effective requirements** = the role's core plus the specialisation's own. Where both name the same item, the specialisation's priority applies.
+- **Role** (job role): a named position in a practice, e.g. Scrum Master. A role has:
+  - **a description**: what the role does and the skillset it looks for, written by the Practice Lead
+  - **its practice**
+  - **core requirements**: the technical skills, soft skills and certifications everyone in the role needs, each weighted Critical, Important or Nice to have
+  - **optional specialisations**: directions within the role, each adding its own requirements (below)
+  - **paths**: official career moves to other roles (below)
+  - **similar roles**: suggestions of roles with an overlapping skillset, showing where they share requirements, e.g. Scrum Master ↔ Project Manager (below)
+
+  Not to be confused with what someone may do in the app: that's their **user type** (below).
+
+- **Specialisation**: a direction within a role that adds requirements on top of the role's core.
+  - Examples:
+    - **Scrum Master: SAFe** (scaled agile): SAFe and PI Planning, plus the SAFe Scrum Master certification
+    - **Scrum Master: Facilitation / Management 3.0**: facilitation techniques and Management 3.0 practices, plus the Management 3.0 Foundation certification
+    - **Frontend Developer: React** or **: Angular**
+  - Its **effective requirements** = the role's core plus the specialisation's own. Where both name the same item, the specialisation's weight applies.
+  - A specialisation is also a **path within the role**: from the core, what's missing is exactly the specialisation's own requirements. No separate path needs to be defined for it.
   - A role may have no specialisations.
+- **Similar roles**: computed from requirements, not curated. Two roles are similar when their core requirements overlap, weighted by importance (§4). The role page lists the most similar roles with:
+  - the share they have in common
+  - the shared items, the synergies, e.g. Scrum Master and Project Manager share Agile, Facilitation, Stakeholder Management and Communication
+  - what each adds
+
+  Similar roles describe the roles themselves; suggested paths (below) describe a person.
+
 - **Catalogue item**: one entry in the catalogue shared by the whole site. There is one "Python", not one per practice. Three types:
   - **Technical skill**: languages, frameworks, methods, tools and platforms. Examples: HTML, CSS, JavaScript, TypeScript, React, SQL, Data Modelling, Azure, Databricks, Git. Tools and platforms have the category "Tool / platform", so they can be filtered and shown apart.
   - **Soft skill**: how someone works with people and problems. Examples: Solutioning, Team Leading, Mentoring, Leadership, Communication, Stakeholder Management.
@@ -80,6 +99,7 @@ Another example: in Delivery Management, a manager has a Business Analyst, a Pro
 - **Dependency**: "Databricks builds on Python and Spark". It orders learning in a plan. Items can also be **related** ("Terraform ↔ Bicep": alternatives or companions).
 - **Path**: a career move from one role (or specialisation) to another, of two kinds:
   - **Official path**: defined by a Practice Lead, with a description and a typical duration. A role can have several official paths out, e.g. Data Engineer → AI Engineer or → Solution Architect, or Frontend Developer: React → Frontend Developer: Angular.
+  - **Specialisation path**: from a role's core into one of its specialisations (above). It always exists, so nobody has to define it.
   - **Suggested path**: computed, not curated. These are roles the person is already close to by readiness. The UI labels them as suggestions.
 
   A path never copies requirements: what's missing is always the target's **current** effective requirements compared with the person's profile.
@@ -121,7 +141,7 @@ Another example: in Delivery Management, a manager has a Business Analyst, a Pro
   - ticks the technical and soft skills they have
   - adds certifications with the date obtained and the expiry date
 - Sees how they meet **their own role**: met and missing, plus certifications that are expiring or expired.
-- Browses roles, the catalogue and the graph.
+- Browses roles, the catalogue and the graph. A role page shows its description, core requirements and specialisations (by type and weight), its paths and similar roles with their synergies.
 - **Compares two roles against their own profile** (§4): what they already have and what's missing, by priority and type.
 - Picks a target and gets a **development plan**: the gaps in learning order, with their manager's accepted recommendations marked. Progress updates as they update their profile.
 - Sees and answers **recommendations** from their manager.
@@ -144,7 +164,7 @@ Another example: in Delivery Management, a manager has a Business Analyst, a Pro
 
 - Everything an employee can do.
 - **Controls the practice**:
-  - creates and edits its roles and specialisations
+  - creates and edits its roles (description, core requirements) and their specialisations
   - sets requirements (item, weight, note)
   - defines official paths
 - **Reviews change requests** for the practice: approve (applies or creates a draft), reject with a reason, or ask for more information.
@@ -275,8 +295,13 @@ The functions:
   - **Reachable**: every Critical requirement met and readiness ≥ 0.70.
   - **Stretch**: readiness ≥ 0.50. **Far**: anything lower.
   - The thresholds live in `src/domain/config.ts`.
+- **Similar roles** `similarRoles(role, n)`: weighted overlap of core requirements.
+  - For two roles A and B, each item gets a weight per role (Critical 3, Important 2, Nice 1; 0 if the role doesn't require it).
+  - similarity = Σ min(wA, wB) / Σ max(wA, wB) over all items either role requires (a weighted Jaccard index, 0–1).
+  - Returns the top N roles above a threshold (0.25, in `src/domain/config.ts`), each with its shared items and what it adds. The role's own specialisations are left out.
 - **Paths for a person**:
   - Official paths from their current role and specialisation, up to 3 hops, each with readiness.
+  - Specialisation paths within their current role, each with readiness.
   - Suggested: the top N targets by readiness that no official path leads to, labelled as suggestions.
 - **Development plan**: `assess(profile, target)` in learning order, with accepted recommendations marked (and added if the target doesn't require them), plus progress = readiness.
 - **Aggregates**:
@@ -301,9 +326,12 @@ The functions:
 - `/onboarding`: pick my practice, role and specialisation, then review the pre-filled profile.
 - `/me`: profile editor (skills, certifications with dates, target). `/me/plan`: development plan and recommendations.
 - `/roles`, `/roles/[slug]`:
-  - core requirements and specialisations, by weight and type, with notes
+  - description
+  - core requirements, grouped by type (technical / soft / certifications) and weight, with notes
+  - specialisations, each with what it adds
   - practice and Practice Leads
   - official paths in and out
+  - similar roles with their synergies (shared items) and a link to compare
   - "compare with my profile"
 - `/catalogue`, `/catalogue/[slug]`: technical skills, soft skills and certifications, and which roles need each one (with weight).
 - `/compare?a=&b=`: two roles or specialisations, always with my profile overlaid.
@@ -357,6 +385,7 @@ All writes go through Server Actions with zod validation and `can()`. The graph 
   - connections grouped by kind
   - weight within the current focus
   - "Roles that need this", each with its weight
+  - for a role: its specialisations and similar roles
   - links to the detail page and to compare
 - **Path mode**: pick two roles, highlight the official path or the shortest route, dim everything else.
 - **Accessibility**
@@ -403,6 +432,11 @@ All writes go through Server Actions with zod validation and `can()`. The graph 
   - **Data & AI**: Data Engineer, Analytics Engineer, Data Analyst, Data Scientist, AI Engineer
   - **Cloud & Security**: Cloud Engineer, DevOps Engineer, Security Engineer
   - **Delivery Management**: Business Analyst, Project Manager, Scrum Master, Product Owner, Delivery Manager
+    - **Scrum Master**:
+      - core: Agile, Scrum, Facilitation, Coaching, Communication, Stakeholder Management; PSM I Critical
+      - specialisation **SAFe**: SAFe, PI Planning; SAFe Scrum Master certification
+      - specialisation **Facilitation / Management 3.0**: facilitation techniques, Management 3.0 practices; Management 3.0 Foundation certification
+    - Scrum Master, Project Manager and Product Owner share enough core requirements to appear as **similar roles** to each other. Project Manager gains Facilitation (Important) for this. Scenario 2 is unaffected, because Delivery Manager doesn't require Facilitation.
 - **Frontend Developer core**: v1's list without React and Next.js, which move to the React specialisation. Frontend Developer: React therefore has exactly v1's requirements, so Scenario 1 is unchanged.
 - **Catalogue re-typed**:
   - v1's technologies become technical skills, with the category "Tool / platform".
@@ -442,21 +476,21 @@ All writes go through Server Actions with zod validation and `can()`. The graph 
 
 ## 8. Milestones (each split into small feature PRs)
 
-| #   | Scope                                                                                                                                               | Done when                                                                                                                                  | Status |
-| --- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
-| M0  | Scaffold, public repo, ruleset, CI, Claude workflow config, `pnpm check`, Vercel + Neon link, `docs/PLAN.md`, README                                | A PR auto-merges after passing CI, and its preview deploy loads                                                                            | Done   |
-| M1  | Schema v1, migrations, local Postgres in Docker, seed v1, DB tests                                                                                  | `pnpm db:reset && pnpm test:db` passes; seed invariants hold                                                                               | Done   |
-| M2  | **Organisation model**: migration `0001` (§3), seed v2 (§7), DB tests                                                                               | Constraints and seed invariants (site, practices, specialisations, the three item types, certifications) pass; production migrates cleanly | To do  |
-| M3  | Domain logic (TDD): effective requirements, assess, learning order, compare with profile, readiness, paths, plan, aggregates, change validation     | Scenarios 1 and 2 exact (missing lists and order); ≥90% coverage on `src/domain`                                                           | To do  |
-| M4  | Better Auth (Microsoft + demo sign-in), `can()`, app shell with navigation per user type                                                            | Sign in as each demo person; every denial in §1 has a test                                                                                 | To do  |
-| M5  | Role browser (with specialisations) and catalogue pages                                                                                             | Search and filters work; role page shows core and specialisations by weight and type, practice, paths                                      | To do  |
-| M6  | Employee: onboarding with pre-fill, profile editor (skills, certifications with dates), target, compare two roles with my profile, development plan | End-to-end Scenarios 1 and 2 through the UI                                                                                                | To do  |
-| M7  | `/explore` graph (§6), plus a performance test on a synthetic 2k-node / 20k-link graph                                                              | Focus, specialisations, my view and path mode work by mouse and keyboard; overview interactive in under 2s                                 | To do  |
-| M8  | Practice Lead: edit roles, specialisations, requirements, paths, drafts, catalogue items; validation, confirmations, audit log                      | A lead edits only their practice; edits show in the graph straight away; audit rows written                                                | To do  |
-| M9  | Change requests: feedback and proposals, comments, approve (applies or drafts), reject, needs info, withdraw                                        | End-to-end: manager sends feedback, lead approves, role changes, audit links to the request; a proposal becomes a draft                    | To do  |
-| M10 | Manager and Practice Lead people views: team, employee profile, recommendations, succession; practice members and gaps                              | End-to-end Scenario 3 and a recommendation accepted into a plan; privacy tests                                                             | To do  |
-| M11 | Site Lead: practices and leads, people and reporting lines, site overview and bench strength, catalogue merge, audit log                            | A Site Lead creates a practice and appoints its lead; aggregates hide groups under 5; no named profiles                                    | To do  |
-| M12 | Accessibility (axe on every page, both themes), keyboard pass, README, production deploy plus smoke test                                            | Zero serious or critical axe violations; production works with Microsoft sign-in                                                           | To do  |
+| #   | Scope                                                                                                                                                          | Done when                                                                                                                                        | Status |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
+| M0  | Scaffold, public repo, ruleset, CI, Claude workflow config, `pnpm check`, Vercel + Neon link, `docs/PLAN.md`, README                                           | A PR auto-merges after passing CI, and its preview deploy loads                                                                                  | Done   |
+| M1  | Schema v1, migrations, local Postgres in Docker, seed v1, DB tests                                                                                             | `pnpm db:reset && pnpm test:db` passes; seed invariants hold                                                                                     | Done   |
+| M2  | **Organisation model**: migration `0001` (§3), seed v2 (§7), DB tests                                                                                          | Constraints and seed invariants (site, practices, specialisations, the three item types, certifications) pass; production migrates cleanly       | To do  |
+| M3  | Domain logic (TDD): effective requirements, assess, learning order, compare with profile, readiness, similar roles, paths, plan, aggregates, change validation | Scenarios 1 and 2 exact (missing lists and order); ≥90% coverage on `src/domain`                                                                 | To do  |
+| M4  | Better Auth (Microsoft + demo sign-in), `can()`, app shell with navigation per user type                                                                       | Sign in as each demo person; every denial in §1 has a test                                                                                       | To do  |
+| M5  | Role browser (with specialisations and similar roles) and catalogue pages                                                                                      | Search and filters work; role page shows description, core and specialisations by type and weight, practice, paths, similar roles with synergies | To do  |
+| M6  | Employee: onboarding with pre-fill, profile editor (skills, certifications with dates), target, compare two roles with my profile, development plan            | End-to-end Scenarios 1 and 2 through the UI                                                                                                      | To do  |
+| M7  | `/explore` graph (§6), plus a performance test on a synthetic 2k-node / 20k-link graph                                                                         | Focus, specialisations, my view and path mode work by mouse and keyboard; overview interactive in under 2s                                       | To do  |
+| M8  | Practice Lead: edit roles, specialisations, requirements, paths, drafts, catalogue items; validation, confirmations, audit log                                 | A lead edits only their practice; edits show in the graph straight away; audit rows written                                                      | To do  |
+| M9  | Change requests: feedback and proposals, comments, approve (applies or drafts), reject, needs info, withdraw                                                   | End-to-end: manager sends feedback, lead approves, role changes, audit links to the request; a proposal becomes a draft                          | To do  |
+| M10 | Manager and Practice Lead people views: team, employee profile, recommendations, succession; practice members and gaps                                         | End-to-end Scenario 3 and a recommendation accepted into a plan; privacy tests                                                                   | To do  |
+| M11 | Site Lead: practices and leads, people and reporting lines, site overview and bench strength, catalogue merge, audit log                                       | A Site Lead creates a practice and appoints its lead; aggregates hide groups under 5; no named profiles                                          | To do  |
+| M12 | Accessibility (axe on every page, both themes), keyboard pass, README, production deploy plus smoke test                                                       | Zero serious or critical axe violations; production works with Microsoft sign-in                                                                 | To do  |
 
 ## 9. Repo and agent workflow (feature branch → PR → auto-merge)
 
@@ -538,9 +572,10 @@ All writes go through Server Actions with zod validation and `can()`. The graph 
   6. A manager recommends a target to a report, the report accepts it, and it becomes their target and plan.
   7. An expired certification isn't a gap: it counts as held, appears faded with its expiry date, and doesn't lower readiness. One expiring within 90 days is flagged.
   8. A Site Lead creates a practice and appoints its Practice Lead.
-  9. Privacy:
-     - an employee can't open another person's profile
-     - a Practice Lead sees only their practice's members
-     - a Site Lead sees no names, and small groups are hidden
+  9. The Scrum Master page shows its core, the SAFe and Management 3.0 specialisations (each with what it adds), and Project Manager and Product Owner as similar roles with their shared items.
+  10. Privacy:
+  - an employee can't open another person's profile
+  - a Practice Lead sees only their practice's members
+  - a Site Lead sees no names, and small groups are hidden
 - **Performance**: a synthetic 2k/20k graph fixture with a measured overview load time and frame rate (M7).
 - **Release (M12)**: production deploy on Vercel; smoke test of Microsoft sign-in, the Scenario 1 compare, a graph focus and one approved change request.
