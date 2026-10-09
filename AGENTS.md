@@ -19,6 +19,7 @@ An internal tool that shows roles, skills and technologies as a graph, so people
 - Keep PRs small: a milestone is usually several PRs. Commit messages and PR titles use Conventional Commits (`feat: …`, `fix: …`); the PR title becomes the squash commit on `main`.
 - **Ship with the `/ship` skill**: `pnpm check` passes → push → open the PR with the template → `gh pr merge --auto --squash --delete-branch`. GitHub merges it once the `ci` check is green. If CI fails, fix it on the same branch. After the merge, switch back to `main` and pull before starting the next branch.
 - Never use `--force`, `--no-verify` or `gh pr merge --admin`. Never change the ruleset to get a PR through.
+- **This repository is public.** Keep everything company-neutral: don't name the employer, clients or real people in code, seed data, docs, commit messages or PRs. Seed data is fictional.
 
 ## Definition of done (every PR)
 

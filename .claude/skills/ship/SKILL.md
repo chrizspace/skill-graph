@@ -17,5 +17,5 @@ Ship the current branch.
    - In a terminal session, use `gh pr checks <number> --watch`.
    - If a check fails, read the log with `gh run view <run-id> --log-failed`. Fix it on the same branch, run `pnpm check`, then commit and push. Auto-merge stays on.
    - If the PR is behind `main` (the ruleset needs branches to be up to date), run `gh pr update-branch <number>`. Then wait for CI again.
-9. **After the merge.** `git switch main && git pull --ff-only && git branch -d <branch>`.
+9. **After the merge.** Run `git switch main && git pull --ff-only`. Check that `git diff <branch> main` is empty, then `git branch -D <branch>` (`-d` refuses after a squash merge).
 10. **Report.** Give the PR link, a line on what landed, how it was checked, and anything deferred.
