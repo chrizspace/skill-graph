@@ -22,7 +22,7 @@ Decisions made at the start: hosting on **Vercel**, **Neon Postgres + Drizzle**,
 - **Who sees named profiles**: the person, their manager, and the Practice Leads of the person's practice. The Site Lead sees aggregates only.
 - **Catalogue**: three item types: **technical skills** (including tools and platforms), **soft skills** and **certifications**.
 - **Weights only**: a role requires an item as Critical, Important or Nice to have. There are **no proficiency levels**: a person has a skill or doesn't.
-- **Profiles**: explicit and self-declared. Certifications carry the date obtained and the expiry date. Nobody confirms profiles in the MVP.
+- **Profiles**: explicit and self-declared. Certifications carry the date obtained and the expiry date. An expired certification isn't a gap: it's shown faded and marked as expired, so it's visible that the person once earned it. Nobody confirms profiles in the MVP.
 - **Seniority**: no seniority levels inside a role; a senior role is a separate role, linked by a path.
 
 ### The brief, in short
@@ -73,7 +73,10 @@ Another example: in Delivery Management, a manager has a Business Analyst, a Pro
 
   The weight belongs to the requirement, not the item: SQL can be Critical for a Data Engineer and Nice to have for a Full-stack Developer. Certifications are weighted the same way, e.g. PSM I is Critical for a Scrum Master. **There are no proficiency levels**: a person has a skill or doesn't, and holds a valid certification or doesn't.
 
-- **Valid certification**: one the person holds that hasn't expired. An expired certification counts as missing. One expiring within 90 days is flagged.
+- **Certification status** in a profile:
+  - **valid**
+  - **expiring**: within 90 days; flagged
+  - **expired**: past its expiry date. It is **not** a gap and still counts as held. The UI shows it faded (semi-transparent) with "expired on <date>", so it's clear the person once earned it and may want to renew it.
 - **Dependency**: "Databricks builds on Python and Spark". It orders learning in a plan. Items can also be **related** ("Terraform ↔ Bicep": alternatives or companions).
 - **Path**: a career move from one role (or specialisation) to another, of two kinds:
   - **Official path**: defined by a Practice Lead, with a description and a typical duration. A role can have several official paths out, e.g. Data Engineer → AI Engineer or → Solution Architect, or Frontend Developer: React → Frontend Developer: Angular.
@@ -117,7 +120,7 @@ Another example: in Delivery Management, a manager has a Business Analyst, a Pro
   - gets a pre-filled profile and corrects it
   - ticks the technical and soft skills they have
   - adds certifications with the date obtained and the expiry date
-- Sees how they meet **their own role**: met and missing, plus certifications that are expiring.
+- Sees how they meet **their own role**: met and missing, plus certifications that are expiring or expired.
 - Browses roles, the catalogue and the graph.
 - **Compares two roles against their own profile** (§4): what they already have and what's missing, by priority and type.
 - Picks a target and gets a **development plan**: the gaps in learning order, with their manager's accepted recommendations marked. Progress updates as they update their profile.
@@ -130,7 +133,7 @@ Another example: in Delivery Management, a manager has a Business Analyst, a Pro
 - Everything an employee can do.
 - **Team view**: each direct report with their role, target, readiness and top gaps. Plus aggregated gaps, e.g. "3 of 5 people lack Critical SQL for their role".
 - **Employee profile** (Scenario 3):
-  - their profile, met and missing for their role, and certifications that are expiring
+  - their profile, met and missing for their role, and certifications that are expiring or expired
   - official and suggested paths
   - the roles they can reach, with readiness
 - **Recommends** development steps to a direct report: a target or items to develop, with a comment.
@@ -246,12 +249,12 @@ M1 built v1. Migration `0001` (milestone M2) brings it to the model below; there
 
 ## 4. Domain logic (`src/domain/`, written test-first)
 
-A requirement is **met** when the person has the skill, or holds a valid (unexpired) certification. Otherwise it's **missing**. Certifications that are met but expire within 90 days are also flagged as **expiring**.
+A requirement is **met** when the person has the skill or holds the certification, **including an expired one**. Otherwise it's **missing**. Met certifications also carry their status: **expiring** (within 90 days) or **expired**. Expired ones count as met for gaps and readiness; the UI shows them faded with their expiry date.
 
 The functions:
 
 - **Effective requirements** `requirementsOf(role, specialisation?)`: the role's core plus the specialisation's own; for the same item, the specialisation wins.
-- **Fit to a target** `assess(profile, target, today)` returns `met`, `missing` and `expiring`, grouped by weight and type. Used for "how do I meet my own role", for gap analysis and for the plan.
+- **Fit to a target** `assess(profile, target, today)` returns `met` (certifications with their status: valid, expiring or expired) and `missing`, grouped by weight and type. Used for "how do I meet my own role", for gap analysis and for the plan.
 - **Learning order** within `missing`, applied in this order:
   1. Critical before Important before Nice
   2. within a priority, prerequisites first (topological sort over `builds_on`)
@@ -340,7 +343,7 @@ All writes go through Server Actions with zod validation and `can()`. The graph 
   - specialisation = small hexagon attached to its role
   - technical skill = ellipse (tools and platforms with a darker outline)
   - soft skill = diamond
-  - certification = star
+  - certification = star; in my view, an expired certification I hold is drawn semi-transparent
 - **Filters**: practice, type (technical / soft / certification), category (e.g. Tool / platform), weight, hop depth.
 - **Priority colour only appears in context.** With a role in focus, its requirements turn red (Critical), orange (Important) or green (Nice). With nothing in focus, everything stays neutral.
 - **Never colour alone**:
@@ -422,7 +425,7 @@ All writes go through Server Actions with zod validation and `can()`. The graph 
   - Jordan Kim: Site Lead.
   - A Practice Lead for each practice.
   - **Morgan Lee**: manager in Frontend Practice. Reports include Alex Rivera (Frontend Developer: React; profile pre-filled from the role) and others.
-  - **A Delivery Management manager**. Reports include Sam Patel (Project Manager; pre-filled, plus Jira), a Business Analyst and a Scrum Master (PSM I, expiring soon).
+  - **A Delivery Management manager**. Reports include Sam Patel (Project Manager; pre-filled, plus Jira), a Business Analyst and a Scrum Master (PSM I, expiring soon). A Business Analyst has an expired PSPO I.
 
   At least two practices have 5+ members, so the Site Lead's aggregates have data.
 
@@ -533,7 +536,7 @@ All writes go through Server Actions with zod validation and `can()`. The graph 
   4. A manager sends feedback on a role, the Practice Lead approves it, the role changes and the audit log links to the request. Reject, needs-info and a new-specialisation proposal (becomes a draft) work too.
   5. A Practice Lead edits a role in their practice and is refused for another practice's role.
   6. A manager recommends a target to a report, the report accepts it, and it becomes their target and plan.
-  7. An expired certification counts as missing; one expiring within 90 days is flagged.
+  7. An expired certification isn't a gap: it counts as held, appears faded with its expiry date, and doesn't lower readiness. One expiring within 90 days is flagged.
   8. A Site Lead creates a practice and appoints its Practice Lead.
   9. Privacy:
      - an employee can't open another person's profile
