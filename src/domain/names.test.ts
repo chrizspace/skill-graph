@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeName, slugify } from "./names";
+import { normalizeName, slugify, specializationSlug } from "./names";
 
 describe("normalizeName", () => {
   it.each([
@@ -27,5 +27,15 @@ describe("slugify", () => {
     ["Retrieval-Augmented Generation", "retrieval-augmented-generation"],
   ])("%j → %j", (input, expected) => {
     expect(slugify(input)).toBe(expected);
+  });
+});
+
+describe("specializationSlug", () => {
+  it("scopes the slug to the role with a separator slugify never produces", () => {
+    expect(specializationSlug("Frontend Developer", "React")).toBe("frontend-developer--react");
+    expect(specializationSlug("Scrum Master", "Facilitation / Management 3.0")).toBe(
+      "scrum-master--facilitation-management-3-0",
+    );
+    expect(slugify("Frontend Developer React")).not.toContain("--");
   });
 });

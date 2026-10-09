@@ -1,60 +1,126 @@
 import { count } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { slugify } from "../../domain/names";
+import { changesSchema } from "../../domain/change-requests";
+import { slugify, specializationSlug } from "../../domain/names";
 import { createTestDb } from "../testing";
-import { edges, nodes, profiles, profileSkills, user } from "../schema";
+import {
+  changeRequestComments,
+  changeRequests,
+  edges,
+  nodes,
+  practiceLeads,
+  practices,
+  profileItems,
+  profiles,
+  recommendations,
+  siteLeads,
+  sites,
+  user,
+} from "../schema";
 import { hasGraphData, seed } from "./seed";
 
-type Priority = "critical" | "important" | "nice";
+type Weight = "critical" | "important" | "nice";
+const TODAY = new Date("2026-10-10T12:00:00Z");
 let t: Awaited<ReturnType<typeof createTestDb>>;
 let allNodes: (typeof nodes.$inferSelect)[];
 let allEdges: (typeof edges.$inferSelect)[];
-const nameOf = (id: string) => allNodes.find((n) => n.id === id)!.name;
-const nodeNamed = (name: string) => {
-  const node = allNodes.find((n) => n.name === name);
+let items: (typeof profileItems.$inferSelect)[];
+const byId = (id: string) => allNodes.find((n) => n.id === id)!;
+const nameOf = (id: string) => byId(id).name;
+const named = (name: string) => {
+  const node = allNodes.find((n) => n.name === name && n.type !== "specialization");
   if (!node) throw new Error(`no node named ${name}`);
   return node;
 };
+const specOf = (role: string, spec: string) =>
+  allNodes.find((n) => n.type === "specialization" && n.name === spec && n.parentRoleId === named(role).id)!;
 
 beforeAll(async () => {
   t = await createTestDb();
   expect(await hasGraphData(t.db)).toBe(false);
-  await seed(t.db);
+  await seed(t.db, { today: TODAY });
   allNodes = await t.db.select().from(nodes);
   allEdges = await t.db.select().from(edges);
+  items = await t.db.select().from(profileItems);
 });
 afterAll(async () => {
   await t.client.close();
 });
 
-function requirementsOf(role: string) {
-  const roleId = nodeNamed(role).id;
-  const result: Record<Priority, string[]> = { critical: [], important: [], nice: [] };
-  for (const e of allEdges.filter((e) => e.kind === "requires" && e.sourceId === roleId)) {
-    result[e.priority!].push(nameOf(e.targetId));
-  }
+/** Effective requirements by item name: the role's core plus the specialisation's own (its weight wins). */
+function requirementsOf(role: string, spec?: string) {
+  const result = new Map<string, Weight>();
+  const add = (sourceId: string) => {
+    for (const e of allEdges.filter((e) => e.kind === "requires" && e.sourceId === sourceId)) {
+      result.set(nameOf(e.targetId), e.priority!);
+    }
+  };
+  add(named(role).id);
+  if (spec) add(specOf(role, spec).id);
+  return result;
+}
+function grouped(requirements: Map<string, Weight>) {
+  const result: Record<Weight, string[]> = { critical: [], important: [], nice: [] };
+  for (const [name, w] of requirements) result[w].push(name);
   for (const list of Object.values(result)) list.sort();
   return result;
 }
-const all = (r: Record<Priority, string[]>) => new Set([...r.critical, ...r.important, ...r.nice]);
-const baseline = (r: Record<Priority, string[]>) => new Set([...r.critical, ...r.important]);
+const itemsOf = (userId: string) =>
+  new Set(items.filter((i) => i.userId === userId).map((i) => nameOf(i.nodeId)));
 const sorted = (s: Iterable<string>) => [...s].sort();
 
-async function declaredBy(userId: string) {
-  const rows = await t.db.select().from(profileSkills);
-  return rows.filter((r) => r.userId === userId).map((r) => nameOf(r.nodeId));
-}
-
-describe("size and shape", () => {
-  it("has about 15 roles, 60 skills and 40 technologies", () => {
-    const byType = (type: string) => allNodes.filter((n) => n.type === type).length;
-    expect(byType("role")).toBeGreaterThanOrEqual(15);
-    expect(byType("skill")).toBeGreaterThanOrEqual(55);
-    expect(byType("technology")).toBeGreaterThanOrEqual(35);
+describe("organisation", () => {
+  it("has one site with the five practices, each role in one of them", async () => {
+    expect(await t.db.select().from(sites)).toHaveLength(1);
+    const ps = await t.db.select().from(practices);
+    expect(ps.map((p) => p.name).sort()).toEqual([
+      "Backend & Architecture",
+      "Cloud & Security",
+      "Data & AI",
+      "Delivery Management",
+      "Frontend Practice",
+    ]);
+    const roles = allNodes.filter((n) => n.type === "role");
+    expect(roles.length).toBeGreaterThanOrEqual(18);
+    for (const r of roles)
+      expect(
+        ps.map((p) => p.id),
+        r.name,
+      ).toContain(r.practiceId);
+    expect(
+      roles
+        .filter((r) => r.practiceId === ps.find((p) => p.slug === "delivery")!.id)
+        .map((r) => r.name)
+        .sort(),
+    ).toEqual(["Business Analyst", "Delivery Manager", "Product Owner", "Project Manager", "Scrum Master"]);
   });
 
-  it("covers every example named in the brief", () => {
-    const examples = {
+  it("gives Frontend Developer and Scrum Master their specialisations, with scoped slugs", () => {
+    const specs = allNodes.filter((n) => n.type === "specialization");
+    expect(specs.map((s) => `${nameOf(s.parentRoleId!)}: ${s.name}`).sort()).toEqual([
+      "Frontend Developer: Angular",
+      "Frontend Developer: React",
+      "Scrum Master: Facilitation / Management 3.0",
+      "Scrum Master: SAFe",
+    ]);
+    for (const s of specs) expect(s.slug).toBe(specializationSlug(nameOf(s.parentRoleId!), s.name));
+  });
+});
+
+describe("catalogue", () => {
+  it("has technical skills (tools included), soft skills and certifications with issuers", () => {
+    const of = (type: string) => allNodes.filter((n) => n.type === type);
+    expect(of("technical_skill").length).toBeGreaterThanOrEqual(60);
+    expect(of("soft_skill").length).toBeGreaterThanOrEqual(12);
+    expect(of("certification").length).toBeGreaterThanOrEqual(12);
+    for (const c of of("certification")) expect(c.issuer, c.name).toBeTruthy();
+    for (const n of allNodes.filter((n) => n.type !== "certification")) expect(n.issuer, n.name).toBeNull();
+    expect(named("Databricks")).toMatchObject({ type: "technical_skill", category: "Tool / platform" });
+    expect(named("Problem Solving").type).toBe("soft_skill");
+  });
+
+  it("covers every example named in the brief and the reviews", () => {
+    const examples: Record<string, string[]> = {
       role: [
         "Frontend Developer",
         "Data Engineer",
@@ -64,24 +130,17 @@ describe("size and shape", () => {
         "Business Analyst",
         "Solution Architect",
         "Security Engineer",
+        "Scrum Master",
+        "UX Developer",
       ],
-      skill: [
+      technical_skill: [
+        "HTML & CSS",
         "JavaScript",
         "TypeScript",
+        "React",
         "Python",
         "SQL",
-        "Leadership",
-        "Stakeholder Management",
         "Data Modelling",
-        "Problem Solving",
-        "Agile",
-        "Financial Management",
-        "Account Management",
-        "Commercial Awareness",
-        "People Management",
-      ],
-      technology: [
-        "React",
         "Databricks",
         "Microsoft Fabric",
         "Azure",
@@ -92,10 +151,23 @@ describe("size and shape", () => {
         "Azure Data Factory",
         "Terraform",
         "Snowflake",
+        "Agile",
       ],
+      soft_skill: [
+        "Solutioning",
+        "Team Leading",
+        "Mentoring",
+        "Leadership",
+        "Stakeholder Management",
+        "Problem Solving",
+        "Account Management",
+        "Commercial Awareness",
+        "People Management",
+      ],
+      certification: ["Figma Foundation", "Professional Scrum Master I (PSM I)"],
     };
     for (const [type, names] of Object.entries(examples)) {
-      for (const name of names) expect(nodeNamed(name).type, name).toBe(type);
+      for (const name of names) expect(named(name).type, name).toBe(type);
     }
   });
 
@@ -103,28 +175,31 @@ describe("size and shape", () => {
     for (const n of allNodes) {
       expect(n.description.length, n.name).toBeGreaterThan(10);
       expect(n.category, n.name).toBeTruthy();
-      expect(n.slug).toBe(slugify(n.name));
+      if (n.type !== "specialization") expect(n.slug).toBe(slugify(n.name));
     }
   });
 
-  it("leaves no skill or technology unconnected and gives every role a critical requirement", () => {
+  it("leaves no catalogue item unconnected and gives every role a critical requirement", () => {
     const linked = new Set(allEdges.flatMap((e) => [e.sourceId, e.targetId]));
-    for (const n of allNodes.filter((n) => n.type !== "role")) expect(linked.has(n.id), n.name).toBe(true);
-    for (const n of allNodes.filter((n) => n.type === "role")) {
-      expect(requirementsOf(n.name).critical.length, n.name).toBeGreaterThan(0);
+    for (const n of allNodes.filter((n) => !["role", "specialization"].includes(n.type))) {
+      expect(linked.has(n.id), n.name).toBe(true);
+    }
+    for (const r of allNodes.filter((n) => n.type === "role")) {
+      expect(grouped(requirementsOf(r.name)).critical.length, r.name).toBeGreaterThan(0);
     }
   });
 });
 
 describe("link rules", () => {
   it("connects the right node types for every kind of link", () => {
-    const type = (id: string) => allNodes.find((n) => n.id === id)!.type;
+    const owner = new Set(["role", "specialization"]);
     for (const e of allEdges) {
-      const pair = `${type(e.sourceId)}→${type(e.targetId)}`;
+      const [from, to] = [byId(e.sourceId).type, byId(e.targetId).type];
       const label = `${e.kind}: ${nameOf(e.sourceId)} → ${nameOf(e.targetId)}`;
-      if (e.kind === "requires") expect(["role→skill", "role→technology"], label).toContain(pair);
-      if (e.kind === "next_step") expect(pair, label).toBe("role→role");
-      if (e.kind === "builds_on" || e.kind === "related_to") expect(pair, label).not.toMatch(/role/);
+      if (e.kind === "requires") expect(owner.has(from) && !owner.has(to), label).toBe(true);
+      if (e.kind === "next_step") expect(owner.has(from) && owner.has(to), label).toBe(true);
+      if (e.kind === "builds_on" || e.kind === "related_to")
+        expect(owner.has(from) || owner.has(to), label).toBe(false);
     }
   });
 
@@ -144,29 +219,39 @@ describe("link rules", () => {
     for (const id of next.keys()) visit(id, []);
   });
 
-  it("has the prerequisites the brief names", () => {
+  it("has the prerequisites the brief names, and descriptions on some official paths", () => {
     const has = (from: string, to: string) =>
       allEdges.some(
-        (e) => e.kind === "builds_on" && e.sourceId === nodeNamed(from).id && e.targetId === nodeNamed(to).id,
+        (e) => e.kind === "builds_on" && e.sourceId === named(from).id && e.targetId === named(to).id,
       );
     expect(has("Databricks", "Python")).toBe(true);
     expect(has("Databricks", "Spark")).toBe(true);
     expect(has("Spark", "Python")).toBe(true);
+    const pmToDm = allEdges.find(
+      (e) =>
+        e.kind === "next_step" &&
+        e.sourceId === named("Project Manager").id &&
+        e.targetId === named("Delivery Manager").id,
+    );
+    expect(pmToDm).toMatchObject({ typicalMonths: 24 });
+    expect(pmToDm?.note).toBeTruthy();
   });
 });
 
 describe("requirements fixed by the scenarios", () => {
   it.each([
     [
-      "Frontend Developer",
+      "Frontend Developer: React",
+      () => requirementsOf("Frontend Developer", "React"),
       {
         critical: ["HTML & CSS", "JavaScript", "Problem Solving", "React", "TypeScript"],
         important: ["Accessibility", "Agile", "Git", "Testing"],
-        nice: ["GitHub Copilot", "Next.js"],
+        nice: ["Figma Foundation", "GitHub Copilot", "Next.js"],
       },
     ],
     [
       "Data Engineer",
+      () => requirementsOf("Data Engineer"),
       {
         critical: ["Data Modelling", "Problem Solving", "Python", "SQL"],
         important: ["Databricks", "Git", "Spark"],
@@ -175,6 +260,7 @@ describe("requirements fixed by the scenarios", () => {
     ],
     [
       "Full-stack Developer",
+      () => requirementsOf("Full-stack Developer"),
       {
         critical: ["JavaScript", "Problem Solving", "React", "TypeScript"],
         important: ["Agile", "Git", "Node.js", "REST APIs"],
@@ -183,14 +269,16 @@ describe("requirements fixed by the scenarios", () => {
     ],
     [
       "Project Manager",
+      () => requirementsOf("Project Manager"),
       {
         critical: ["Communication", "Planning & Scheduling", "Risk Management", "Stakeholder Management"],
-        important: ["Agile", "Azure DevOps"],
-        nice: ["Change Management", "Estimation", "Jira"],
+        important: ["Agile", "Azure DevOps", "Facilitation"],
+        nice: ["Change Management", "Estimation", "Jira", "Project Management Professional (PMP)"],
       },
     ],
     [
       "Delivery Manager",
+      () => requirementsOf("Delivery Manager"),
       {
         critical: [
           "Communication",
@@ -203,16 +291,26 @@ describe("requirements fixed by the scenarios", () => {
         nice: ["Agile"],
       },
     ],
-  ])("%s", (role, expected) => {
-    expect(requirementsOf(role)).toEqual(expected);
+  ])("%s", (_label, requirements, expected) => {
+    expect(grouped(requirements())).toEqual(expected);
   });
 
-  // Until the domain functions arrive (M2) these use plain set operations on the seeded data.
-  it("Scenario 1, role vs role: Frontend Developer → Data Engineer", () => {
-    const from = all(requirementsOf("Frontend Developer"));
-    const to = all(requirementsOf("Data Engineer"));
-    expect(sorted([...to].filter((s) => from.has(s)))).toEqual(["Agile", "Git", "Problem Solving"]);
-    expect(sorted([...to].filter((s) => !from.has(s)))).toEqual([
+  it("lets a specialisation raise a core requirement's weight", () => {
+    expect(requirementsOf("Scrum Master").get("Facilitation")).toBe("important");
+    expect(requirementsOf("Scrum Master", "Facilitation / Management 3.0").get("Facilitation")).toBe(
+      "critical",
+    );
+    expect(requirementsOf("Scrum Master", "SAFe").get("Professional Scrum Master I (PSM I)")).toBe(
+      "critical",
+    );
+  });
+
+  // Until the domain functions arrive (M3) these use plain set operations on the seeded data.
+  it("Scenario 1, role vs role: Frontend Developer: React → Data Engineer", () => {
+    const from = requirementsOf("Frontend Developer", "React");
+    const to = requirementsOf("Data Engineer");
+    expect(sorted([...to.keys()].filter((s) => from.has(s)))).toEqual(["Agile", "Git", "Problem Solving"]);
+    expect(sorted([...to.keys()].filter((s) => !from.has(s)))).toEqual([
       "Data Modelling",
       "Databricks",
       "Python",
@@ -221,14 +319,11 @@ describe("requirements fixed by the scenarios", () => {
     ]);
   });
 
-  it("Scenario 1, person vs role: Alex (declared + Frontend Developer baseline) → Data Engineer", async () => {
-    const has = new Set([
-      ...(await declaredBy("seed-alex")),
-      ...baseline(requirementsOf("Frontend Developer")),
-    ]);
-    const to = all(requirementsOf("Data Engineer"));
-    expect(sorted([...to].filter((s) => has.has(s)))).toEqual(["Agile", "Git", "Problem Solving"]);
-    expect(sorted([...to].filter((s) => !has.has(s)))).toEqual([
+  it("Scenario 1, person vs role: Alex → Data Engineer", () => {
+    const has = itemsOf("seed-alex");
+    const to = [...requirementsOf("Data Engineer").keys()];
+    expect(sorted(to.filter((s) => has.has(s)))).toEqual(["Agile", "Git", "Problem Solving"]);
+    expect(sorted(to.filter((s) => !has.has(s)))).toEqual([
       "Data Modelling",
       "Databricks",
       "Python",
@@ -237,9 +332,9 @@ describe("requirements fixed by the scenarios", () => {
     ]);
   });
 
-  it("Scenario 2: Sam (Project Manager) → Delivery Manager misses exactly the five from the brief", async () => {
-    const has = new Set([...(await declaredBy("seed-sam")), ...baseline(requirementsOf("Project Manager"))]);
-    const missing = [...all(requirementsOf("Delivery Manager"))].filter((s) => !has.has(s));
+  it("Scenario 2: Sam (Project Manager) → Delivery Manager misses exactly the five from the brief", () => {
+    const has = itemsOf("seed-sam");
+    const missing = [...requirementsOf("Delivery Manager").keys()].filter((s) => !has.has(s));
     expect(sorted(missing)).toEqual([
       "Account Management",
       "Commercial Awareness",
@@ -251,23 +346,51 @@ describe("requirements fixed by the scenarios", () => {
 });
 
 describe("demo people", () => {
-  it("seeds the four people with their roles, managers and declared skills", async () => {
+  it("seeds the Site Lead, a Practice Lead per practice and two managers with five reports each", async () => {
     const people = await t.db.select().from(user);
-    expect(people.map((p) => p.email).sort()).toEqual([
-      "alex.rivera@example.com",
-      "jordan.kim@example.com",
-      "morgan.lee@example.com",
-      "sam.patel@example.com",
-    ]);
-    const byId = new Map((await t.db.select().from(profiles)).map((p) => [p.userId, p]));
-    const roleOf = (id: string) => nameOf(byId.get(id)!.currentRoleId!);
-    expect(roleOf("seed-alex")).toBe("Frontend Developer");
-    expect(roleOf("seed-sam")).toBe("Project Manager");
-    expect(byId.get("seed-alex")).toMatchObject({ appRole: "employee", managerId: "seed-morgan" });
-    expect(byId.get("seed-sam")).toMatchObject({ appRole: "employee", managerId: "seed-morgan" });
-    expect(byId.get("seed-morgan")).toMatchObject({ appRole: "manager", managerId: null });
-    expect(byId.get("seed-jordan")).toMatchObject({ appRole: "admin" });
-    expect((await declaredBy("seed-alex")).sort()).toEqual(["JavaScript", "React", "TypeScript"]);
+    expect(people.length).toBeGreaterThanOrEqual(16);
+    for (const p of people) expect(p.email).toMatch(/@example\.com$/);
+    expect((await t.db.select().from(siteLeads)).map((l) => l.userId)).toEqual(["seed-jordan"]);
+    const leads = await t.db.select().from(practiceLeads);
+    expect(new Set(leads.map((l) => l.practiceId)).size).toBe(5);
+    const ps = await t.db.select().from(profiles);
+    const reportsOf = (id: string) => ps.filter((p) => p.managerId === id);
+    const frontend = (await t.db.select().from(practices)).find((p) => p.slug === "frontend")!.id;
+    expect(reportsOf("seed-morgan")).toHaveLength(5);
+    for (const r of reportsOf("seed-morgan")) expect(r.practiceId).toBe(frontend);
+    expect(reportsOf("seed-riley")).toHaveLength(5);
+    // the Site Lead's aggregates hide groups under 5: two practices are big enough
+    const members = (practiceId: string) => ps.filter((p) => p.practiceId === practiceId).length;
+    expect((await t.db.select().from(practices)).filter((p) => members(p.id) >= 5)).toHaveLength(2);
+  });
+
+  it("pre-fills profiles from the role and keeps certification dates", () => {
+    expect(itemsOf("seed-alex")).toEqual(
+      new Set(
+        [...requirementsOf("Frontend Developer", "React").keys()].filter((n) => n !== "Figma Foundation"),
+      ),
+    );
+    expect(itemsOf("seed-noah").has("Testing")).toBe(false);
+    const cert = (userId: string, name: string) =>
+      items.find((i) => i.userId === userId && i.nodeId === named(name).id)!;
+    expect(cert("seed-omar", "SAFe Scrum Master (SSM)").expiresOn).toBe("2026-11-14"); // expiring within 90 days
+    expect(cert("seed-ella", "Power BI Data Analyst (PL-300)").expiresOn).toBe("2026-08-01"); // expired
+    expect(cert("seed-jamie", "Azure Fundamentals (AZ-900)").expiresOn).toBeNull(); // doesn't expire
+  });
+
+  it("seeds recommendations and change requests in every state, with valid operations", async () => {
+    const recs = await t.db.select().from(recommendations);
+    expect(sorted(recs.map((r) => r.status))).toEqual(["accepted", "accepted", "open", "open"]);
+    const ben = (await t.db.select().from(profiles)).find((p) => p.userId === "seed-ben")!;
+    expect(nameOf(ben.targetSpecializationId!)).toBe("Facilitation / Management 3.0");
+
+    const requests = await t.db.select().from(changeRequests);
+    expect(sorted(requests.map((r) => r.status))).toEqual(["approved", "needs_info", "open", "rejected"]);
+    for (const r of requests) {
+      expect(() => changesSchema.parse(r.changes), r.reason).not.toThrow();
+      if (r.status === "approved" || r.status === "rejected") expect(r.decidedBy).toBeTruthy();
+    }
+    expect(await t.db.select().from(changeRequestComments)).toHaveLength(1);
   });
 });
 
@@ -277,19 +400,23 @@ describe("re-running", () => {
       nodes: (await t.db.select({ n: count() }).from(nodes))[0].n,
       edges: (await t.db.select({ n: count() }).from(edges))[0].n,
       people: (await t.db.select({ n: count() }).from(user))[0].n,
+      items: (await t.db.select({ n: count() }).from(profileItems))[0].n,
+      comments: (await t.db.select({ n: count() }).from(changeRequestComments))[0].n,
     });
     const before = await counts();
-    expect(await seed(t.db)).toEqual({ nodes: 0, links: 0, people: 0 });
+    expect(await seed(t.db, { today: TODAY })).toEqual({ nodes: 0, links: 0, people: 0 });
     expect(await counts()).toEqual(before);
     expect(await hasGraphData(t.db)).toBe(true);
   });
 
-  it("can seed the graph without demo people (production)", async () => {
+  it("seeds the site, practices and graph without demo data (production)", async () => {
     const fresh = await createTestDb();
-    const added = await seed(fresh.db, { demoPeople: false });
-    expect(added.people).toBe(0);
-    expect(added.nodes).toBe(allNodes.length);
-    expect(await fresh.db.select().from(user)).toHaveLength(0);
+    const added = await seed(fresh.db, { demo: false, today: TODAY });
+    expect(added).toEqual({ nodes: allNodes.length, links: allEdges.length, people: 0 });
+    expect(await fresh.db.select().from(practices)).toHaveLength(5);
+    for (const table of [user, profiles, recommendations, changeRequests]) {
+      expect(await fresh.db.select().from(table)).toHaveLength(0);
+    }
     await fresh.client.close();
   });
 });

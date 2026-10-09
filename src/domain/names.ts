@@ -18,3 +18,8 @@ export function normalizeName(name: string) {
 export function slugify(name: string) {
   return normalizeName(name).replace(/#/g, "sharp").replace(/\+/g, "plus").replace(/ /g, "-");
 }
+
+/** A specialisation's slug is scoped to its role: "Frontend Developer" + "React" → "frontend-developer--react". */
+export function specializationSlug(roleName: string, specializationName: string) {
+  return `${slugify(roleName)}--${slugify(specializationName)}`;
+}
