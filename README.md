@@ -67,19 +67,23 @@ Claude Code follows the same flow automatically:
 - no force pushes
 - secret scanning
 
-## Deployment (one-time setup by the repository owner)
+## Deployment
 
-### 1. Vercel
+|            |                                                                                                                                                                             |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Production | https://skill-graph-one.vercel.app (deploys from `main`)                                                                                                                    |
+| Previews   | One URL per pull request; Vercel posts it on the PR                                                                                                                         |
+| Hosting    | Vercel project `skill-graph`, functions in `fra1` (Frankfurt), see `vercel.json`                                                                                            |
+| Database   | Neon Postgres (free plan, `fra1`), connected through the Vercel Marketplace; it sets `DATABASE_URL` and the other `PG*` / `POSTGRES_*` variables for Preview and Production |
 
-1. In Vercel, choose **Add New → Project**, import `chrizspace/skill-graph`, and keep the Next.js defaults.
-2. Production deploys from `main`. Every pull request gets a preview URL.
+Local development doesn't use Neon: from M1 it runs Postgres in Docker. `vercel link` connects a checkout to the project if you need the Vercel CLI.
 
-### 2. Neon
+### Setting it up again from scratch
 
-1. In the Vercel project, go to **Storage → Create Database → Neon**.
-2. Connect it to all environments and turn on **preview branches**. Each preview deploy then gets its own copy of the database.
-3. This sets `DATABASE_URL` and needs to be done before M1 reaches production.
+1. **Vercel:** choose **Add New → Project**, import `chrizspace/skill-graph`, and keep the Next.js defaults.
+2. **Neon:** in the Vercel project, go to **Storage → Create Database → Neon** and pick region Frankfurt. Connect it to Preview and Production.
+3. **Preview database branches:** in the Neon resource's settings, under deployments, turn on a database branch for **Preview**. Each preview deploy then migrates and seeds its own copy instead of the production database.
 
-### 3. Microsoft sign-in
+### Microsoft sign-in
 
 This comes at M3. The README will list the Entra app registration steps and the environment variables then.

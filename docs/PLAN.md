@@ -22,18 +22,18 @@ Decisions made at the start: hosting on **Vercel**, **Neon Postgres + Drizzle**,
 
 ## 1. Stack
 
-| Concern      | Choice                                                                                                                                    | Why                                                                                                                                          |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| Framework    | Next.js 16 (App Router, Server Components, Server Actions), TypeScript (strict), pnpm, Node 24                                            | Before writing code, read the bundled docs in `node_modules/next/dist/docs/` for caching, route handlers and auth, as AGENTS.md requires.    |
-| UI           | Tailwind 4 + shadcn/ui (Radix) + lucide icons; light and dark themes from colour variables                                                | Accessible primitives.                                                                                                                       |
-| DB           | Neon Postgres via Vercel Marketplace (prod plus one database branch per preview), Drizzle ORM + drizzle-kit migrations, `postgres` driver | Scales to zero but never pauses. Preview deploys get their own database. One driver everywhere.                                              |
-| Local DB     | Postgres 17 in `docker compose` ; PGlite for fast DB tests                                                                                | No cloud needed to develop or test.                                                                                                          |
-| Auth         | Better Auth: Microsoft (Entra ID) provider in production; demo sign-in with seeded users in dev and on previews only                      | Entra doesn't allow wildcard redirect URIs, so previews can't use Microsoft sign-in.                                                         |
-| Graph        | Cytoscape.js 3.34 + `cytoscape-fcose`, wrapped in a thin React client component written by us (`react-cytoscapejs` is stale)              | Shapes per node type, line width mapping, built-in Dijkstra and neighbourhood search, concentric and force layouts, optional WebGL renderer. |
-| Domain logic | Pure TypeScript in `src/domain/`, working on an in-memory graph                                                                           | At ~22k rows the whole graph fits in memory. The same functions serve the UI, the API and the future V3 AI assistant.                        |
-| Validation   | zod 4, shared by server actions and API                                                                                                   |                                                                                                                                              |
-| Tests        | Vitest (domain + components), PGlite (DB), Playwright + `@axe-core/playwright` (end-to-end + accessibility)                               |                                                                                                                                              |
-| Hosting      | Vercel, region `fra1`, production = `main`, preview per PR                                                                                | Hobby is non-commercial only: fine for a demo. Real internal use needs Pro or a move to Azure (see Risks).                                   |
+| Concern | Choice | Why |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| Framework | Next.js 16 (App Router, Server Components, Server Actions), TypeScript (strict), pnpm, Node 24 | Before writing code, read the bundled docs in `node_modules/next/dist/docs/` for caching, route handlers and auth, as AGENTS.md requires. |
+| UI | Tailwind 4 + shadcn/ui (Radix) + lucide icons; light and dark themes from colour variables | Accessible primitives. |
+| DB | Neon Postgres via Vercel Marketplace (prod plus one database branch per preview), Drizzle ORM + drizzle-kit migrations, `postgres` driver | Scales to zero but never pauses. Preview deploys get their own database. One driver everywhere. |
+| Local DB | Postgres 17 in `docker compose` ; PGlite for fast DB tests | No cloud needed to develop or test. |
+| Auth | Better Auth: Microsoft (Entra ID) provider in production; demo sign-in with seeded users in dev and on previews only | Entra doesn't allow wildcard redirect URIs, so previews can't use Microsoft sign-in. |
+| Graph | Cytoscape.js 3.34 + `cytoscape-fcose`, wrapped in a thin React client component written by us (`react-cytoscapejs` is stale) | Shapes per node type, line width mapping, built-in Dijkstra and neighbourhood search, concentric and force layouts, optional WebGL renderer. |
+| Domain logic | Pure TypeScript in `src/domain/`, working on an in-memory graph | At ~22k rows the whole graph fits in memory. The same functions serve the UI, the API and the future V3 AI assistant. |
+| Validation | zod 4, shared by server actions and API | |
+| Tests | Vitest (domain + components), PGlite (DB), Playwright + `@axe-core/playwright` (end-to-end + accessibility) | |
+| Hosting | Vercel, region `fra1`, production = `main`, preview per PR | Hobby is non-commercial only: fine for a demo. Real internal use needs Pro or a move to Azure (see Risks). |
 
 **Why relational and not a graph database:** the data is small. All graph algorithms run in TypeScript on a cached, in-memory copy of the graph, and Postgres stays a plain store with constraints. A graph database would add operational cost for no gain, and Postgres moves easily to Azure Database for PostgreSQL later.
 
@@ -168,18 +168,18 @@ About 15 roles, 60 skills and 40 technologies (Microsoft-heavy: Azure, Fabric, P
 
 ## 7. Milestones (each split into small feature PRs)
 
-| #   | Scope                                                                                                                   | Done when                                                                                   |
-| --- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| M0  | Scaffold, public repo, ruleset, CI, Claude workflow config, `pnpm check`, Vercel + Neon link, `docs/PLAN.md`, README    | First PR (`chore/workflow`) auto-merges after passing CI, and its preview deploy loads      |
-| M1  | Schema, migrations, docker compose, seed, DB tests                                                                      | `pnpm db:reset && pnpm test:db` passes; seed invariants hold                                |
-| M2  | Domain functions (TDD)                                                                                                  | Scenario 1 and 2 unit tests match exactly; ≥90% coverage on `src/domain`                    |
-| M3  | Better Auth (Microsoft + demo), profiles, `authorize()`, app shell and navigation                                       | Sign in as each seeded user locally; denial tests pass                                      |
-| M4  | Role browser + skill and technology detail pages                                                                        | Search and filter work; role detail is grouped by priority                                  |
-| M5  | `/compare` (role vs role, me vs role) + `/me` skills editor                                                             | End-to-end Scenarios 1 and 2 through the UI                                                 |
-| M6  | `/explore` graph: everything in §5, plus a performance test on a synthetic 2k-node / 20k-link graph                     | Focus and path work by mouse and keyboard; overview interactive in under 2s, panning smooth |
-| M7  | Admin create/edit/delete for nodes and links, validation, confirmations, audit log, user management, cache invalidation | Edits show up in the graph straight away; audit rows written; non-admins blocked            |
-| M8  | `/team`, `/team/[id]`, team gap summary                                                                                 | End-to-end Scenario 3                                                                       |
-| M9  | Accessibility (axe on every page, both themes), keyboard pass, README, production deploy plus smoke test                | Zero serious or critical axe violations; production works with Microsoft sign-in            |
+| #   | Scope                                                                                                                   | Done when                                                                                   | Status |
+| --- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ------ |
+| M0  | Scaffold, public repo, ruleset, CI, Claude workflow config, `pnpm check`, Vercel + Neon link, `docs/PLAN.md`, README    | A PR auto-merges after passing CI, and its preview deploy loads                             | Done   |
+| M1  | Schema, migrations, docker compose, seed, DB tests                                                                      | `pnpm db:reset && pnpm test:db` passes; seed invariants hold                                | To do  |
+| M2  | Domain functions (TDD)                                                                                                  | Scenario 1 and 2 unit tests match exactly; ≥90% coverage on `src/domain`                    | To do  |
+| M3  | Better Auth (Microsoft + demo), profiles, `authorize()`, app shell and navigation                                       | Sign in as each seeded user locally; denial tests pass                                      | To do  |
+| M4  | Role browser + skill and technology detail pages                                                                        | Search and filter work; role detail is grouped by priority                                  | To do  |
+| M5  | `/compare` (role vs role, me vs role) + `/me` skills editor                                                             | End-to-end Scenarios 1 and 2 through the UI                                                 | To do  |
+| M6  | `/explore` graph: everything in §5, plus a performance test on a synthetic 2k-node / 20k-link graph                     | Focus and path work by mouse and keyboard; overview interactive in under 2s, panning smooth | To do  |
+| M7  | Admin create/edit/delete for nodes and links, validation, confirmations, audit log, user management, cache invalidation | Edits show up in the graph straight away; audit rows written; non-admins blocked            | To do  |
+| M8  | `/team`, `/team/[id]`, team gap summary                                                                                 | End-to-end Scenario 3                                                                       | To do  |
+| M9  | Accessibility (axe on every page, both themes), keyboard pass, README, production deploy plus smoke test                | Zero serious or critical axe violations; production works with Microsoft sign-in            | To do  |
 
 ## 8. Repo and agent workflow (feature branch → PR → auto-merge)
 
