@@ -30,6 +30,26 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
 
+  db:
+    name: Database tests and migrations
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with: { node-version-file: .nvmrc, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test:db
+      - name: Migrations match the schema
+        run: |
+          pnpm db:generate
+          if [[ -n "$(git status --porcelain drizzle)" ]]; then
+            git status --porcelain drizzle
+            echo "src/db/schema.ts changed without a migration: run \`pnpm db:generate\` and commit the result." >&2
+            exit 1
+          fi
+
   build:
     name: Production build
     runs-on: ubuntu-latest
@@ -51,7 +71,7 @@ jobs:
   ci:
     name: ci
     if: always()
-    needs: [static, build]
+    needs: [static, db, build]
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:

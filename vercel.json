@@ -1,3 +1,4 @@
 {
-  "regions": ["fra1"]
+  "regions": ["fra1"],
+  "buildCommand": "pnpm db:migrate && pnpm build"
 }

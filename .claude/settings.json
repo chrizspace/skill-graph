@@ -33,7 +33,8 @@
       "Bash(gh pr merge * --auto --squash --delete-branch)",
       "Bash(gh run view *)",
       "Bash(gh run list*)",
-      "Bash(docker compose *)"
+      "Bash(docker ps*)",
+      "Bash(docker logs *)"
     ],
     "deny": [
       "Bash(git push --force*)",

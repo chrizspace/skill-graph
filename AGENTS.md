@@ -28,6 +28,11 @@ An internal tool that shows roles, skills and technologies as a graph, so people
 3. New behaviour has tests; Scenarios 1–3 from the plan stay green.
 4. `README.md` and `docs/PLAN.md` are updated if setup, commands or decisions changed. The PR that completes a milestone sets its Status to Done in the table in `docs/PLAN.md` §7.
 
+## Database rules
+
+- Every schema change ships with its generated migration (`pnpm db:generate`); CI fails if they drift apart. Never edit a migration that has been merged: add a new one.
+- Migrations run automatically before each Vercel build. Preview deploys use their own Neon branch; production uses the main branch. Migrations must be backwards compatible with the code currently in production.
+
 ## Commands
 
 | Command                                      | What it does                                                                              |
