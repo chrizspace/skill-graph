@@ -485,7 +485,7 @@ Seed v2 (M2) holds:
   - catalogue types and issuers; every example from the brief and the reviews
   - no unconnected items; link type rules; no `builds_on` cycles
   - the scenario roles' requirements; a specialisation raising a core weight
-  - Scenarios 1 and 2 (role vs role and person vs role) as set operations, until M3's domain functions replace them
+  - Scenarios 1 and 2 (role vs role and person vs role) as set operations on the data; `src/db/graph.db.test.ts` runs them end to end through the domain functions
   - leads, managers and their reports; pre-filled profiles; certification dates (valid, expiring, expired, no expiry)
   - recommendations and change requests in every state, with valid operations
   - idempotency; production mode without demo data
@@ -497,7 +497,7 @@ Seed v2 (M2) holds:
 | M0  | Scaffold, public repo, ruleset, CI, Claude workflow config, `pnpm check`, Vercel + Neon link, `docs/PLAN.md`, README                                           | A PR auto-merges after passing CI, and its preview deploy loads                                                                                  | Done   |
 | M1  | Schema v1, migrations, local Postgres in Docker, seed v1, DB tests                                                                                             | `pnpm db:reset && pnpm test:db` passes; seed invariants hold                                                                                     | Done   |
 | M2  | **Organisation model**: migration `0001` (§3), seed v2 (§7), DB tests                                                                                          | Constraints and seed invariants (site, practices, specialisations, the three item types, certifications) pass; production migrates cleanly       | Done   |
-| M3  | Domain logic (TDD): effective requirements, assess, learning order, compare with profile, readiness, similar roles, paths, plan, aggregates, change validation | Scenarios 1 and 2 exact (missing lists and order); Scrum Master ↔ Project Manager are similar roles; ≥90% coverage on `src/domain`               | To do  |
+| M3  | Domain logic (TDD): effective requirements, assess, learning order, compare with profile, readiness, similar roles, paths, plan, aggregates, change validation | Scenarios 1 and 2 exact (missing lists and order); Scrum Master ↔ Project Manager are similar roles; ≥90% coverage on `src/domain`               | Done   |
 | M4  | Better Auth (Microsoft + demo sign-in), `can()`, app shell with navigation per user type                                                                       | Sign in as each demo person; every denial in §1 has a test                                                                                       | To do  |
 | M5  | Role browser (with specialisations and similar roles) and catalogue pages                                                                                      | Search and filters work; role page shows description, core and specialisations by type and weight, practice, paths, similar roles with synergies | To do  |
 | M6  | Employee: onboarding with pre-fill, profile editor (skills, certifications with dates), target, compare two roles with my profile, development plan            | End-to-end Scenarios 1, 2 and 7 (certification states) through the UI                                                                            | To do  |

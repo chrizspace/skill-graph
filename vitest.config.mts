@@ -6,7 +6,12 @@ export default defineConfig({
   test: {
     include: ["src/**/*.test.{ts,tsx}"],
     exclude: ["**/*.db.test.ts", "node_modules/**"],
-    // the first tests arrive with the domain logic (M2)
-    passWithNoTests: true,
+    coverage: {
+      provider: "v8",
+      include: ["src/domain/**/*.ts"],
+      exclude: ["src/domain/testing/**", "**/*.test.ts"],
+      // docs/PLAN.md M3: at least 90% of the domain logic is covered
+      thresholds: { lines: 90, statements: 90, functions: 90, branches: 85 },
+    },
   },
 });

@@ -305,7 +305,8 @@ describe("requirements fixed by the scenarios", () => {
     );
   });
 
-  // Until the domain functions arrive (M3) these use plain set operations on the seeded data.
+  // Guards on the seed data itself, as plain set operations; the domain functions run the same scenarios end to end
+  // in src/db/graph.db.test.ts.
   it("Scenario 1, role vs role: Frontend Developer: React → Data Engineer", () => {
     const from = requirementsOf("Frontend Developer", "React");
     const to = requirementsOf("Data Engineer");
