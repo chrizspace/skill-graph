@@ -18,6 +18,10 @@ The plan, data model and milestones are in [docs/PLAN.md](docs/PLAN.md).
 - Vitest and Playwright
 - hosted on Vercel
 
+## Design system
+
+Storybook with every primitive and component, in the Orange and Violet themes: https://chrizspace.github.io/skill-graph/ (published from `main`). Locally: `pnpm storybook`.
+
 ## Getting started
 
 Requirements: Node 24+, pnpm (the version is pinned in `package.json`), Docker (Colima, OrbStack or Docker Desktop) for the local database.

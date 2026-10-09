@@ -1,0 +1,26 @@
+/* Storybook's docs pages follow the design system's tokens, so the overview recolours with the theme and mode */
+.sbdocs-wrapper,
+.sbdocs.sbdocs-content {
+  background: var(--background) !important;
+  color: var(--foreground) !important;
+}
+.sbdocs h1,
+.sbdocs h2,
+.sbdocs h3,
+.sbdocs p,
+.sbdocs li,
+.sbdocs td,
+.sbdocs th {
+  color: var(--foreground) !important;
+}
+.sbdocs a {
+  color: var(--link) !important;
+}
+.sbdocs code {
+  background: var(--muted) !important;
+  color: var(--foreground) !important;
+  border-color: var(--border) !important;
+}
+.sbdocs .docs-story {
+  background: var(--background) !important;
+}
