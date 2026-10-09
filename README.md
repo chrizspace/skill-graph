@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Skill Graph
 
-## Getting Started
+An interactive graph of **roles, skills and technologies**:
 
-First, run the development server:
+- employees see which competencies they're missing for a role they want
+- managers plan their team's development
+- admins keep the graph up to date
+
+The plan, data model and milestones are in [docs/PLAN.md](docs/PLAN.md).
+
+**Stack:**
+
+- Next.js 16 (App Router) and TypeScript
+- Tailwind 4 with shadcn/ui
+- Neon Postgres with Drizzle ORM
+- Better Auth (Microsoft Entra ID)
+- Cytoscape.js
+- Vitest and Playwright
+- hosted on Vercel
+
+## Getting started
+
+Requirements: Node 24+, pnpm (the version is pinned in `package.json`), Docker (for the local database, from M1).
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Commands
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command                                    | What it does                                                                      |
+| ------------------------------------------ | --------------------------------------------------------------------------------- |
+| `pnpm dev`                                 | Dev server                                                                        |
+| `pnpm check`                               | Only the checks that matter for what changed; `pnpm check --full` runs everything |
+| `pnpm lint`, `pnpm typecheck`, `pnpm test` | ESLint, `next typegen` + `tsc`, Vitest                                            |
+| `pnpm format`                              | Prettier                                                                          |
+| `pnpm build`                               | Production build                                                                  |
 
-## Learn More
+## How changes reach `main`
 
-To learn more about Next.js, take a look at the following resources:
+`main` is protected: every change goes through a feature branch and a pull request, and a PR merges itself (squash) once the `ci` check passes.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```text
+git switch main && git pull --ff-only
+git switch -c feat/<milestone>-<slug>
+# work, commit (Conventional Commits)
+pnpm check
+git push -u origin feat/<milestone>-<slug>
+gh pr create --fill
+gh pr merge --auto --squash --delete-branch
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Claude Code follows the same flow automatically:
 
-## Deploy on Vercel
+- `AGENTS.md` holds the rules.
+- `.claude/hooks/guard-main.mjs` blocks commits and pushes on `main`.
+- The `/feature` and `/ship` skills start and finish a branch.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+`scripts/setup-repository.sh` (re)applies the GitHub settings and the ruleset:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- squash merges only
+- auto-merge
+- the required `ci` check
+- no force pushes
+- secret scanning
+
+## Deployment (one-time setup by the repository owner)
+
+### 1. Vercel
+
+1. In Vercel, choose **Add New → Project**, import `chrizspace/skill-graph`, and keep the Next.js defaults.
+2. Production deploys from `main`. Every pull request gets a preview URL.
+
+### 2. Neon
+
+1. In the Vercel project, go to **Storage → Create Database → Neon**.
+2. Connect it to all environments and turn on **preview branches**. Each preview deploy then gets its own copy of the database.
+3. This sets `DATABASE_URL` and needs to be done before M1 reaches production.
+
+### 3. Microsoft sign-in
+
+This comes at M3. The README will list the Entra app registration steps and the environment variables then.

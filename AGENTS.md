@@ -7,3 +7,42 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+# Skill Graph
+
+An internal tool that shows roles, skills and technologies as a graph, so people can see the gap to a role they want and managers can plan development. The full plan, data model and milestones are in [docs/PLAN.md](docs/PLAN.md); read it before starting a milestone and update it when a decision changes.
+
+## Git workflow (always)
+
+- **Never commit, merge or push on `main`.** `main` changes only through pull requests that pass CI; a ruleset on GitHub and the hook in `.claude/hooks/guard-main.mjs` both enforce it.
+- **One branch per feature**, from an up-to-date `main`: `feat|fix|chore|docs/<milestone>-<slug>`, e.g. `feat/m4-role-browser`. Use the `/feature <slug>` skill to start one.
+- Keep PRs small: a milestone is usually several PRs. Commit messages and PR titles use Conventional Commits (`feat: …`, `fix: …`); the PR title becomes the squash commit on `main`.
+- **Ship with the `/ship` skill**: `pnpm check` passes → push → open the PR with the template → `gh pr merge --auto --squash --delete-branch`. GitHub merges it once the `ci` check is green. If CI fails, fix it on the same branch. After the merge, switch back to `main` and pull before starting the next branch.
+- Never use `--force`, `--no-verify` or `gh pr merge --admin`. Never change the ruleset to get a PR through.
+
+## Definition of done (every PR)
+
+1. `pnpm check` passes (lint, types, unit tests, plus database tests, build and e2e when the change touches them).
+2. UI changes are checked in the browser at 1280 px and 375 px, in light and dark.
+3. New behaviour has tests; Scenarios 1–3 from the plan stay green.
+4. `README.md` and `docs/PLAN.md` are updated if setup, commands or decisions changed.
+
+## Commands
+
+| Command                                      | What it does                                                                              |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `pnpm dev`                                   | Dev server on http://localhost:3000                                                       |
+| `pnpm check`                                 | Only the checks that matter for what changed (vs `origin/main`); `--full` runs everything |
+| `pnpm lint` / `pnpm typecheck` / `pnpm test` | ESLint / `next typegen` + `tsc` / Vitest unit tests                                       |
+| `pnpm format`                                | Prettier                                                                                  |
+
+## Architecture map
+
+| Path              | Purpose                                                                                                     |
+| ----------------- | ----------------------------------------------------------------------------------------------------------- |
+| `src/app/`        | Next.js App Router pages, layouts, route handlers (`/api/v1`)                                               |
+| `src/domain/`     | Pure graph logic: gap analysis, comparison, readiness, paths, validation. No framework or database imports. |
+| `src/db/`         | Drizzle schema, queries, migrations and seed                                                                |
+| `src/components/` | UI components (shadcn/ui based)                                                                             |
+| `scripts/`        | `check.mts` (local checks), `setup-repository.sh` (GitHub settings and ruleset)                             |
+| `.claude/`        | Hook and skills for the branch workflow                                                                     |
