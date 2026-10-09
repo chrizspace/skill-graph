@@ -2,9 +2,10 @@
  * `pnpm check` runs only the checks that matter for what changed (vs where this branch left origin/main, plus the working tree).
  *   always      format, lint, typecheck and unit tests, in parallel
  *   database    `test:db` when the schema, migrations, seed, queries or db tests change
+ *   storybook   `build-storybook` when components, the design system, stories or .storybook change
  *   build       `build` when config, dependencies or app code change
  *   e2e         `test:e2e` (only the changed specs) when e2e specs change
- * `pnpm check --full` runs everything; `pnpm check --only=static,db,build,e2e` picks groups explicitly.
+ * `pnpm check --full` runs everything; `pnpm check --only=static,db,storybook,build,e2e` picks groups explicitly.
  * A group whose package.json script doesn't exist yet is skipped, so this works from the first milestone on.
  */
 import { spawn, execSync } from "node:child_process";
@@ -49,6 +50,12 @@ const wants = {
     has("build") &&
     (full || touches(/^src\/app\/|^next\.config|^package\.json$|^pnpm-lock\.yaml$|^tsconfig/)),
   e2e: has("test:e2e") && (full || changedSpecs.length > 0),
+  storybook:
+    has("build-storybook") &&
+    (full ||
+      touches(
+        /^src\/components\/|^src\/design-system\/|\.stories\.tsx$|\.mdx$|^\.storybook\/|^package\.json$/,
+      )),
 };
 if (only) for (const k of Object.keys(wants) as (keyof typeof wants)[]) wants[k] = only.includes(k);
 
@@ -88,6 +95,7 @@ lanes.push(
       const specs = full ? "" : changedSpecs.join(" ");
       report(await run("e2e", `pnpm test:e2e ${specs}`.trim()));
     }
+    if (wants.storybook) report(await run("storybook build", "pnpm build-storybook"));
     if (wants.build) report(await run("production build", "pnpm build"));
   })(),
 );
@@ -95,7 +103,7 @@ await Promise.all(lanes);
 
 const failed = results.filter((r) => !r.ok);
 for (const r of failed) console.log(`\n── ${r.name} ──\n${r.out.split("\n").slice(-40).join("\n")}`);
-const skipped = (["db", "build", "e2e"] as const).filter((k) => !wants[k]);
+const skipped = (["db", "storybook", "build", "e2e"] as const).filter((k) => !wants[k]);
 if (skipped.length)
   console.log(`\nSkipped (nothing relevant changed or not set up yet): ${skipped.join(", ")}.`);
 process.exit(failed.length ? 1 : 0);

@@ -1,0 +1,67 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { ThemeSwitcher } from "../components/theme/theme-switcher";
+import {
+  ColorScales,
+  ComponentIndex,
+  ContrastTable,
+  Motion,
+  RadiusAndShadows,
+  SemanticTokens,
+  Typography,
+} from "./docs/overview-blocks";
+
+<Meta title="Design system/Overview" />
+
+# Skill Graph design system
+
+Two colour themes, **Orange** and **Violet**, each in light and dark. Every page and component uses the **semantic
+tokens** below (`bg-primary`, `text-critical`…), never the raw primitives, so switching the theme recolours
+everything. Tokens live in `src/design-system/tokens.ts`; `pnpm tokens` generates the CSS.
+
+<ThemeSwitcher className="my-4" />
+
+## Components
+
+Everything in `src/components`, each with its own stories. A test fails if a component has no story or is missing
+from this list (`src/design-system/catalogue.ts`).
+
+<ComponentIndex />
+
+## Colour primitives
+
+Raw scales. Orange and Violet are anchored at 500; neutral, red, amber, green and blue serve every theme.
+
+<ColorScales />
+
+## Semantic tokens
+
+What components use, per theme and mode. "Current" follows the switcher above.
+
+<SemanticTokens />
+
+## Contrast
+
+WCAG 2.2 AA: 4.5:1 for text, 3:1 for focus rings, field borders and graph nodes. `tokens.test.ts` checks every pair
+in every theme and mode.
+
+<ContrastTable />
+
+## Weights and statuses
+
+A requirement's weight is always an icon, a label and a colour together, never colour alone. Critical is red,
+Important amber, Nice to have green. A held but expired certification is shown faded (`--opacity-expired`), and still
+counts as held.
+
+## Typography
+
+Geist and Geist Mono.
+
+<Typography />
+
+## Radius and shadows
+
+<RadiusAndShadows />
+
+## Motion
+
+<Motion />
