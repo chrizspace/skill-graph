@@ -10,7 +10,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 # Skill Graph
 
-An internal tool that shows roles (with specialisations), skills, competencies and tools as a graph. Employees keep a profile and plan their development; managers follow their direct reports, recommend development steps and send change requests; Practice Leads control their practice's roles and paths; the Site Lead oversees the practices. The concepts, user types and permissions are defined in `docs/PLAN.md` §1: use its vocabulary in code and UI. The full plan, data model and milestones are in [docs/PLAN.md](docs/PLAN.md); read it before starting a milestone and update it when a decision changes.
+An internal tool that shows roles (with specialisations) and what they require (technical skills, soft skills and certifications, each weighted Critical / Important / Nice to have) as a graph. Employees keep a profile and plan their development; managers follow their direct reports, recommend development steps and send change requests; Practice Leads control their practice's roles and paths; the Site Lead oversees the practices. The concepts, user types and permissions are defined in `docs/PLAN.md` §1: use its vocabulary in code and UI. The full plan, data model and milestones are in [docs/PLAN.md](docs/PLAN.md); read it before starting a milestone and update it when a decision changes.
 
 ## Git workflow (always)
 
