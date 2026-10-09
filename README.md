@@ -32,7 +32,7 @@ pnpm dev
 
 Open http://localhost:3000.
 
-The seed holds 17 roles, 62 skills and 42 technologies, plus four fictional people (`@example.com`): Alex Rivera (Frontend Developer), Sam Patel (Project Manager), Morgan Lee (their manager) and Jordan Kim (admin). Production gets the graph but never the demo people.
+The seed holds a demo site with 5 practices, 19 roles (4 specialisations), a catalogue of technical skills, soft skills and certifications, and 18 fictional people (`@example.com`): a Site Lead, a Practice Lead per practice, two managers and their teams. Production gets the site, practices and graph but never the demo people. Details: `docs/PLAN.md` §7.
 
 ## Commands
 

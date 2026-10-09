@@ -235,7 +235,7 @@ M1 built v1. Migration `0001` (milestone M2) brings it to the model below; there
   - Name rules:
     - Normalisation: lowercase, punctuation stripped except `+` and `#`, `&` read as "and".
     - Names are unique across roles and catalogue items.
-    - Specialisation names are unique within their role ("React" can be a specialisation of Frontend Developer and also a technical skill).
+    - Specialisation names are unique within their role ("React" can be a specialisation of Frontend Developer and also a technical skill). Their slug is scoped to the role: `frontend-developer--react`.
 - **`edges`**
   - `id`, `kind`, `source_id`/`target_id` → nodes (on delete cascade), `priority`, `strength` 1–5, `note` _(new)_, `typical_months` _(new)_, `external_id`, `source`, timestamps.
   - Kinds (type rules in the domain validator, tested):
@@ -397,82 +397,98 @@ All writes go through Server Actions with zod validation and `can()`. The graph 
 
 ## 7. Seed data (`src/db/seed/`, fictional people only)
 
-**Now (v1, M1):**
+Seed v2 (M2) holds:
 
-- 17 roles, 62 skills, 42 technologies, 283 links, 4 demo people.
-- The scenario roles' requirements are fixed exactly:
-  - **Frontend Developer**
-    - Critical: JavaScript, TypeScript, React, HTML & CSS, Problem Solving
-    - Important: Git, Agile, Accessibility, Testing
-    - Nice: Next.js, GitHub Copilot
-  - **Data Engineer**, **only**:
-    - Critical: SQL, Python, Data Modelling, Problem Solving
-    - Important: Spark, Databricks, Git
-    - Nice: Agile
-    - Prerequisites: Databricks builds on Python and Spark; Spark builds on Python.
-  - **Project Manager**
-    - Critical: Planning & Scheduling, Stakeholder Management, Risk Management, Communication
-    - Important: Agile, Azure DevOps
-    - No Leadership and no financial skills
-  - **Delivery Manager**
-    - Critical: Leadership, Financial Management, People Management, Stakeholder Management, Communication
-    - Important: Account Management, Commercial Awareness, Risk Management
-    - Nice: Agile
-  - **Full-stack Developer**: Frontend core + Node.js (I) + REST APIs (I) + SQL (N).
+- one site, "Demo Site", with 5 practices
+- 19 roles and 4 specialisations
+- the catalogue: 102 technical skills (tools and platforms among them), 15 soft skills, 17 certifications
+- 369 links: 245 requirements, 84 dependencies, 17 related pairs, 23 official paths
+- 18 demo people, plus example recommendations and change requests
 
-**v2 (M2):**
+`src/db/seed/data.ts` is the source; `src/db/seed/seed.db.test.ts` guards it.
 
-- **Site**: one, "Demo Site".
-- **Practices**:
+- **Practices and roles**:
   - **Frontend Practice**:
-    - Frontend Developer, with specialisations **React** (React, Next.js) and **Angular** (Angular, RxJS). Figma Foundation is a Nice-to-have certification in the core.
+    - Frontend Developer, with specialisations **React** (React, Next.js) and **Angular** (Angular, RxJS)
     - UX Developer
     - Full-stack Developer
   - **Backend & Architecture**: Backend Developer, Solution Architect, Engineering Manager
   - **Data & AI**: Data Engineer, Analytics Engineer, Data Analyst, Data Scientist, AI Engineer
   - **Cloud & Security**: Cloud Engineer, DevOps Engineer, Security Engineer
   - **Delivery Management**: Business Analyst, Project Manager, Scrum Master, Product Owner, Delivery Manager
-    - **Scrum Master**:
-      - core: Agile, Scrum, Facilitation, Coaching, Communication, Stakeholder Management; PSM I Critical
-      - specialisation **SAFe**: SAFe, PI Planning; SAFe Scrum Master certification
-      - specialisation **Facilitation / Management 3.0**: facilitation techniques, Management 3.0 practices; Management 3.0 Foundation certification
-    - Scrum Master, Project Manager and Product Owner share enough core requirements to appear as **similar roles** to each other. Project Manager gains Facilitation (Important) for this. Scenario 2 is unaffected, because Delivery Manager doesn't require Facilitation.
-- **Frontend Developer core**: v1's list without React and Next.js, which move to the React specialisation. Frontend Developer: React therefore has exactly v1's requirements, so Scenario 1 is unchanged.
-- **Catalogue re-typed**:
-  - v1's technologies become technical skills, with the category "Tool / platform".
-  - Soft skills: Problem Solving, Communication, Stakeholder Management, Leadership, People Management, Mentoring, Team Leading, Solutioning, Facilitation, Negotiation, Commercial Awareness, Account Management, Change Management, Product Thinking.
-  - The rest of v1's skills stay technical.
-- **Certifications**, about 12, with issuers. Examples:
-  - Figma Foundation
-  - PSM I (Critical for Scrum Master)
-  - PSPO I (Product Owner)
-  - Azure Fundamentals (AZ-900), Azure Administrator (AZ-104) (Cloud Engineer)
-  - Power BI Data Analyst (PL-300) (Data Analyst)
-  - Databricks Data Engineer Associate (Analytics Engineer)
-  - Kubernetes Administrator (CKA) (DevOps)
-  - Terraform Associate
-  - PMP (Project Manager, Nice)
+- **Scrum Master**:
+  - **core**:
+    - Critical: Scrum, Agile, Coaching, Communication, PSM I
+    - Important: Facilitation, Stakeholder Management, Azure DevOps
+    - Nice: Jira, Estimation, Change Management
+  - **SAFe**: SAFe (Critical), PI Planning and SAFe Scrum Master (Important)
+  - **Facilitation / Management 3.0**: Management 3.0 Practices and Facilitation (Critical; raised from Important in the core), Workshop Design and Management 3.0 Foundation (Important), Liberating Structures (Nice)
 
-  Data Engineer and Delivery Manager get no certifications, so the brief's Scenario 1 and 2 lists stay exact.
+  Scrum Master, Project Manager and Product Owner share enough core requirements to be **similar roles**.
 
-- **Demo people**: about 16, at `@example.com`.
-  - Jordan Kim: Site Lead.
-  - A Practice Lead for each practice.
-  - **Morgan Lee**: manager in Frontend Practice. Reports include Alex Rivera (Frontend Developer: React; profile pre-filled from the role) and others.
-  - **A Delivery Management manager**. Reports include Sam Patel (Project Manager; pre-filled, plus Jira), a Business Analyst and a Scrum Master (PSM I, expiring soon). A Business Analyst has an expired PSPO I.
+- **The scenario roles' requirements are fixed exactly** (tests fail if they change):
+  - **Frontend Developer: React** (core + specialisation)
+    - Critical: JavaScript, TypeScript, HTML & CSS, Problem Solving, React
+    - Important: Git, Agile, Accessibility, Testing
+    - Nice: GitHub Copilot, Next.js, Figma Foundation
+  - **Data Engineer**, **only**, and no certifications:
+    - Critical: SQL, Python, Data Modelling, Problem Solving
+    - Important: Spark, Databricks, Git
+    - Nice: Agile
+    - Prerequisites: Databricks builds on Python and Spark; Spark builds on Python and SQL.
+  - **Project Manager**
+    - Critical: Planning & Scheduling, Stakeholder Management, Risk Management, Communication
+    - Important: Agile, Azure DevOps, Facilitation
+    - Nice: Jira, Estimation, Change Management, PMP
+    - No Leadership and no financial skills
+  - **Delivery Manager**, no certifications:
+    - Critical: Leadership, Financial Management, People Management, Stakeholder Management, Communication
+    - Important: Account Management, Commercial Awareness, Risk Management
+    - Nice: Agile
+  - **Full-stack Developer**: Frontend core + React (C) + Node.js and REST APIs (I) + SQL (N).
+- **Catalogue**:
+  - Tools and platforms are technical skills with the category "Tool / platform" (their area is a tag).
+  - Soft skills: Problem Solving, Solutioning, Product Thinking, Communication, Stakeholder Management, Facilitation, Negotiation, Leadership, Team Leading, People Management, Mentoring, Coaching, Change Management, Account Management, Commercial Awareness.
+  - Certifications, each with an issuer: Figma Foundation, PSM I, PSPO I, SAFe Scrum Master, Management 3.0 Foundation, PMP, AZ-900, AZ-104, AZ-204, AZ-305, PL-300, AI-102, DP-100, SC-200, Databricks Data Engineer Associate, CKA, Terraform Associate.
+  - Certifications build on what they test, e.g. PSM I builds on Scrum.
+- **Demo people** (`@example.com`), each profile pre-filled from the role's skill requirements and then adjusted:
+  - **Site Lead**: Jordan Kim (Solution Architect).
+  - **Practice Leads**: Taylor Brooks (Frontend), Robin Weiss (Backend & Architecture), Avery Chen (Data & AI), Jamie Ortiz (Cloud & Security), Casey Lin (Delivery Management).
+  - **Morgan Lee** (Frontend Practice) manages:
+    - Alex Rivera: Frontend Developer: React
+    - Noah Fischer: Frontend Developer: Angular, without Testing
+    - Mia Kowalski: UX Developer, with Figma Foundation
+    - Leo Martins: Full-stack Developer
+    - Zoe Adler: Frontend Developer: React, without Accessibility; target Full-stack Developer
+  - **Riley Nowak** (Delivery Management) manages:
+    - Sam Patel: Project Manager
+    - Ella Jensen: Business Analyst; PL-300 **expired**
+    - Omar Haddad: Scrum Master: SAFe; PSM I, and SAFe Scrum Master **expiring** in 35 days
+    - Lena Hoffmann: Product Owner; PSPO I
+    - Ben Carter: Scrum Master; PSM I; target Scrum Master: Facilitation / Management 3.0
 
-  At least two practices have 5+ members, so the Site Lead's aggregates have data.
+  Frontend Practice and Delivery Management have 7 members each. The other practices are smaller than 5, so the Site Lead's aggregates show the hiding.
 
-- **Examples**: change requests (one open feedback, one approved, one rejected, one proposal for a new specialisation) and recommendations (one open, one accepted), so those screens have data.
+- **Examples**:
+  - Recommendations: Morgan → Alex (target Full-stack, open), Morgan → Zoe (Accessibility, accepted), Riley → Ben (Management 3.0 specialisation, accepted), Riley → Sam (PMP, open).
+  - Change requests:
+    - add Playwright to Frontend Developer (open)
+    - remove Accessibility (rejected, with a reason)
+    - Jira on Scrum Master to Nice (approved)
+    - a Kanban specialisation for Scrum Master (needs info, with a comment)
 - **When it runs**: `pnpm db:seed` runs before every Vercel build, after the migrations, and only adds what's missing.
-  - **Production:** it seeds the site, practices and graph once into an empty database, and never adds demo people, requests or recommendations.
+  - **Production:** it seeds the site, practices and graph once into an empty database, and never adds demo people, recommendations or change requests.
   - **Locally and on previews:** it runs in full.
-- **Tests that guard the seed**, in `src/db/seed/seed.db.test.ts`:
-  - the scenario roles' requirements
-  - Scenarios 1 and 2: the brief's **missing** lists exactly
-  - type rules, no cycles, no unconnected items
-  - every role has a practice and every specialisation a role
-  - idempotency
+  - Certification dates are relative to the day the seed runs.
+- **Tests that guard the seed**:
+  - organisation: site, practices, roles per practice, specialisations with scoped slugs
+  - catalogue types and issuers; every example from the brief and the reviews
+  - no unconnected items; link type rules; no `builds_on` cycles
+  - the scenario roles' requirements; a specialisation raising a core weight
+  - Scenarios 1 and 2 (role vs role and person vs role) as set operations, until M3's domain functions replace them
+  - leads, managers and their reports; pre-filled profiles; certification dates (valid, expiring, expired, no expiry)
+  - recommendations and change requests in every state, with valid operations
+  - idempotency; production mode without demo data
 
 ## 8. Milestones (each split into small feature PRs)
 
@@ -480,11 +496,11 @@ All writes go through Server Actions with zod validation and `can()`. The graph 
 | --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
 | M0  | Scaffold, public repo, ruleset, CI, Claude workflow config, `pnpm check`, Vercel + Neon link, `docs/PLAN.md`, README                                           | A PR auto-merges after passing CI, and its preview deploy loads                                                                                  | Done   |
 | M1  | Schema v1, migrations, local Postgres in Docker, seed v1, DB tests                                                                                             | `pnpm db:reset && pnpm test:db` passes; seed invariants hold                                                                                     | Done   |
-| M2  | **Organisation model**: migration `0001` (§3), seed v2 (§7), DB tests                                                                                          | Constraints and seed invariants (site, practices, specialisations, the three item types, certifications) pass; production migrates cleanly       | To do  |
-| M3  | Domain logic (TDD): effective requirements, assess, learning order, compare with profile, readiness, similar roles, paths, plan, aggregates, change validation | Scenarios 1 and 2 exact (missing lists and order); ≥90% coverage on `src/domain`                                                                 | To do  |
+| M2  | **Organisation model**: migration `0001` (§3), seed v2 (§7), DB tests                                                                                          | Constraints and seed invariants (site, practices, specialisations, the three item types, certifications) pass; production migrates cleanly       | Done   |
+| M3  | Domain logic (TDD): effective requirements, assess, learning order, compare with profile, readiness, similar roles, paths, plan, aggregates, change validation | Scenarios 1 and 2 exact (missing lists and order); Scrum Master ↔ Project Manager are similar roles; ≥90% coverage on `src/domain`               | To do  |
 | M4  | Better Auth (Microsoft + demo sign-in), `can()`, app shell with navigation per user type                                                                       | Sign in as each demo person; every denial in §1 has a test                                                                                       | To do  |
 | M5  | Role browser (with specialisations and similar roles) and catalogue pages                                                                                      | Search and filters work; role page shows description, core and specialisations by type and weight, practice, paths, similar roles with synergies | To do  |
-| M6  | Employee: onboarding with pre-fill, profile editor (skills, certifications with dates), target, compare two roles with my profile, development plan            | End-to-end Scenarios 1 and 2 through the UI                                                                                                      | To do  |
+| M6  | Employee: onboarding with pre-fill, profile editor (skills, certifications with dates), target, compare two roles with my profile, development plan            | End-to-end Scenarios 1, 2 and 7 (certification states) through the UI                                                                            | To do  |
 | M7  | `/explore` graph (§6), plus a performance test on a synthetic 2k-node / 20k-link graph                                                                         | Focus, specialisations, my view and path mode work by mouse and keyboard; overview interactive in under 2s                                       | To do  |
 | M8  | Practice Lead: edit roles, specialisations, requirements, paths, drafts, catalogue items; validation, confirmations, audit log                                 | A lead edits only their practice; edits show in the graph straight away; audit rows written                                                      | To do  |
 | M9  | Change requests: feedback and proposals, comments, approve (applies or drafts), reject, needs info, withdraw                                                   | End-to-end: manager sends feedback, lead approves, role changes, audit links to the request; a proposal becomes a draft                          | To do  |
