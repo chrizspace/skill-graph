@@ -45,11 +45,11 @@ An internal tool that shows roles (with specialisations) and what they require (
 
 ## Architecture map
 
-| Path              | Purpose                                                                                                     |
-| ----------------- | ----------------------------------------------------------------------------------------------------------- |
-| `src/app/`        | Next.js App Router pages, layouts, route handlers (`/api/v1`)                                               |
-| `src/domain/`     | Pure graph logic: gap analysis, comparison, readiness, paths, validation. No framework or database imports. |
-| `src/db/`         | Drizzle schema, queries, migrations and seed                                                                |
-| `src/components/` | UI components (shadcn/ui based)                                                                             |
-| `scripts/`        | `check.mts` (local checks), `setup-repository.sh` (GitHub settings and ruleset)                             |
-| `.claude/`        | Hook and skills for the branch workflow                                                                     |
+| Path              | Purpose                                                                                                                                                                                                   |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/app/`        | Next.js App Router pages, layouts, route handlers (`/api/v1`)                                                                                                                                             |
+| `src/domain/`     | Pure graph logic: requirements, assess, learning order, compare, readiness, similar roles, paths, plan, aggregates, validation. No framework or database imports; ≥90% coverage, enforced by `pnpm test`. |
+| `src/db/`         | Drizzle schema, `graph.ts` (loads the graph and profiles for the domain), seed; `drizzle/` holds the SQL migrations                                                                                       |
+| `src/components/` | UI components (shadcn/ui based)                                                                                                                                                                           |
+| `scripts/`        | `check.mts` (local checks), `setup-repository.sh` (GitHub settings and ruleset)                                                                                                                           |
+| `.claude/`        | Hook and skills for the branch workflow                                                                                                                                                                   |
