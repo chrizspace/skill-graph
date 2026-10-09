@@ -10,7 +10,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 # Skill Graph
 
-An internal tool that shows roles, skills and technologies as a graph, so people can see the gap to a role they want and managers can plan development. The full plan, data model and milestones are in [docs/PLAN.md](docs/PLAN.md); read it before starting a milestone and update it when a decision changes.
+An internal tool that shows roles, skills, competencies and tools as a graph. Employees keep a profile and plan their development, managers follow their team and propose changes to roles, and Practice Leads own the roles of their practice. The concepts, user types and permissions are defined in `docs/PLAN.md` §1: use its vocabulary in code and UI. The full plan, data model and milestones are in [docs/PLAN.md](docs/PLAN.md); read it before starting a milestone and update it when a decision changes.
 
 ## Git workflow (always)
 
@@ -26,7 +26,7 @@ An internal tool that shows roles, skills and technologies as a graph, so people
 1. `pnpm check` passes (lint, types, unit tests, plus database tests, build and e2e when the change touches them).
 2. UI changes are checked in the browser at 1280 px and 375 px, in light and dark.
 3. New behaviour has tests; Scenarios 1–3 from the plan stay green.
-4. `README.md` and `docs/PLAN.md` are updated if setup, commands or decisions changed. The PR that completes a milestone sets its Status to Done in the table in `docs/PLAN.md` §7.
+4. `README.md` and `docs/PLAN.md` are updated if setup, commands or decisions changed. The PR that completes a milestone sets its Status to Done in the table in `docs/PLAN.md` §8.
 
 ## Database rules
 
