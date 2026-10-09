@@ -26,7 +26,7 @@ An internal tool that shows roles, skills and technologies as a graph, so people
 1. `pnpm check` passes (lint, types, unit tests, plus database tests, build and e2e when the change touches them).
 2. UI changes are checked in the browser at 1280 px and 375 px, in light and dark.
 3. New behaviour has tests; Scenarios 1–3 from the plan stay green.
-4. `README.md` and `docs/PLAN.md` are updated if setup, commands or decisions changed.
+4. `README.md` and `docs/PLAN.md` are updated if setup, commands or decisions changed. The PR that completes a milestone sets its Status to Done in the table in `docs/PLAN.md` §7.
 
 ## Commands
 
