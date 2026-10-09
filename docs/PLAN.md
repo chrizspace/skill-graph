@@ -4,7 +4,7 @@ Living document: update it when a decision changes. Milestone status is tracked 
 
 ## Context
 
-An internal platform that shows Avanade's competencies as a graph of **roles → skills → technologies**. Employees use it to see the gap to a target role. Managers use it to plan their team's development, and admins maintain the graph by hand.
+An internal platform that shows an organisation's competencies as a graph of **roles → skills → technologies**. Employees use it to see the gap to a target role. Managers use it to plan their team's development, and admins maintain the graph by hand.
 
 Decisions made at the start: hosting on **Vercel**, **Neon Postgres + Drizzle**, **Cytoscape.js** for the graph, and every change through a **feature branch → PR → auto-merge when CI passes**.
 
@@ -250,7 +250,7 @@ Step-by-step instructions are in README.md.
 
 ## 9. Risks
 
-- **Avanade sign-in**: Avanade's Entra tenant may block consent to an app registered outside it, which means IT has to grant admin consent. Fallbacks: personal Microsoft accounts, or demo sign-in.
+- **Company sign-in**: the organisation's Entra tenant may block consent to an app registered outside it, which means its IT has to grant admin consent. Fallbacks: personal Microsoft accounts, or demo sign-in.
 - **Vercel Hobby is non-commercial**: real rollout needs Pro, or Azure App Service with the same Postgres.
 - **Full-graph performance at 20k links**: the UX defaults to focus mode, the WebGL renderer is available, and it gets measured in M6.
 - **Seed realism vs exact scenarios**: the Data Engineer's requirement list is deliberately small, and that's documented in the seed.
