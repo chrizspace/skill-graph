@@ -82,7 +82,7 @@ Claude Code follows the same flow automatically:
 |            |                                                                                                                                                                             |
 | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Production | https://skill-graph-one.vercel.app (deploys from `main`)                                                                                                                    |
-| Previews   | One URL per pull request; Vercel posts it on the PR                                                                                                                         |
+| Previews   | One URL per pull request, each with its own Neon database branch; Vercel posts it on the PR. `docs/*` and Dependabot branches get none (`vercel.json`)                      |
 | Hosting    | Vercel project `skill-graph`, functions in `fra1` (Frankfurt), see `vercel.json`                                                                                            |
 | Database   | Neon Postgres (free plan, `fra1`), connected through the Vercel Marketplace; it sets `DATABASE_URL` and the other `PG*` / `POSTGRES_*` variables for Preview and Production |
 
