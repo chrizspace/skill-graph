@@ -14,6 +14,11 @@ async function graphRows() {
   return loadGraphRows(getDb());
 }
 
+/** The graph's rows for the explorer, which builds its own in-memory graph in the browser. */
+export async function getGraphRows() {
+  return graphRows();
+}
+
 export async function getGraph(): Promise<Graph> {
   const { nodes, edges } = await graphRows();
   return buildGraph(nodes, edges);

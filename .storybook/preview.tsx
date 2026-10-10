@@ -38,7 +38,7 @@ const preview: Preview = {
     controls: { matchers: { color: /(background|color)$/i, date: /Date$/i } },
     // fail the a11y panel on violations rather than only listing them
     a11y: { test: "error" },
-    options: { storySort: { order: ["Design system", ["Overview"], "App", "Domain", "UI"] } },
+    options: { storySort: { order: ["Design system", ["Overview"], "App", "Graph", "Domain", "UI"] } },
   },
 };
 
