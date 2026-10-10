@@ -60,11 +60,21 @@ const wants = {
 if (only) for (const k of Object.keys(wants) as (keyof typeof wants)[]) wants[k] = only.includes(k);
 
 type Result = { name: string; ok: boolean; secs: number; out: string };
-function run(name: string, cmd: string): Promise<Result> {
+// a check that runs longer than `limitMinutes` is killed and reported as failed, so `pnpm check` can't hang
+function run(name: string, cmd: string, limitMinutes = 15): Promise<Result> {
   const t = Date.now();
   return new Promise((resolve) => {
-    const p = spawn(cmd, { shell: true });
+    const p = spawn(cmd, { shell: true, detached: true });
     let out = "";
+    const timer = setTimeout(() => {
+      out += `\n[killed after ${limitMinutes} minutes]`;
+      try {
+        process.kill(-p.pid!, "SIGKILL");
+      } catch {
+        p.kill("SIGKILL");
+      }
+    }, limitMinutes * 60_000);
+    p.on("close", () => clearTimeout(timer));
     p.stdout.on("data", (d) => (out += d));
     p.stderr.on("data", (d) => (out += d));
     p.on("close", (code) => resolve({ name, ok: code === 0, secs: (Date.now() - t) / 1000, out }));
@@ -78,6 +88,7 @@ const report = (r: Result) => {
 };
 
 const lanes: Promise<void>[] = [];
+const staticLanes: Promise<void>[] = [];
 if (wants.static) {
   const staticChecks = [
     ["format", "pnpm format:check"],
@@ -85,12 +96,15 @@ if (wants.static) {
     ["typecheck", "pnpm typecheck"],
     ["unit tests", "pnpm test"],
   ];
-  lanes.push(...staticChecks.map(([n, c]) => run(n, c).then(report)));
+  staticLanes.push(...staticChecks.map(([n, c]) => run(n, c).then(report)));
+  lanes.push(...staticLanes);
 }
-// database tests and e2e both reset the local database, and `next build` replaces `.next`: run them one after the other
+// database tests and e2e both reset the local database, and `next build` replaces `.next` (which typecheck and lint also
+// write to): run them one after the other, and the ones that build only after the static checks are done
 lanes.push(
   (async () => {
     if (wants.db) report(await run("database tests", "pnpm test:db"));
+    await Promise.all(staticLanes);
     if (wants.e2e) {
       const specs = full ? "" : changedSpecs.join(" ");
       report(await run("e2e", `pnpm test:e2e ${specs}`.trim()));
