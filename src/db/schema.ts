@@ -274,6 +274,8 @@ export const profiles = pgTable(
       onDelete: "set null",
     }),
     managerId: text("manager_id").references(() => user.id, { onDelete: "set null" }),
+    // the person's colour theme (a name from src/design-system/tokens.ts, checked in the app); empty until they choose
+    theme: text("theme"),
     ...timestamps,
   },
   (t) => [

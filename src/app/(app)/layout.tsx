@@ -1,7 +1,10 @@
 import { Suspense } from "react";
+import { ThemeSync } from "@/components/app/theme-switch";
 import { AppShell } from "@/components/app/app-shell";
 import { Skeleton } from "@/components/ui/skeleton";
 import { navigationFor } from "@/domain/navigation";
+import { getDb } from "@/db/client";
+import { loadTheme } from "@/db/graph";
 import { requireActor } from "@/lib/session";
 import { signOut } from "../actions";
 
@@ -16,8 +19,10 @@ export default function AppLayout({ children }: LayoutProps<"/">) {
 
 async function SignedIn({ children }: { children: React.ReactNode }) {
   const actor = await requireActor();
+  const theme = await loadTheme(getDb(), actor.userId);
   return (
     <AppShell groups={navigationFor(actor)} user={actor} signOut={signOut}>
+      <ThemeSync theme={theme} />
       {children}
     </AppShell>
   );

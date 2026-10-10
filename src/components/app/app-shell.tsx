@@ -10,7 +10,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MobileNav } from "./mobile-nav";
-import { ThemeMenuGroup } from "./theme-switch";
 import { NavLinks } from "./nav-links";
 
 const initials = (name: string) =>
@@ -65,8 +64,6 @@ export function AppShell({
                 <span className="block font-medium">{user.name}</span>
                 <span className="block text-xs text-muted-foreground">{user.email}</span>
               </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <ThemeMenuGroup />
               <DropdownMenuSeparator />
               <form action={signOut} className="p-1">
                 <Button type="submit" variant="ghost" size="sm" className="w-full justify-start">

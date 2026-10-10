@@ -30,17 +30,19 @@ const getSnapshot = (): ThemeName => {
 };
 const getServerSnapshot = (): ThemeName => defaultTheme;
 
-/** The theme in use and a function to change it (and remember it in this browser). */
+/** Puts a theme on the page and remembers it in this browser (it also lets the next page load skip a flash). */
+export function applyTheme(next: ThemeName) {
+  document.documentElement.setAttribute("data-theme", next);
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, next);
+  } catch {
+    // storage blocked (private window): the choice lasts until the page is closed
+  }
+  notify();
+}
+
+/** The theme in use and a function to change it in this browser. */
 export function useTheme() {
   const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-  const setTheme = (next: ThemeName) => {
-    document.documentElement.setAttribute("data-theme", next);
-    try {
-      localStorage.setItem(THEME_STORAGE_KEY, next);
-    } catch {
-      // storage blocked (private window): the choice lasts until the page is closed
-    }
-    notify();
-  };
-  return { theme, setTheme };
+  return { theme, setTheme: applyTheme };
 }

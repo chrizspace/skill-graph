@@ -66,6 +66,16 @@ export async function saveCertification(db: Database, userId: string, cert: Cert
     .onConflictDoUpdate({ target: [profileItems.userId, profileItems.nodeId], set: dates });
 }
 
+/** Saves the colour theme on the profile. Returns false when the person has no profile yet. */
+export async function setTheme(db: Database, userId: string, theme: string) {
+  const updated = await db
+    .update(profiles)
+    .set({ theme })
+    .where(eq(profiles.userId, userId))
+    .returning({ userId: profiles.userId });
+  return updated.length > 0;
+}
+
 export async function removeItem(db: Database, userId: string, nodeId: string) {
   await db.delete(profileItems).where(and(eq(profileItems.userId, userId), eq(profileItems.nodeId, nodeId)));
 }

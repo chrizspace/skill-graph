@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { roles, type Graph } from "../domain/graph";
-import { loadGraph, loadMyProfile, loadRecommendations } from "./graph";
+import { loadGraph, loadMyProfile, loadRecommendations, loadTheme } from "./graph";
 import {
   addSkills,
   answerRecommendation,
@@ -10,6 +10,7 @@ import {
   setCurrentRole,
   setSkills,
   setTarget,
+  setTheme,
 } from "./profile-write";
 import { recommendations, user } from "./schema";
 import { seed } from "./seed/seed";
@@ -90,6 +91,19 @@ describe("target", () => {
     });
     await setTarget(t.db, "new", null);
     expect((await loadMyProfile(t.db, "new"))!.profile.target).toBeNull();
+  });
+});
+
+describe("theme", () => {
+  it("is empty until chosen, saved on the profile, and needs a profile", async () => {
+    expect((await loadMyProfile(t.db, "new"))!.theme).toBeNull();
+    expect(await setTheme(t.db, "nobody", "violet")).toBe(false);
+    expect(await setTheme(t.db, "new", "violet")).toBe(true);
+    expect((await loadMyProfile(t.db, "new"))!.theme).toBe("violet");
+    expect(await loadTheme(t.db, "new")).toBe("violet");
+    expect(await loadTheme(t.db, "nobody")).toBeNull();
+    await setTheme(t.db, "new", "orange");
+    expect(await loadTheme(t.db, "new")).toBe("orange");
   });
 });
 

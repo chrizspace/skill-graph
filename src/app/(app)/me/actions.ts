@@ -12,9 +12,11 @@ import {
   setCurrentRole,
   setSkills,
   setTarget,
+  setTheme,
 } from "@/db/profile-write";
 import { can } from "@/domain/access";
 import type { Target } from "@/domain/graph";
+import { isThemeName } from "@/design-system/theme";
 import { parseCertification, skillIds, targetBySlug } from "@/domain/profile-input";
 import { getGraph } from "@/lib/graph-data";
 import { requireActor } from "@/lib/session";
@@ -108,4 +110,11 @@ export async function answerRecommendationAction(formData: FormData) {
         : null;
   await answerRecommendation(db, actor.userId, id, answer, target);
   revalidatePath("/", "layout");
+}
+
+/** Saves the colour theme on the profile. False when there is no profile yet (the browser still remembers it). */
+export async function saveTheme(theme: string) {
+  const actor = await actorOrThrow();
+  if (!isThemeName(theme)) throw new Error("Unknown theme");
+  return setTheme(getDb(), actor.userId, theme);
 }

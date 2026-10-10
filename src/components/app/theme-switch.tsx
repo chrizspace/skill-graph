@@ -1,13 +1,15 @@
 "use client";
 
+import { useEffect } from "react";
 import { Check } from "lucide-react";
 import {
   DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
 } from "@/components/ui/dropdown-menu";
+import { isThemeName } from "@/design-system/theme";
 import { themeLabels, themeNames, themes, type ThemeName } from "@/design-system/tokens";
-import { useTheme } from "@/lib/use-theme";
+import { applyTheme, useTheme } from "@/lib/use-theme";
 import { cn } from "@/lib/utils";
 
 /** A dot in the theme's own colour, so the choice can be seen as well as read. */
@@ -19,26 +21,22 @@ const Swatch = ({ theme }: { theme: ThemeName }) => (
   />
 );
 
-/** The theme choice inside a menu (the account menu, top right). */
-export function ThemeMenuGroup() {
-  const { theme, setTheme } = useTheme();
-  return (
-    <>
-      <DropdownMenuLabel className="text-xs font-semibold text-muted-foreground">Theme</DropdownMenuLabel>
-      <DropdownMenuRadioGroup value={theme} onValueChange={(v) => setTheme(v as ThemeName)}>
-        {themeNames.map((t) => (
-          <DropdownMenuRadioItem key={t} value={t} className="gap-2">
-            <Swatch theme={t} />
-            {themeLabels[t]}
-          </DropdownMenuRadioItem>
-        ))}
-      </DropdownMenuRadioGroup>
-    </>
-  );
+/**
+ * Puts the theme saved on the signed-in person's profile on the page, e.g. on a device they haven't used before.
+ * Renders nothing. A person without a saved theme keeps whatever this browser has.
+ */
+export function ThemeSync({ theme }: { theme: string | null }) {
+  useEffect(() => {
+    if (isThemeName(theme)) applyTheme(theme);
+  }, [theme]);
+  return null;
 }
 
-/** The same choice as radio buttons, for the profile page. */
-export function ThemeRadios() {
+/**
+ * The theme choice as radio buttons, on the profile page. It applies at once; `onSave` stores the choice on the
+ * profile (a server action), so it follows the person to other browsers.
+ */
+export function ThemeRadios({ onSave }: { onSave?: (theme: ThemeName) => void | Promise<unknown> }) {
   const { theme, setTheme } = useTheme();
   return (
     <fieldset className="flex flex-wrap gap-3">
@@ -56,7 +54,10 @@ export function ThemeRadios() {
             name="theme"
             value={t}
             checked={theme === t}
-            onChange={() => setTheme(t)}
+            onChange={() => {
+              setTheme(t);
+              void onSave?.(t);
+            }}
             className="sr-only"
           />
           <Swatch theme={t} />

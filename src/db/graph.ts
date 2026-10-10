@@ -107,6 +107,7 @@ export async function loadPractices(db: Database): Promise<PracticeInfo[]> {
 export interface MyProfile {
   profile: Profile;
   practiceId: string | null;
+  theme: string | null;
 }
 
 /** Profile data for the pages: the domain profile plus the home practice. Null when the person has no profile yet. */
@@ -114,10 +115,16 @@ export async function loadMyProfile(db: Database, userId: string): Promise<MyPro
   const profile = await loadProfile(db, userId);
   if (!profile) return null;
   const [row] = await db
-    .select({ practiceId: profiles.practiceId })
+    .select({ practiceId: profiles.practiceId, theme: profiles.theme })
     .from(profiles)
     .where(eq(profiles.userId, userId));
-  return { profile, practiceId: row?.practiceId ?? null };
+  return { profile, practiceId: row?.practiceId ?? null, theme: row?.theme ?? null };
+}
+
+/** The theme saved on a person's profile, if they have chosen one. */
+export async function loadTheme(db: Database, userId: string): Promise<string | null> {
+  const [row] = await db.select({ theme: profiles.theme }).from(profiles).where(eq(profiles.userId, userId));
+  return row?.theme ?? null;
 }
 
 export interface MyRecommendation {
