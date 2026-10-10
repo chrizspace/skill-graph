@@ -12,6 +12,10 @@ import { isPending } from "@/domain/change-requests";
 import { getGraph, getPractices } from "@/lib/graph-data";
 import { requireActor } from "@/lib/session";
 import { createRoleAction } from "../actions";
+import { loadPeople, memberIds } from "@/db/people";
+import { readinessPerRole, summarize, teamGaps } from "@/domain/people";
+import { PriorityBadge } from "@/components/domain/priority-badge";
+import { PeopleList } from "../../team/people-list";
 
 export const metadata = { title: "Practice · Skill Graph" };
 
@@ -23,6 +27,14 @@ export default async function PracticePage({ params }: PageProps<"/practices/[sl
   if (!practice || !can(actor, "role:edit", { practiceId: practice.id })) notFound();
   const graph = await getGraph();
   const list = roles(graph, { includeDrafts: true }).filter((r) => r.practiceId === practice.id);
+  // named profiles are for the practice's own leads; the Site Lead sees aggregates only (M12)
+  const leads = actor.leadOf.some((p) => p.id === practice.id);
+  const members = leads ? await loadPeople(getDb(), await memberIds(getDb(), practice.id)) : [];
+  const today = new Date();
+  const summaries = new Map(members.map((m) => [m.id, summarize(graph, m, today)]));
+  const gaps = teamGaps(graph, members, today).slice(0, 8);
+  const perRole = readinessPerRole(graph, members, today);
+  const names = new Map(members.map((m) => [m.id, m.name]));
   const waiting = (await listRequests(getDb(), actor)).inbox.filter(
     (r) => r.practiceId === practice.id && isPending(r.status),
   );
@@ -50,6 +62,99 @@ export default async function PracticePage({ params }: PageProps<"/practices/[sl
           </Link>
         </p>
       </section>
+
+      {leads ? (
+        <>
+          <section aria-labelledby="members" className="flex flex-col gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 id="members" className="text-xl font-semibold">
+                People ({members.length})
+              </h2>
+              <Button asChild size="sm" variant="outline">
+                <Link href={`/practices/${practice.slug}/succession`}>Succession</Link>
+              </Button>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              The people whose home practice this is. You, their manager and they themselves see these
+              profiles; nobody else does.
+            </p>
+            <PeopleList
+              people={members}
+              summaries={summaries}
+              hrefFor={(m) => `/practices/${practice.slug}/people/${m.id}`}
+              empty="Nobody has this as their practice yet."
+            />
+          </section>
+
+          <section aria-labelledby="gaps" className="flex flex-col gap-3">
+            <h2 id="gaps" className="text-xl font-semibold">
+              Gaps across the practice
+            </h2>
+            {gaps.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No shared gaps.</p>
+            ) : (
+              <ul className="divide-y rounded-lg border">
+                {gaps.map((g) => (
+                  <li key={g.item.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 p-3">
+                    <Link
+                      href={`/catalogue/${g.item.slug}`}
+                      className="font-medium underline-offset-4 hover:underline"
+                    >
+                      {g.item.name}
+                    </Link>
+                    <PriorityBadge weight={g.weight} />
+                    <span className="text-sm">
+                      {g.people.length} of {members.length}
+                    </span>
+                    <span className="text-sm text-muted-foreground">
+                      {g.people.map((id) => names.get(id)).join(", ")}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <section aria-labelledby="per-role" className="flex flex-col gap-3">
+            <h2 id="per-role" className="text-xl font-semibold">
+              How people meet their roles
+            </h2>
+            {perRole.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nobody holds a role of this practice yet.</p>
+            ) : (
+              <ul className="divide-y rounded-lg border">
+                {perRole.map((r) => (
+                  <li key={r.role.id} className="flex flex-wrap items-start gap-x-6 gap-y-1 p-3 text-sm">
+                    <div className="min-w-48">
+                      <span className="font-medium">{r.role.name}</span>
+                      <p className="text-muted-foreground">
+                        {r.people.length} {r.people.length === 1 ? "person" : "people"}
+                      </p>
+                    </div>
+                    <p>
+                      Meet it on average:{" "}
+                      <span className="font-medium tabular-nums">{Math.round(r.average * 100)}%</span>
+                      {r.criticalMissing > 0 && (
+                        <span> · {r.criticalMissing} still miss a Critical requirement</span>
+                      )}
+                    </p>
+                    {r.gaps.length > 0 && (
+                      <p className="text-muted-foreground">
+                        Most missed: {r.gaps.map((g) => g.item.name).join(", ")}
+                      </p>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </>
+      ) : (
+        <p role="note" className="rounded-lg border p-3 text-sm">
+          Named profiles are visible only to the person, their manager and the Practice Leads of their
+          practice. As Site Lead you see aggregates only.
+        </p>
+      )}
 
       <section aria-labelledby="roles" className="flex flex-col gap-3">
         <h2 id="roles" className="text-xl font-semibold">
