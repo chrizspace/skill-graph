@@ -7,9 +7,9 @@ const port = 3100;
 export default defineConfig({
   testDir: "e2e",
   // the tests share one database, so they run one after the other
-  // one test at most 30 s, the whole run at most 10 min: a hang fails instead of waiting
+  // one test at most 30 s, the whole run at most 20 min: a hang fails instead of waiting
   timeout: 30_000,
-  globalTimeout: 600_000,
+  globalTimeout: 1_200_000,
   workers: 1,
   fullyParallel: false,
   forbidOnly: Boolean(process.env.CI),

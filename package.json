@@ -24,7 +24,8 @@
     "tokens": "tsx scripts/build-tokens.mts",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build -o storybook-static",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "smoke": "tsx scripts/smoke.mts"
   },
   "dependencies": {
     "better-auth": "^1.7.7",
@@ -44,6 +45,7 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@electric-sql/pglite": "^0.5.8",
     "@playwright/test": "^1.64.0",
     "@storybook/addon-a11y": "10.6.1",

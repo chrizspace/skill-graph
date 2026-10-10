@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -49,8 +50,10 @@ export function AppShell({
           <span aria-hidden className="mr-2 inline-block size-3 rounded-sm bg-brand" />
           Skill Graph
         </Link>
+        <form id="sign-out-form" action={signOut} />
         <div className="ml-auto">
-          <DropdownMenu>
+          {/* not modal: the rest of the page stays available to assistive technology while the menu is open */}
+          <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="gap-2" aria-label={`Account menu for ${user.name}`}>
                 <Avatar size="sm">
@@ -65,11 +68,12 @@ export function AppShell({
                 <span className="block text-xs text-muted-foreground">{user.email}</span>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <form action={signOut} className="p-1">
-                <Button type="submit" variant="ghost" size="sm" className="w-full justify-start">
+              {/* a real menu item (the menu only allows items inside it) that submits the form below */}
+              <DropdownMenuItem asChild>
+                <button type="submit" form="sign-out-form" className="w-full cursor-pointer">
                   Sign out
-                </Button>
-              </form>
+                </button>
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

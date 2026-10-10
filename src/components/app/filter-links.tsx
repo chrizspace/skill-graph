@@ -26,7 +26,7 @@ export function FilterLinks({ label, options }: { label: string; options: Filter
               )}
             >
               {o.label}
-              {o.count !== undefined && <span className="text-xs opacity-80">{o.count}</span>}
+              {o.count !== undefined && <span className="text-xs">{o.count}</span>}
             </Link>
           </li>
         ))}

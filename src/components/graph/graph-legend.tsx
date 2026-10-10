@@ -77,7 +77,7 @@ export function GraphLegend({
         <ul className="flex flex-col gap-1">
           <li>✓ I have it</li>
           <li>○ I still need it (hollow, dashed outline)</li>
-          <li className="opacity-55">✓ expired certification (faded): still held</li>
+          <li className="opacity-(--opacity-expired)">✓ expired certification (faded): still held</li>
         </ul>
       )}
     </section>
