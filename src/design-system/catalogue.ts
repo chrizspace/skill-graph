@@ -2,7 +2,7 @@
  * Every component in src/components, listed for the Storybook overview (Design system/Overview).
  * catalogue.test.ts fails if a component has no story or isn't listed here: add both when you add a component.
  */
-export type ComponentGroup = "App" | "Domain" | "UI";
+export type ComponentGroup = "App" | "Graph" | "Domain" | "UI";
 
 export interface CatalogueEntry {
   name: string;
@@ -66,6 +66,32 @@ export const componentCatalogue: CatalogueEntry[] = [
     name: "Item type badge",
     file: "src/components/domain/item-type-badge.tsx",
     description: "Technical skill, soft skill or certification.",
+  },
+  {
+    group: "Graph",
+    name: "Canvas",
+    file: "src/components/graph/graph-canvas.tsx",
+    description:
+      "The drawing: Cytoscape on a canvas, following the theme; clicks select, a double click opens.",
+  },
+  {
+    group: "Graph",
+    name: "Details panel",
+    file: "src/components/graph/graph-panel.tsx",
+    description:
+      "The selected node: weight in focus, connections by kind, roles that need it, specialisations, similar roles.",
+  },
+  {
+    group: "Graph",
+    name: "Legend",
+    file: "src/components/graph/graph-legend.tsx",
+    description: "What the shapes and line styles mean; colour is never the only signal.",
+  },
+  {
+    group: "Graph",
+    name: "Table view",
+    file: "src/components/graph/graph-table.tsx",
+    description: "The nodes in view as a table: the accessible way to read and walk the graph.",
   },
   {
     group: "Domain",

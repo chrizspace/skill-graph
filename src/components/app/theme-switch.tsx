@@ -2,11 +2,6 @@
 
 import { useEffect } from "react";
 import { Check } from "lucide-react";
-import {
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-} from "@/components/ui/dropdown-menu";
 import { isThemeName } from "@/design-system/theme";
 import { themeLabels, themeNames, themes, type ThemeName } from "@/design-system/tokens";
 import { applyTheme, useTheme } from "@/lib/use-theme";
