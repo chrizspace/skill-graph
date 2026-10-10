@@ -182,7 +182,12 @@ export async function createRecommendation(
       action: "create",
       entity: "recommendation",
       entityId: row.id,
-      after: { person: person.name, node: node.name, comment },
+      after: {
+        person: person.name,
+        node: node.name,
+        comment,
+        summary: `recommended “${node.name}” to ${person.name}`,
+      },
     });
     return row;
   });

@@ -60,6 +60,7 @@ async function audit(
   requestId: string,
   before: Record<string, unknown> | null,
   after: Record<string, unknown>,
+  summary: string,
 ) {
   await tx.insert(auditLog).values({
     actorId: actor.userId,
@@ -67,7 +68,7 @@ async function audit(
     entity: "change_request",
     entityId: requestId,
     before,
-    after,
+    after: { ...after, summary },
     changeRequestId: requestId,
   });
 }
@@ -107,12 +108,20 @@ export async function createRequest(
       .insert(changeRequests)
       .values({ practiceId: input.practiceId, roleId: input.roleId, authorId: actor.userId, reason, changes })
       .returning();
-    await audit(tx, actor, "create", row.id, null, {
-      status: "open",
-      practiceId: row.practiceId,
-      roleId: row.roleId,
-      operations: changes.length,
-    });
+    await audit(
+      tx,
+      actor,
+      "create",
+      row.id,
+      null,
+      {
+        status: "open",
+        practiceId: row.practiceId,
+        roleId: row.roleId,
+        operations: changes.length,
+      },
+      `sent a change request with ${changes.length} ${changes.length === 1 ? "change" : "changes"}`,
+    );
     return toRow(row);
   });
 }
@@ -250,7 +259,15 @@ export async function addComment(db: Database, actor: Actor, requestId: string, 
     await tx.insert(changeRequestComments).values({ requestId, authorId: actor.userId, body: text });
     if (r.status === "needs_info" && r.authorId === actor.userId) {
       await tx.update(changeRequests).set({ status: "open" }).where(eq(changeRequests.id, requestId));
-      await audit(tx, actor, "update", requestId, { status: "needs_info" }, { status: "open" });
+      await audit(
+        tx,
+        actor,
+        "update",
+        requestId,
+        { status: "needs_info" },
+        { status: "open" },
+        "answered a request for information",
+      );
     }
   });
 }
@@ -270,7 +287,15 @@ export async function requestInfo(db: Database, actor: Actor, requestId: string,
     await tx.insert(changeRequestComments).values({ requestId, authorId: actor.userId, body: text });
     if (r.status !== "needs_info") {
       await tx.update(changeRequests).set({ status: "needs_info" }).where(eq(changeRequests.id, requestId));
-      await audit(tx, actor, "update", requestId, { status: r.status }, { status: "needs_info" });
+      await audit(
+        tx,
+        actor,
+        "update",
+        requestId,
+        { status: r.status },
+        { status: "needs_info" },
+        "asked for more information on a change request",
+      );
     }
   });
 }
@@ -287,7 +312,15 @@ export async function rejectRequest(db: Database, actor: Actor, requestId: strin
       .update(changeRequests)
       .set({ status: "rejected", decidedBy: actor.userId, decidedAt: new Date(), decisionNote: text })
       .where(eq(changeRequests.id, requestId));
-    await audit(tx, actor, "update", requestId, { status: r.status }, { status: "rejected", note: text });
+    await audit(
+      tx,
+      actor,
+      "update",
+      requestId,
+      { status: r.status },
+      { status: "rejected", note: text },
+      "rejected a change request",
+    );
   });
 }
 
@@ -298,7 +331,15 @@ export async function withdrawRequest(db: Database, actor: Actor, requestId: str
     if (!can(actor, "changeRequest:withdraw", { authorId: r.authorId })) throw new ForbiddenError();
     if (!isPending(r.status)) fail("This request has already been decided.");
     await tx.update(changeRequests).set({ status: "withdrawn" }).where(eq(changeRequests.id, requestId));
-    await audit(tx, actor, "update", requestId, { status: r.status }, { status: "withdrawn" });
+    await audit(
+      tx,
+      actor,
+      "update",
+      requestId,
+      { status: r.status },
+      { status: "withdrawn" },
+      "withdrew a change request",
+    );
   });
 }
 
@@ -400,6 +441,7 @@ export async function approveRequest(db: Database, actor: Actor, requestId: stri
       requestId,
       { status: r.status },
       { status: "approved", operations: r.changes.length, note: note?.trim() || null },
+      `approved a change request (${r.changes.length} ${r.changes.length === 1 ? "change" : "changes"} applied)`,
     );
   });
 }
