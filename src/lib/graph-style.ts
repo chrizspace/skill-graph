@@ -37,6 +37,8 @@ export const TOOL_CATEGORY = "Tool / platform";
 export interface DrawOptions {
   /** how the person stands with each catalogue item ("my view"); empty or absent when it is off */
   states?: ReadonlyMap<string, MyState>;
+  /** a route: node id to its step number (1, 2, …), written into the label so the order isn't only a highlight */
+  route?: ReadonlyMap<string, number>;
 }
 
 const stateMark: Record<MyState, { prefix: string; suffix: string }> = {
@@ -69,7 +71,8 @@ export function toElements(
       vn.weight ?? (context && centerId && isCatalogue(n) ? weightFor(graph, centerId, n.id) : null);
     const state = options.states?.get(n.id) ?? null;
     const mark = state ? stateMark[state] : null;
-    const label = `${mark?.prefix ?? ""}${n.name}${mark?.suffix ?? ""}${weight && context ? ` · ${WEIGHT_LABEL[weight]}` : ""}`;
+    const step = options.route?.get(n.id);
+    const label = `${step ? `${step}. ` : ""}${mark?.prefix ?? ""}${n.name}${mark?.suffix ?? ""}${weight && context ? ` · ${WEIGHT_LABEL[weight]}` : ""}`;
     const classes = [
       n.type,
       n.category === TOOL_CATEGORY ? "tool" : "",
@@ -112,17 +115,20 @@ export function toElements(
 /** The layout for a view: force-directed overview, rings for a role, rings by hops for a neighbourhood. */
 export function layoutFor(view: GraphView): cytoscape.LayoutOptions {
   switch (view.kind) {
-    case "overview":
-      // fcose is slower with size: a rougher, faster pass for big graphs
+    case "overview": {
+      // fcose gets slower with size: small graphs get the careful layout, bigger ones a rougher, much faster pass
+      const big = view.nodes.length > 250;
       return {
         name: "fcose",
         animate: false,
-        quality: view.nodes.length > 800 ? "draft" : "default",
+        quality: big ? "draft" : "default",
         randomize: true,
         nodeRepulsion: () => 9000,
         idealEdgeLength: () => 70,
+        piTol: big ? 0.001 : 0.0000001,
         padding: 24,
       } as cytoscape.LayoutOptions;
+    }
     case "role":
       return {
         name: "concentric",
@@ -144,6 +150,18 @@ export function layoutFor(view: GraphView): cytoscape.LayoutOptions {
     case "path":
       return { name: "breadthfirst", animate: false, directed: true, spacingFactor: 1.2, padding: 24 };
   }
+}
+
+/**
+ * A force layout gets slow with the number of links. Above this many, only the strongest links steer the layout; all of
+ * them are still drawn. (docs/PLAN.md §6: the overview of a 2k-node, 20k-link graph must be interactive in under 2 s.)
+ */
+export const LAYOUT_EDGE_BUDGET = 3000;
+
+/** The links that steer the layout: all of them, or the strongest `LAYOUT_EDGE_BUDGET` for a big graph. */
+export function layoutEdges<T extends { strength: number }>(edges: readonly T[]): T[] {
+  if (edges.length <= LAYOUT_EDGE_BUDGET) return [...edges];
+  return [...edges].sort((a, b) => b.strength - a.strength).slice(0, LAYOUT_EDGE_BUDGET);
 }
 
 /** The design tokens the drawing uses, as colours read from the page (they follow the theme). */
@@ -172,7 +190,7 @@ export function readColors(el: Element): Colors {
 }
 
 /** The Cytoscape stylesheet for the tokens' colours. Line width runs 1–6 px with strength 1–5. */
-export function stylesheet(c: Colors): cytoscape.StylesheetJson {
+export function stylesheet(c: Colors, big = false): cytoscape.StylesheetJson {
   const type = (cls: string, shape: string, color: string, size: number): cytoscape.StylesheetJsonBlock => ({
     selector: `node.${cls}`,
     style: {
@@ -216,20 +234,37 @@ export function stylesheet(c: Colors): cytoscape.StylesheetJson {
     },
     { selector: "node.expired", style: { opacity: 0.45 } },
     { selector: "node:selected", style: { "border-color": c.ring, "border-width": 5 } },
-    { selector: "node.hidden-label", style: { label: "" } },
+    // a route: everything else steps back, the route keeps full strength and a heavier line
+    { selector: ".dimmed", style: { opacity: 0.12 } },
+    {
+      selector: "node.route",
+      style: { "border-width": 4, "font-weight": "bold", "font-size": 13, "min-zoomed-font-size": 0 },
+    },
+    {
+      selector: "edge.route",
+      style: {
+        width: 6,
+        opacity: 1,
+        "line-color": c.foreground,
+        "target-arrow-color": c.foreground,
+      },
+    },
     {
       selector: "edge",
       style: {
         width: "mapData(strength, 1, 5, 1, 6)",
         "line-color": c.border,
         "target-arrow-color": c.border,
-        "curve-style": "bezier",
+        // a big graph draws plain straight lines (several times faster than curves); arrows keep their curve
+        "curve-style": big ? "haystack" : "bezier",
+        ...(big ? { "haystack-radius": 0 } : {}),
         opacity: 0.55,
       },
     },
     {
       selector: "edge.next_step",
       style: {
+        "curve-style": "bezier",
         "target-arrow-shape": "triangle",
         "arrow-scale": 1.2,
         opacity: 0.9,
@@ -237,7 +272,10 @@ export function stylesheet(c: Colors): cytoscape.StylesheetJson {
         "target-arrow-color": c["muted-foreground"],
       },
     },
-    { selector: "edge.builds_on", style: { "target-arrow-shape": "vee", "line-style": "solid" } },
+    {
+      selector: "edge.builds_on",
+      style: { "curve-style": "bezier", "target-arrow-shape": "vee", "line-style": "solid" },
+    },
     { selector: "edge.related_to", style: { "line-style": "dashed" } },
     // priority: colour, and always a line style too (solid, dashed, dotted)
     { selector: "edge.w-critical", style: { "line-color": c.critical, "line-style": "solid", opacity: 1 } },

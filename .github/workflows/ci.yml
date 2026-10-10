@@ -103,6 +103,10 @@ jobs:
           --health-retries 10
     env:
       DATABASE_URL: postgres://skillgraph:skillgraph@localhost:5433/skillgraph
+      # GitHub's shared runners are slower than a developer machine: the performance budgets (e2e/explore-performance.spec.ts)
+      # are looser here, still well within "interactive in a few seconds"
+      E2E_PERF_READY_MS: 6000
+      E2E_PERF_MIN_FPS: 10
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
