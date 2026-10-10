@@ -5,7 +5,10 @@ import { PriorityBadge, weightLabel } from "@/components/domain/priority-badge";
 import { RequirementList } from "@/components/domain/requirement-list";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { roleDetail, type PathLink } from "@/domain/browse";
+import { canEditNode } from "@/domain/editing";
 import { getGraph, getPractices } from "@/lib/graph-data";
+import { getActor } from "@/lib/session";
+import { Button } from "@/components/ui/button";
 
 // a static title: reading the graph here would need the database while the app is built
 export const metadata: Metadata = { title: "Role · Skill Graph" };
@@ -48,6 +51,8 @@ export default async function RolePage({ params }: PageProps<"/roles/[slug]">) {
   if (!detail) notFound();
   const { role, core, specializations, pathsOut, pathsIn, similar } = detail;
   const practice = practices.find((p) => p.id === role.practiceId);
+  const actor = await getActor();
+  const canEdit = Boolean(actor && practice && canEditNode(actor, graph, role.id));
 
   return (
     <article className="flex flex-col gap-8">
@@ -66,6 +71,11 @@ export default async function RolePage({ params }: PageProps<"/roles/[slug]">) {
           )}
         </p>
         <h1 className="mt-1 text-3xl font-bold tracking-tight">{role.name}</h1>
+        {canEdit && practice && (
+          <Button asChild size="sm" variant="outline" className="mt-2">
+            <Link href={`/practices/${practice.slug}/roles/${role.slug}/edit`}>Edit this role</Link>
+          </Button>
+        )}
         {role.description && (
           <p className="mt-2 max-w-3xl text-lg text-muted-foreground">{role.description}</p>
         )}
