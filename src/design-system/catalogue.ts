@@ -27,6 +27,12 @@ export const componentCatalogue: CatalogueEntry[] = [
   },
   {
     group: "App",
+    name: "Change builder",
+    file: "src/components/app/change-builder.tsx",
+    description: "Builds the list of operations of a change request; several changes can go in one request.",
+  },
+  {
+    group: "App",
     name: "Confirm button",
     file: "src/components/app/confirm-button.tsx",
     description:

@@ -31,8 +31,8 @@ describe("navigation per user type", () => {
     expect(groups.map((g) => g.label)).toEqual(["Explore", "Me", "Practice", "Requests"]);
     expect(groups[2].items.map((i) => i.href)).toEqual(["/practices/frontend", "/practices/data-ai"]);
   });
-  it("adds Site for the Site Lead, without requests", () => {
-    expect(labels({ ...base, siteLead: true })).toEqual(["Explore", "Me", "Site"]);
+  it("adds Requests and Site for the Site Lead, who can step in", () => {
+    expect(labels({ ...base, siteLead: true })).toEqual(["Explore", "Me", "Requests", "Site"]);
   });
   it("adds up for someone who is all of them", () => {
     const all = { ...base, reportCount: 1, siteLead: true, leadOf: [{ id: "1", slug: "a", name: "A" }] };
