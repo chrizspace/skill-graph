@@ -6,7 +6,7 @@ import { MicrosoftButton } from "@/components/app/microsoft-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { isManager, isPracticeLead } from "@/domain/access";
-import { demoSignInEnabled, microsoftConfigured } from "@/lib/auth";
+import { authConfigured, demoSignInEnabled, microsoftConfigured } from "@/lib/auth";
 import { getActor, safeNext } from "@/lib/session";
 import { signInAsDemo } from "../actions";
 
@@ -48,8 +48,8 @@ async function SignIn({ searchParams }: Pick<PageProps<"/sign-in">, "searchParam
           next step.
         </p>
       </div>
-      {microsoftConfigured && <MicrosoftButton next={next} />}
-      {!microsoftConfigured && !demoSignInEnabled && (
+      {microsoftConfigured && authConfigured && <MicrosoftButton next={next} />}
+      {!(microsoftConfigured && authConfigured) && !demoSignInEnabled && (
         <p role="alert">Sign-in isn&apos;t configured. Ask the administrator.</p>
       )}
       {demoSignInEnabled && (

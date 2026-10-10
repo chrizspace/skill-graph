@@ -4,10 +4,11 @@ import { notFound, redirect } from "next/navigation";
 import { loadActor } from "@/db/actor";
 import { getDb } from "@/db/client";
 import { can, type Action, type Actor, type Resources } from "@/domain/access";
-import { getAuth } from "./auth";
+import { authConfigured, getAuth } from "./auth";
 
 /** The signed-in person with their user types, or null. One lookup per request. */
 export const getActor = cache(async (): Promise<Actor | null> => {
+  if (!authConfigured) return null; // no secret in production: nobody can be signed in
   // read the request first: while prerendering this postpones, before anything needs the database
   const requestHeaders = await headers();
   const session = await getAuth().api.getSession({ headers: requestHeaders });

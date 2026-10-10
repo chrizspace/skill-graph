@@ -68,6 +68,9 @@ jobs:
     name: Production build
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # as on Vercel production, where no database and (until it is set) no sign-in secret exist at build time
+    env:
+      VERCEL_ENV: production
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
