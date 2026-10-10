@@ -2,7 +2,7 @@
  * Every component in src/components, listed for the Storybook overview (Design system/Overview).
  * catalogue.test.ts fails if a component has no story or isn't listed here: add both when you add a component.
  */
-export type ComponentGroup = "Domain" | "UI";
+export type ComponentGroup = "App" | "Domain" | "UI";
 
 export interface CatalogueEntry {
   name: string;
@@ -13,6 +13,30 @@ export interface CatalogueEntry {
 }
 
 export const componentCatalogue: CatalogueEntry[] = [
+  {
+    group: "App",
+    name: "App shell",
+    file: "src/components/app/app-shell.tsx",
+    description: "Header, navigation per user type, user menu and the page area.",
+  },
+  {
+    group: "App",
+    name: "Microsoft sign-in",
+    file: "src/components/app/microsoft-button.tsx",
+    description: "Starts the Microsoft (Entra ID) sign-in.",
+  },
+  {
+    group: "App",
+    name: "Mobile menu",
+    file: "src/components/app/mobile-nav.tsx",
+    description: "The navigation below 768px, behind a menu button.",
+  },
+  {
+    group: "App",
+    name: "Navigation",
+    file: "src/components/app/nav-links.tsx",
+    description: "The menu groups for a person's user types, with the current page marked.",
+  },
   {
     group: "Domain",
     name: "Priority badge",

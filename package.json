@@ -26,6 +26,7 @@
     "build-storybook": "storybook build -o storybook-static"
   },
   "dependencies": {
+    "better-auth": "^1.7.7",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.4.0",
     "drizzle-orm": "^0.45.4",
