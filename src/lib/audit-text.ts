@@ -6,6 +6,10 @@ export function describeAudit(row: {
   after: Record<string, unknown> | null;
 }) {
   const data = (row.after ?? row.before ?? {}) as Record<string, unknown>;
+  // changes the Site Lead makes (a practice, an appointment, a merge) carry their own sentence
+  if (typeof data.summary === "string") {
+    return { verb: row.action, what: data.summary, emergency: Boolean(data.emergency), text: data.summary };
+  }
   const verb = row.action === "create" ? "added" : row.action === "delete" ? "removed" : "changed";
   const what =
     row.entity === "edge"
