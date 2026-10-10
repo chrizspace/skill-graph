@@ -56,19 +56,28 @@ function baseUrl() {
 
 // Microsoft sign-in is for production only (Entra has no wildcard redirect URIs, so previews can't use it);
 // demo sign-in needs no redirect and works everywhere else
-export const auth = betterAuth({
-  database: drizzleAdapter(getDb(), { provider: "pg", schema }),
-  baseURL: baseUrl(),
-  // outside production the demo sign-in is open anyway, so a fixed fallback secret does no harm there
-  secret: process.env.BETTER_AUTH_SECRET ?? "skill-graph-demo-secret-not-for-production",
-  socialProviders: microsoftConfigured
-    ? {
-        microsoft: {
-          clientId: process.env.MICROSOFT_CLIENT_ID!,
-          clientSecret: process.env.MICROSOFT_CLIENT_SECRET!,
-          tenantId: process.env.MICROSOFT_TENANT_ID ?? "common",
-        },
-      }
-    : {},
-  plugins: [demoSignIn, nextCookies()],
-});
+function createAuth() {
+  return betterAuth({
+    database: drizzleAdapter(getDb(), { provider: "pg", schema }),
+    baseURL: baseUrl(),
+    // outside production the demo sign-in is open anyway, so a fixed fallback secret does no harm there
+    secret: process.env.BETTER_AUTH_SECRET ?? "skill-graph-demo-secret-not-for-production",
+    socialProviders: microsoftConfigured
+      ? {
+          microsoft: {
+            clientId: process.env.MICROSOFT_CLIENT_ID!,
+            clientSecret: process.env.MICROSOFT_CLIENT_SECRET!,
+            tenantId: process.env.MICROSOFT_TENANT_ID ?? "common",
+          },
+        }
+      : {},
+    plugins: [demoSignIn, nextCookies()],
+  });
+}
+
+let instance: ReturnType<typeof createAuth> | undefined;
+
+/** Created on first use, so importing this file (e.g. while Next collects routes at build time) needs no database. */
+export function getAuth() {
+  return (instance ??= createAuth());
+}
