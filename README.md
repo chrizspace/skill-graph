@@ -38,6 +38,19 @@ Open http://localhost:3000.
 
 The seed holds a demo site with 5 practices, 19 roles (4 specialisations), a catalogue of technical skills, soft skills and certifications, and 18 fictional people (`@example.com`): a Site Lead, a Practice Lead per practice, two managers and their teams. Production gets the site, practices and graph but never the demo people. Details: `docs/PLAN.md` §7.
 
+## End-to-end tests
+
+Playwright specs live in `e2e/`, one file per scenario or area (`scenario-1-…`, `permissions`, …). `pnpm test:e2e` builds the app, **resets the local database** (it refuses any other), starts the app on port 3100 and runs everything; `pnpm db:up` must be running. Each test is limited to 30 s and the run to 10 min, and `list` output shows every test as it passes.
+
+To run one file quickly, start the app yourself once and keep its database:
+
+```bash
+pnpm db:reset && pnpm build && pnpm exec next start -p 3100   # in one terminal
+E2E_KEEP_DB=1 pnpm exec playwright test e2e/permissions.spec.ts   # in another
+```
+
+(`E2E_KEEP_DB=1` is needed because the app caches the graph with its row ids, which a reset replaces.)
+
 ## Commands
 
 | Command                                    | What it does                                                                      |
@@ -51,6 +64,7 @@ The seed holds a demo site with 5 practices, 19 roles (4 specialisations), a cat
 | `pnpm db:generate`                         | Write a migration after changing `src/db/schema.ts`                               |
 | `pnpm db:seed`                             | Add the seed graph and demo people (idempotent)                                   |
 | `pnpm test:db`                             | Database tests on PGlite (in-process Postgres, no Docker needed)                  |
+| `pnpm test:e2e`                            | Playwright end-to-end tests (resets the local database, see above)                |
 | `pnpm build`                               | Production build                                                                  |
 
 ## How changes reach `main`

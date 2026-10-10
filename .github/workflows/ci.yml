@@ -81,11 +81,48 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
 
+  e2e:
+    name: End-to-end tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: skillgraph
+          POSTGRES_PASSWORD: skillgraph
+          POSTGRES_DB: skillgraph
+        ports: ["5433:5432"]
+        options: >-
+          --health-cmd "pg_isready -U skillgraph"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://skillgraph:skillgraph@localhost:5433/skillgraph
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with: { node-version-file: .nvmrc, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      # builds, migrates and seeds a fresh database, starts the app on port 3100 and runs every spec (playwright.config.ts)
+      - run: pnpm test:e2e
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            playwright-report
+            test-results
+          retention-days: 7
+
   # The single required check on main (see scripts/setup-repository.sh). Add every new job to `needs`.
   ci:
     name: ci
     if: always()
-    needs: [static, db, storybook, build]
+    needs: [static, db, storybook, build, e2e]
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
