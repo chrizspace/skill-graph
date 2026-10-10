@@ -21,6 +21,8 @@ export interface GraphNode {
   parentRoleId: string | null;
   status: "draft" | "published";
   issuer: string | null;
+  /** What a role does, or what an item is; optional so fixtures can leave it out. */
+  description?: string;
 }
 
 export interface GraphEdge {

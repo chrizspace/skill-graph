@@ -3,7 +3,7 @@ import { assess, compare } from "../domain/assess";
 import { roles, type Graph } from "../domain/graph";
 import { pathsFor } from "../domain/paths";
 import { similarRoles } from "../domain/similar";
-import { loadGraph, loadProfile } from "./graph";
+import { loadGraph, loadPractices, loadProfile } from "./graph";
 import { seed } from "./seed/seed";
 import { createTestDb } from "./testing";
 
@@ -70,5 +70,17 @@ describe("loaded from the database", () => {
 
   it("has no profile for an unknown person", async () => {
     expect(await loadProfile(t.db, "nobody")).toBeNull();
+  });
+});
+
+describe("role browser data", () => {
+  it("loads the practices with their leads", async () => {
+    const practices = await loadPractices(t.db);
+    expect(practices.map((p) => p.name)).toHaveLength(5);
+    expect(practices.find((p) => p.slug === "delivery")!.leads).toEqual(["Casey Lin"]);
+  });
+  it("loads descriptions into the graph", () => {
+    const scrumMaster = roles(graph).find((r) => r.name === "Scrum Master")!;
+    expect(scrumMaster.description).toContain("Scrum");
   });
 });
