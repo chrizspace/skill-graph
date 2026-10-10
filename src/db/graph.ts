@@ -2,7 +2,16 @@ import { eq } from "drizzle-orm";
 import { buildGraph, type Graph } from "../domain/graph";
 import type { Profile } from "../domain/profile";
 import type { Database } from "./database";
-import { edges, nodes, practiceLeads, practices, profileItems, profiles, user } from "./schema";
+import {
+  edges,
+  nodes,
+  practiceLeads,
+  practices,
+  profileItems,
+  profiles,
+  recommendations,
+  user,
+} from "./schema";
 
 /** The rows of the whole graph: plain data, so the app can cache them (src/lib/graph-data.ts). */
 export async function loadGraphRows(db: Database) {
@@ -93,4 +102,44 @@ export async function loadPractices(db: Database): Promise<PracticeInfo[]> {
     ...p,
     leads: leads.filter((l) => l.practiceId === p.id).map((l) => l.name),
   }));
+}
+
+export interface MyProfile {
+  profile: Profile;
+  practiceId: string | null;
+}
+
+/** Profile data for the pages: the domain profile plus the home practice. Null when the person has no profile yet. */
+export async function loadMyProfile(db: Database, userId: string): Promise<MyProfile | null> {
+  const profile = await loadProfile(db, userId);
+  if (!profile) return null;
+  const [row] = await db
+    .select({ practiceId: profiles.practiceId })
+    .from(profiles)
+    .where(eq(profiles.userId, userId));
+  return { profile, practiceId: row?.practiceId ?? null };
+}
+
+export interface MyRecommendation {
+  id: string;
+  nodeId: string;
+  comment: string;
+  status: "open" | "accepted" | "declined";
+  author: string | null;
+}
+
+export async function loadRecommendations(db: Database, userId: string): Promise<MyRecommendation[]> {
+  const rows = await db
+    .select({
+      id: recommendations.id,
+      nodeId: recommendations.nodeId,
+      comment: recommendations.comment,
+      status: recommendations.status,
+      author: user.name,
+    })
+    .from(recommendations)
+    .leftJoin(user, eq(user.id, recommendations.authorId))
+    .where(eq(recommendations.personId, userId))
+    .orderBy(recommendations.createdAt);
+  return rows;
 }

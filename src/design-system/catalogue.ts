@@ -51,9 +51,27 @@ export const componentCatalogue: CatalogueEntry[] = [
   },
   {
     group: "Domain",
+    name: "Comparison table",
+    file: "src/components/domain/comparison-table.tsx",
+    description: "Two roles side by side with the person's own profile overlaid.",
+  },
+  {
+    group: "Domain",
     name: "Item type badge",
     file: "src/components/domain/item-type-badge.tsx",
     description: "Technical skill, soft skill or certification.",
+  },
+  {
+    group: "Domain",
+    name: "Assessment list",
+    file: "src/components/domain/assessment-list.tsx",
+    description: "How a profile meets a role: still to learn in learning order, and already met.",
+  },
+  {
+    group: "Domain",
+    name: "Certification form",
+    file: "src/components/domain/certification-form.tsx",
+    description: "Add a certification or change its dates; the server says what to fix.",
   },
   {
     group: "Domain",
@@ -72,6 +90,12 @@ export const componentCatalogue: CatalogueEntry[] = [
     name: "Role card",
     file: "src/components/domain/role-card.tsx",
     description: "A role in the browser: practice, summary, core weights and specialisations.",
+  },
+  {
+    group: "Domain",
+    name: "Plan steps",
+    file: "src/components/domain/plan-steps.tsx",
+    description: "The development plan: what's missing, numbered in learning order.",
   },
   {
     group: "Domain",
@@ -118,6 +142,12 @@ export const componentCatalogue: CatalogueEntry[] = [
   },
   { group: "UI", name: "Input", file: "src/components/ui/input.tsx", description: "A text field." },
   { group: "UI", name: "Label", file: "src/components/ui/label.tsx", description: "A form field's label." },
+  {
+    group: "UI",
+    name: "Native select",
+    file: "src/components/ui/native-select.tsx",
+    description: "The browser's own select: works in plain forms without JavaScript.",
+  },
   { group: "UI", name: "Progress", file: "src/components/ui/progress.tsx", description: "A progress bar." },
   {
     group: "UI",

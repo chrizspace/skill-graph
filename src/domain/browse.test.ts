@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { browseCatalogue, browseRoles, catalogueCategories, itemDetail, roleDetail } from "./browse";
+import {
+  browseCatalogue,
+  browseRoles,
+  catalogueCategories,
+  itemDetail,
+  roleDetail,
+  targetChoices,
+} from "./browse";
 import { seedGraph } from "./testing/seed-graph";
 
 const graph = seedGraph();
@@ -145,5 +152,21 @@ describe("itemDetail", () => {
     const pairs = itemDetail(graph, "terraform")!.related;
     expect(pairs.map((n) => n.name)).toContain("Bicep");
     expect(names(itemDetail(graph, "bicep")!.related)).toContain("Terraform");
+  });
+});
+
+describe("targetChoices", () => {
+  it("groups roles and their specialisations by practice, in name order", () => {
+    const groups = targetChoices(graph);
+    expect(groups).toHaveLength(5);
+    const frontend = groups.find((g) => g.practiceId === "frontend")!;
+    expect(frontend.options.map((o) => o.label)).toEqual([
+      "Frontend Developer",
+      "Frontend Developer: Angular",
+      "Frontend Developer: React",
+      "Full-stack Developer",
+      "UX Developer",
+    ]);
+    expect(frontend.options[2].slug).toBe("frontend-developer--react");
   });
 });
