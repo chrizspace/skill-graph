@@ -246,7 +246,7 @@ M1 built v1. Migration `0001` (milestone M2) brings it to the model below; there
   - Database checks: no self-loops; `priority` set exactly on `requires`; strength 1–5; `related_to` ordered; `typical_months` only on `next_step`.
 - **Better Auth tables**: `user`, `session`, `account`, `verification` (M5, migration `0002`).
 - **`profiles`**
-  - `user_id` PK, `practice_id` → practices _(new: home practice)_, `current_role_id` and `current_specialization_id` → nodes, `target_role_id` and `target_specialization_id` _(new)_ → nodes, `manager_id` → user, timestamps.
+  - `user_id` PK, `practice_id` → practices _(new: home practice)_, `current_role_id` and `current_specialization_id` → nodes, `target_role_id` and `target_specialization_id` _(new)_ → nodes, `manager_id` → user, `theme` _(M7+, migration `0003`)_: the colour theme the person chose, empty until then, timestamps.
   - `app_role` is removed. Manager, Practice Lead and Site Lead follow from `manager_id`, `practice_leads` and `site_leads`.
 - **`profile_items`** _(replaces `profile_skills`)_: (`user_id`, `node_id`) PK, `obtained_on` and `expires_on` dates (certifications only; `expires_on` empty if it doesn't expire), timestamps.
 - **`recommendations`** _(new)_

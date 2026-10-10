@@ -11,7 +11,7 @@ import { browseCatalogue } from "@/domain/browse";
 import { slugOfTarget } from "@/domain/profile-input";
 import { loadMe } from "@/lib/me";
 import { TargetSelect } from "../target-select";
-import { removeCertification, saveCertificationAction, saveSkills, saveTarget } from "./actions";
+import { removeCertification, saveCertificationAction, saveSkills, saveTarget, saveTheme } from "./actions";
 
 export const metadata = { title: "My profile · Skill Graph" };
 
@@ -51,8 +51,8 @@ export default async function Me() {
         <h2 id="appearance" className="text-xl font-semibold">
           Appearance
         </h2>
-        <p className="text-sm text-muted-foreground">The colours of the app. Kept in this browser.</p>
-        <ThemeRadios />
+        <p className="text-sm text-muted-foreground">The colours of the app. Saved on your profile.</p>
+        <ThemeRadios onSave={saveTheme} />
       </section>
 
       <section aria-labelledby="target" className="flex flex-col gap-2">
