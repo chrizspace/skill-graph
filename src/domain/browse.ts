@@ -264,3 +264,22 @@ export function itemDetail(graph: Graph, slug: string): ItemDetail | null {
     ].sort(byName),
   };
 }
+
+export interface TargetChoice {
+  practiceId: string | null;
+  /** the roles of this practice, each followed by its specialisations */
+  options: { slug: string; label: string }[];
+}
+
+/** Every published role and specialisation to pick as a target, grouped by practice (for select lists). */
+export function targetChoices(graph: Graph): TargetChoice[] {
+  const byPractice = new Map<string | null, TargetChoice["options"]>();
+  for (const role of roles(graph)) {
+    const list = byPractice.get(role.practiceId) ?? [];
+    list.push({ slug: role.slug, label: role.name });
+    for (const s of specializationsOf(graph, role.id))
+      list.push({ slug: s.slug, label: `${role.name}: ${s.name}` });
+    byPractice.set(role.practiceId, list);
+  }
+  return [...byPractice].map(([practiceId, options]) => ({ practiceId, options }));
+}
