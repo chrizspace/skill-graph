@@ -33,7 +33,8 @@ An internal tool that shows roles (with specialisations) and what they require (
 1. `pnpm check` passes (lint, types, unit tests, plus database tests, build and e2e when the change touches them).
 2. UI changes are checked in the browser at 1280 px and 375 px.
 3. New behaviour has tests; Scenarios 1–3 from the plan stay green.
-4. `README.md` and `docs/PLAN.md` are updated if setup, commands or decisions changed. The PR that completes a milestone sets its Status to Done in the table in `docs/PLAN.md` §8.
+4. A new page is added to `e2e/a11y.spec.ts` (axe, zero violations) and works by keyboard.
+5. `README.md` and `docs/PLAN.md` are updated if setup, commands or decisions changed. The PR that completes a milestone sets its Status to Done in the table in `docs/PLAN.md` §8.
 
 ## Database rules
 

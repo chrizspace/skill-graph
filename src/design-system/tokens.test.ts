@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { contrastRatio } from "./contrast";
-import { contrastPairs, primitives, semanticTokenNames, themeNames, themes } from "./tokens";
+import { contrastPairs, opacity, primitives, semanticTokenNames, themeNames, themes } from "./tokens";
 
 describe("contrastRatio", () => {
   it("matches the WCAG reference values", () => {
@@ -27,6 +27,27 @@ describe("Orange theme", () => {
     expect(themes.orange.primary).toBe("#ff5800");
     expect(themes.orange["primary-foreground"]).toBe("#1a1a1a");
     expect(themes.orange.foreground).toBe("#333333");
+  });
+});
+
+describe("a held certification that has expired is faded, and stays readable", () => {
+  const blend = (fg: string, bg: string, alpha: number) =>
+    "#" +
+    [1, 3, 5]
+      .map((i) =>
+        Math.round(parseInt(fg.slice(i, i + 2), 16) * alpha + parseInt(bg.slice(i, i + 2), 16) * (1 - alpha)),
+      )
+      .map((v) => v.toString(16).padStart(2, "0"))
+      .join("");
+  it.each(themeNames)(
+    "%s: the body ink at the fade's strength on the background is at least 4.5:1",
+    (theme) => {
+      const faded = blend(themes[theme].foreground, themes[theme].background, Number(opacity.expired));
+      expect(contrastRatio(faded, themes[theme].background)).toBeGreaterThanOrEqual(4.5);
+    },
+  );
+  it("but is still visibly faded", () => {
+    expect(Number(opacity.expired)).toBeLessThan(0.85);
   });
 });
 

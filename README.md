@@ -1,10 +1,11 @@
 # Skill Graph
 
-An interactive graph of **roles, skills and technologies**:
+An interactive graph of **roles, skills, certifications and technologies**:
 
-- employees see which competencies they're missing for a role they want
-- managers plan their team's development
-- Practice Leads keep their practice's roles and paths up to date; the Site Lead oversees the practices
+- **employees** keep a profile, see how they meet their role, compare roles with their own skills and plan their development
+- **managers** follow their direct reports, recommend next steps and send feedback on roles to the practice
+- **Practice Leads** keep their practice's roles, requirements and paths up to date and review change requests
+- **the Site Lead** oversees the practices with numbers only, never named profiles
 
 The plan, data model and milestones are in [docs/PLAN.md](docs/PLAN.md).
 
@@ -15,7 +16,7 @@ The plan, data model and milestones are in [docs/PLAN.md](docs/PLAN.md).
 - Neon Postgres with Drizzle ORM
 - Better Auth (Microsoft Entra ID)
 - Cytoscape.js
-- Vitest and Playwright
+- Vitest, Playwright and axe
 - hosted on Vercel
 
 ## Design system
@@ -40,7 +41,7 @@ The seed holds a demo site with 5 practices, 19 roles (4 specialisations), a cat
 
 ## End-to-end tests
 
-Playwright specs live in `e2e/`, one file per scenario or area (`scenario-1-…`, `permissions`, …). `pnpm test:e2e` builds the app, **resets the local database** (it refuses any other), starts the app on port 3100 and runs everything; `pnpm db:up` must be running. Each test is limited to 30 s and the run to 10 min, and `list` output shows every test as it passes.
+Playwright specs live in `e2e/`, one file per scenario or area (`scenario-1-…`, `permissions`, …). `pnpm test:e2e` builds the app, **resets the local database** (it refuses any other), starts the app on port 3100 and runs everything; `pnpm db:up` must be running. Each test is limited to 30 s and the run to 20 min, and `list` output shows every test as it passes.
 
 To run one file quickly, start the app yourself once and keep its database:
 
@@ -51,21 +52,32 @@ E2E_KEEP_DB=1 pnpm exec playwright test e2e/permissions.spec.ts   # in another
 
 (`E2E_KEEP_DB=1` is needed because the app caches the graph with its row ids, which a reset replaces.)
 
+## Accessibility
+
+The target is WCAG 2.2 AA, checked in the repository rather than by hand:
+
+- **Colour**: every text and component colour pair of both themes is tested for contrast in `src/design-system/tokens.test.ts`, including the fade of an expired certification.
+- **`e2e/a11y.spec.ts`** scans every page with [axe](https://github.com/dequelabs/axe-core) for each kind of user, in both themes, at phone width and with menus and windows open, and fails on any violation. A new page gets a line in it.
+- **`e2e/keyboard.spec.ts`** is the keyboard pass: the skip link, tab order, a visible focus on every interactive element, menus, windows (focus trapped and given back), tabs, and the graph.
+- The graph has a table view with the same content, and on phones the table opens first.
+- Storybook's accessibility panel fails on violations for every component.
+
 ## Commands
 
-| Command                                    | What it does                                                                      |
-| ------------------------------------------ | --------------------------------------------------------------------------------- |
-| `pnpm dev`                                 | Dev server                                                                        |
-| `pnpm check`                               | Only the checks that matter for what changed; `pnpm check --full` runs everything |
-| `pnpm lint`, `pnpm typecheck`, `pnpm test` | ESLint, `next typegen` + `tsc`, Vitest                                            |
-| `pnpm format`                              | Prettier                                                                          |
-| `pnpm db:up`, `pnpm db:down`               | Start / stop the local Postgres                                                   |
-| `pnpm db:reset`                            | Rebuild the local database from the migrations (refuses any non-local database)   |
-| `pnpm db:generate`                         | Write a migration after changing `src/db/schema.ts`                               |
-| `pnpm db:seed`                             | Add the seed graph and demo people (idempotent)                                   |
-| `pnpm test:db`                             | Database tests on PGlite (in-process Postgres, no Docker needed)                  |
-| `pnpm test:e2e`                            | Playwright end-to-end tests (resets the local database, see above)                |
-| `pnpm build`                               | Production build                                                                  |
+| Command                                     | What it does                                                                      |
+| ------------------------------------------- | --------------------------------------------------------------------------------- |
+| `pnpm dev`                                  | Dev server                                                                        |
+| `pnpm check`                                | Only the checks that matter for what changed; `pnpm check --full` runs everything |
+| `pnpm lint`, `pnpm typecheck`, `pnpm test`  | ESLint, `next typegen` + `tsc`, Vitest                                            |
+| `pnpm format`                               | Prettier                                                                          |
+| `pnpm db:up`, `pnpm db:down`                | Start / stop the local Postgres                                                   |
+| `pnpm db:reset`                             | Rebuild the local database from the migrations (refuses any non-local database)   |
+| `pnpm db:generate`                          | Write a migration after changing `src/db/schema.ts`                               |
+| `pnpm db:seed`                              | Add the seed graph and demo people (idempotent)                                   |
+| `pnpm test:db`                              | Database tests on PGlite (in-process Postgres, no Docker needed)                  |
+| `pnpm test:e2e`                             | Playwright end-to-end tests (resets the local database, see above)                |
+| `pnpm build`                                | Production build                                                                  |
+| `pnpm smoke <url> [--production \| --demo]` | Quick check of a deployed copy (see "Going live")                                 |
 
 ## How changes reach `main`
 
@@ -125,3 +137,20 @@ To set up Microsoft sign-in:
 4. If your organisation blocks users from consenting to new apps, its IT has to grant admin consent once.
 
 A person who signs in with Microsoft for the first time has no profile yet; onboarding (M7) creates it. Their user types come from the data (reporting lines and lead assignments), see `docs/PLAN.md` §1. Every capability is checked on the server by `can()` (`src/domain/access.ts`).
+
+### Going live
+
+Production is the `main` branch on Vercel. Before real people use it:
+
+1. **Sign-in**: set the variables above in Vercel (Production only). Until `BETTER_AUTH_SECRET` and the Microsoft settings exist, production builds and runs but nobody can sign in.
+2. **The first Site Lead**: there is nobody yet to appoint one in the app, so add them once in the Neon console, after they have signed in with Microsoft for the first time:
+
+   ```sql
+   insert into site_leads (site_id, user_id)
+   select s.id, u.id from sites s, "user" u where u.email = 'first.site.lead@your-company.com';
+   ```
+
+   From then on the Site Lead appoints Practice Leads, other Site Leads, home practices and reporting lines in the app (`/site/practices`, `/site/people`).
+
+3. **Smoke test**: `pnpm smoke https://<production domain> --production` checks that the site is alive, that sign-in is Microsoft (or switched off) and that the demo sign-in is not offered. It prints what is left to try by hand with a real account: sign in and onboard, Scenario 1 on `/compare`, focus a role on `/explore`, send and approve one change request, and see that `/site` names nobody.
+4. **Before wide use** (see the risks in `docs/PLAN.md` §10): Vercel's Hobby plan is for non-commercial use only, so use Pro or move to Azure; and export and deletion of a person's own data (GDPR) is not built yet.

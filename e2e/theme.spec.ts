@@ -52,6 +52,6 @@ test("it is saved on the profile, so a browser that never saw it gets it too", a
 test("the account menu has no theme choice", async ({ page }) => {
   await signInAs(page, "Alex Rivera");
   await page.getByRole("button", { name: /Account menu/ }).click();
-  await expect(page.getByRole("button", { name: "Sign out" })).toBeVisible();
+  await expect(page.getByRole("menuitem", { name: "Sign out" })).toBeVisible();
   await expect(page.getByRole("menuitemradio")).toHaveCount(0);
 });
