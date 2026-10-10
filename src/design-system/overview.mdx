@@ -13,8 +13,8 @@ import {
 
 # Skill Graph design system
 
-One theme for now: **Orange**, light only (there is no dark mode). A second theme, **Violet**, comes later. Every page
-and component uses the **semantic tokens** below (`bg-primary`, `text-critical`…), never the raw primitives, so adding
+Two themes, both light (there is no dark mode): **Orange**, the default, and **Violet**. People switch between them in
+the account menu or on their profile; the choice is kept in the browser. Every page and component uses the **semantic tokens** below (`bg-primary`, `text-critical`…), never the raw primitives, so adding
 a theme recolours everything. Tokens live in `src/design-system/tokens.ts`; `pnpm tokens` generates the CSS.
 
 ## Components
@@ -26,7 +26,8 @@ from this list (`src/design-system/catalogue.ts`).
 
 ## Colour primitives
 
-Raw scales. Orange is anchored at 500 on the brand orange `#ff5800`; neutral, red, amber, green and blue serve every
+Raw scales. Orange is anchored at 500 on the brand orange `#ff5800`, Violet on the core purple `#a100ff` (its 50, 700 and
+900 steps are the palette's tint `#f5e5ff`, mid `#7500c0` and deep `#460073` purples); neutral, red, amber, green and blue serve every
 theme. Body text is `#333333`, secondary text `#555555`, surfaces `#f2f2f2`, borders `#d1d1d1`.
 
 <ColorScales />
@@ -40,7 +41,7 @@ What components use. "Current" is the live theme.
 ## Contrast
 
 WCAG 2.2 AA: 4.5:1 for text, 3:1 for focus rings, field borders and graph nodes. The brand orange is too light for white
-text and for the body ink, so buttons on it carry a darker near-black (`#1a1a1a`). `tokens.test.ts` checks every pair in every theme.
+text and for the body ink, so buttons on it carry a darker near-black (`#1a1a1a`); the core purple takes white text (5.3:1). `tokens.test.ts` checks every pair in every theme.
 
 <ContrastTable />
 

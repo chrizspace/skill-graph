@@ -39,6 +39,12 @@ export const componentCatalogue: CatalogueEntry[] = [
   },
   {
     group: "App",
+    name: "Theme switch",
+    file: "src/components/app/theme-switch.tsx",
+    description: "Choose Orange or Violet, in the account menu or on the profile page; kept in the browser.",
+  },
+  {
+    group: "App",
     name: "Navigation",
     file: "src/components/app/nav-links.tsx",
     description: "The menu groups for a person's user types, with the current page marked.",

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { contrastRatio } from "./contrast";
-import { contrastPairs, semanticTokenNames, themeNames, themes } from "./tokens";
+import { contrastPairs, primitives, semanticTokenNames, themeNames, themes } from "./tokens";
 
 describe("contrastRatio", () => {
   it("matches the WCAG reference values", () => {
@@ -27,6 +27,20 @@ describe("Orange theme", () => {
     expect(themes.orange.primary).toBe("#ff5800");
     expect(themes.orange["primary-foreground"]).toBe("#1a1a1a");
     expect(themes.orange.foreground).toBe("#333333");
+  });
+});
+
+describe("Violet theme", () => {
+  it("is anchored on the core purple, with white text on it", () => {
+    expect(themes.violet.primary).toBe("#a100ff");
+    expect(themes.violet["primary-foreground"]).toBe("#ffffff");
+  });
+  it("uses the palette's tint, mid and deep purples", () => {
+    expect(primitives.violet[50]).toBe("#f5e5ff");
+    expect(primitives.violet[700]).toBe("#7500c0");
+    expect(primitives.violet[900]).toBe("#460073");
+    expect(themes.violet.accent).toBe("#f5e5ff");
+    expect(themes.violet.link).toBe("#7500c0");
   });
 });
 
