@@ -43,9 +43,11 @@ const demoSignIn = {
   },
 } satisfies BetterAuthPlugin;
 
-if (production && !process.env.BETTER_AUTH_SECRET) {
-  throw new Error("BETTER_AUTH_SECRET is not set (see README, Sign-in).");
-}
+/**
+ * Production needs its own BETTER_AUTH_SECRET (README, "Sign-in"). Without it sign-in is switched off at runtime
+ * instead of failing at import: Next imports this file while building, and a throw here broke every production build.
+ */
+export const authConfigured = !production || Boolean(process.env.BETTER_AUTH_SECRET);
 
 /** BETTER_AUTH_URL if set; else this Vercel deployment's URL (production domain, or the preview's); else localhost. */
 function baseUrl() {
@@ -57,6 +59,7 @@ function baseUrl() {
 // Microsoft sign-in is for production only (Entra has no wildcard redirect URIs, so previews can't use it);
 // demo sign-in needs no redirect and works everywhere else
 function createAuth() {
+  if (!authConfigured) throw new Error("BETTER_AUTH_SECRET is not set (see README, Sign-in).");
   return betterAuth({
     database: drizzleAdapter(getDb(), { provider: "pg", schema }),
     baseURL: baseUrl(),

@@ -121,7 +121,7 @@ To set up Microsoft sign-in:
 
 1. In the Entra admin centre: **App registrations → New registration**. Supported account types: your organisation only (or "any organisation and personal accounts" to allow personal accounts too). Redirect URI (Web): `https://<production domain>/api/auth/callback/microsoft`. Entra has no wildcard redirect URIs, which is why previews use the demo sign-in.
 2. **Certificates & secrets → New client secret**; copy its value.
-3. In Vercel (Production only), set `BETTER_AUTH_SECRET` (`openssl rand -base64 32`), `BETTER_AUTH_URL` (the production URL), `MICROSOFT_CLIENT_ID` (the application ID), `MICROSOFT_CLIENT_SECRET` and `MICROSOFT_TENANT_ID` (the directory ID; the default `common` also allows personal accounts).
+3. In Vercel (Production only; without `BETTER_AUTH_SECRET` production builds and runs, but sign-in is switched off), set `BETTER_AUTH_SECRET` (`openssl rand -base64 32`), `BETTER_AUTH_URL` (the production URL), `MICROSOFT_CLIENT_ID` (the application ID), `MICROSOFT_CLIENT_SECRET` and `MICROSOFT_TENANT_ID` (the directory ID; the default `common` also allows personal accounts).
 4. If your organisation blocks users from consenting to new apps, its IT has to grant admin consent once.
 
 A person who signs in with Microsoft for the first time has no profile yet; onboarding (M7) creates it. Their user types come from the data (reporting lines and lead assignments), see `docs/PLAN.md` §1. Every capability is checked on the server by `can()` (`src/domain/access.ts`).
