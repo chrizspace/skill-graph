@@ -21,6 +21,12 @@ export const componentCatalogue: CatalogueEntry[] = [
   },
   {
     group: "App",
+    name: "Filter links",
+    file: "src/components/app/filter-links.tsx",
+    description: "A filter as a row of links that keeps the other filters in the URL.",
+  },
+  {
+    group: "App",
     name: "Microsoft sign-in",
     file: "src/components/app/microsoft-button.tsx",
     description: "Starts the Microsoft (Entra ID) sign-in.",
@@ -54,6 +60,18 @@ export const componentCatalogue: CatalogueEntry[] = [
     name: "Certification status",
     file: "src/components/domain/certification-status.tsx",
     description: "A held certification: valid, expiring, or expired (faded, still counts as held).",
+  },
+  {
+    group: "Domain",
+    name: "Requirement list",
+    file: "src/components/domain/requirement-list.tsx",
+    description: "A role's requirements grouped by type, each with its weight and note.",
+  },
+  {
+    group: "Domain",
+    name: "Role card",
+    file: "src/components/domain/role-card.tsx",
+    description: "A role in the browser: practice, summary, core weights and specialisations.",
   },
   {
     group: "Domain",
