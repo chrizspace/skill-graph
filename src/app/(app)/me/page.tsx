@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { CertificationForm } from "@/components/domain/certification-form";
 import { CertificationStatus } from "@/components/domain/certification-status";
+import { ThemeRadios } from "@/components/app/theme-switch";
 import { ItemTypeBadge } from "@/components/domain/item-type-badge";
 import { Button } from "@/components/ui/button";
 import { certificationStatus } from "@/domain/profile";
@@ -44,6 +45,14 @@ export default async function Me() {
         <Button asChild variant="outline" className="w-fit">
           <Link href="/onboarding">Change role</Link>
         </Button>
+      </section>
+
+      <section aria-labelledby="appearance" className="flex flex-col gap-2">
+        <h2 id="appearance" className="text-xl font-semibold">
+          Appearance
+        </h2>
+        <p className="text-sm text-muted-foreground">The colours of the app. Kept in this browser.</p>
+        <ThemeRadios />
       </section>
 
       <section aria-labelledby="target" className="flex flex-col gap-2">

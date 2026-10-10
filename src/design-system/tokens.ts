@@ -5,9 +5,9 @@
  * Two layers:
  *   - primitives: raw scales (orange, neutral, red, amber, green, blue). Don't use them in components.
  *   - semantic tokens: what components use (background, primary, critical…), defined per theme.
- * One theme for now: Orange, light only (no dark mode). A second theme (Violet) comes later: add its scale to
- * `primitives`, its name to `themeNames`, and its tokens to `themes` (use `buildTheme`). Contrast pairs for every theme
- * are checked in tokens.test.ts.
+ * Two themes, both light (no dark mode): Orange (the default) and Violet. To add another: add its scale to `primitives`,
+ * its name to `themeNames`, its tokens to `themes` (use `buildTheme`) and its label to `themeLabels`. Contrast pairs
+ * for every theme are checked in tokens.test.ts.
  */
 
 export type Scale = Record<50 | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900 | 950, string>;
@@ -26,6 +26,21 @@ export const primitives = {
     800: "#8f2f05",
     900: "#742909",
     950: "#421103",
+  },
+  // anchored at 500 on the core purple #a100ff; 50, 700 and 900 are the palette's tint, mid and deep purples
+  // (#f5e5ff, #7500c0, #460073); the other steps are interpolated around them
+  violet: {
+    50: "#f5e5ff",
+    100: "#ebccff",
+    200: "#dcadff",
+    300: "#c97aff",
+    400: "#b44aff",
+    500: "#a100ff",
+    600: "#8a00dd",
+    700: "#7500c0",
+    800: "#5c0099",
+    900: "#460073",
+    950: "#2c0049",
   },
   neutral: {
     50: "#fafafa",
@@ -94,7 +109,7 @@ export const primitives = {
   },
 } as const satisfies Record<string, Scale>;
 
-export const themeNames = ["orange"] as const;
+export const themeNames = ["orange", "violet"] as const;
 export type ThemeName = (typeof themeNames)[number];
 
 /** Semantic tokens every theme defines. Names follow shadcn/ui, plus our own (priority, status, node types). */
@@ -232,9 +247,14 @@ function buildTheme(
  */
 export const themes: Record<ThemeName, SemanticTokens> = {
   orange: buildTheme(primitives.orange, inkOnBrand, 500, 700),
+  // the core purple takes white text (5.3:1), and its mid purple is dark enough for links (8.3:1)
+  violet: buildTheme(primitives.violet, "#ffffff", 500, 700),
 };
 
-export const themeLabels: Record<ThemeName, string> = { orange: "Orange" };
+export const themeLabels: Record<ThemeName, string> = { orange: "Orange", violet: "Violet" };
+
+/** The theme used until a person picks another. Its tokens are the plain `:root` ones, so it needs no `data-theme`. */
+export const defaultTheme: ThemeName = "orange";
 
 /** The reference site's font stack; Segoe UI is used where installed, the system font elsewhere. */
 export const fonts = {

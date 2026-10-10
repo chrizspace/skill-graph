@@ -1,4 +1,14 @@
-import { fonts, motion, opacity, primitives, radius, semanticTokenNames, themeNames, themes } from "./tokens";
+import {
+  defaultTheme,
+  fonts,
+  motion,
+  opacity,
+  primitives,
+  radius,
+  semanticTokenNames,
+  themeNames,
+  themes,
+} from "./tokens";
 
 /**
  * Renders tokens.ts as CSS for Tailwind 4: primitives as theme colours, semantic tokens as CSS variables per theme,
@@ -38,11 +48,11 @@ export function renderTokensCss() {
     ...Object.entries(opacity).map(([name, value]) => `  --opacity-${name}: ${value};`),
     "}",
   ];
-  // Orange is the default, so it needs no `data-theme`; a later theme is selected with data-theme="<name>" on <html>
+  // the default theme also answers to plain :root; every theme is selected with data-theme="<name>" on <html>
   for (const theme of themeNames) {
     lines.push(
       "",
-      `${theme === "orange" ? ":root,\n" : ""}:root[data-theme="${theme}"] {`,
+      `${theme === defaultTheme ? ":root,\n" : ""}:root[data-theme="${theme}"] {`,
       "  color-scheme: light;",
       ...semanticTokenNames.map((name) => `  --${name}: ${themes[theme][name]};`),
       "}",

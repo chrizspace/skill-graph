@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { defaultTheme, themeInitScript } from "@/design-system/theme";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -9,8 +10,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    // the design system has one theme (Orange, light); a later theme is selected with data-theme (src/design-system)
-    <html lang="en" data-theme="orange" className="h-full antialiased">
+    // the server renders the default theme; the inline script puts a saved choice on <html> before the first paint
+    // (so `suppressHydrationWarning`, since the attribute differs from what was rendered)
+    <html lang="en" data-theme={defaultTheme} className="h-full antialiased" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body className="flex min-h-full flex-col">
         <TooltipProvider>{children}</TooltipProvider>
       </body>
