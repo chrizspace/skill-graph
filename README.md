@@ -4,7 +4,7 @@ An interactive graph of **roles, skills and technologies**:
 
 - employees see which competencies they're missing for a role they want
 - managers plan their team's development
-- admins keep the graph up to date
+- Practice Leads keep their practice's roles and paths up to date; the Site Lead oversees the practices
 
 The plan, data model and milestones are in [docs/PLAN.md](docs/PLAN.md).
 
@@ -98,6 +98,16 @@ Local development doesn't use Neon: from M1 it runs Postgres in Docker. `vercel 
 2. **Neon:** in the Vercel project, go to **Storage → Create Database → Neon** and pick region Frankfurt. Connect it to Preview and Production.
 3. **Preview database branches:** in the Neon resource's settings, under deployments, turn on a database branch for **Preview**. Each preview deploy then migrates and seeds its own copy instead of the production database.
 
-### Microsoft sign-in
+### Sign-in
 
-This comes at M3. The README will list the Entra app registration steps and the environment variables then.
+- **Demo sign-in** (locally and on previews, never in production): the sign-in page lists the seeded people; pick one to use the app as them. It needs no setup.
+- **Microsoft sign-in** (production): Better Auth with the Microsoft (Entra ID) provider. It is shown when `MICROSOFT_CLIENT_ID` and `MICROSOFT_CLIENT_SECRET` are set.
+
+To set up Microsoft sign-in:
+
+1. In the Entra admin centre: **App registrations → New registration**. Supported account types: your organisation only (or "any organisation and personal accounts" to allow personal accounts too). Redirect URI (Web): `https://<production domain>/api/auth/callback/microsoft`. Entra has no wildcard redirect URIs, which is why previews use the demo sign-in.
+2. **Certificates & secrets → New client secret**; copy its value.
+3. In Vercel (Production only), set `BETTER_AUTH_SECRET` (`openssl rand -base64 32`), `BETTER_AUTH_URL` (the production URL), `MICROSOFT_CLIENT_ID` (the application ID), `MICROSOFT_CLIENT_SECRET` and `MICROSOFT_TENANT_ID` (the directory ID; the default `common` also allows personal accounts).
+4. If your organisation blocks users from consenting to new apps, its IT has to grant admin consent once.
+
+A person who signs in with Microsoft for the first time has no profile yet; onboarding (M7) creates it. Their user types come from the data (reporting lines and lead assignments), see `docs/PLAN.md` §1. Every capability is checked on the server by `can()` (`src/domain/access.ts`).

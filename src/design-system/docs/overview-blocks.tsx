@@ -191,7 +191,7 @@ export function Motion() {
   );
 }
 
-const groups: ComponentGroup[] = ["Domain", "UI"];
+const groups: ComponentGroup[] = ["App", "Domain", "UI"];
 
 /** Every component in the catalogue, with a link to its docs page. */
 export function ComponentIndex() {
