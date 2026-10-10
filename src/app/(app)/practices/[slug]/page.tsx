@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { can } from "@/domain/access";
 import { outgoing, roles, specializationsOf } from "@/domain/graph";
+import { getDb } from "@/db/client";
+import { listRequests } from "@/db/change-requests";
+import { isPending } from "@/domain/change-requests";
 import { getGraph, getPractices } from "@/lib/graph-data";
 import { requireActor } from "@/lib/session";
 import { createRoleAction } from "../actions";
@@ -20,6 +23,9 @@ export default async function PracticePage({ params }: PageProps<"/practices/[sl
   if (!practice || !can(actor, "role:edit", { practiceId: practice.id })) notFound();
   const graph = await getGraph();
   const list = roles(graph, { includeDrafts: true }).filter((r) => r.practiceId === practice.id);
+  const waiting = (await listRequests(getDb(), actor)).inbox.filter(
+    (r) => r.practiceId === practice.id && isPending(r.status),
+  );
 
   return (
     <div className="flex max-w-4xl flex-col gap-8">
@@ -30,6 +36,20 @@ export default async function PracticePage({ params }: PageProps<"/practices/[sl
           <p className="mt-1 text-sm text-muted-foreground">Led by {practice.leads.join(", ")}</p>
         )}
       </header>
+
+      <section aria-labelledby="waiting" className="flex flex-col gap-2 rounded-lg border p-4">
+        <h2 id="waiting" className="text-xl font-semibold">
+          Change requests ({waiting.length} waiting)
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          {waiting.length === 0
+            ? "Nothing is waiting for a decision."
+            : `${waiting.length} from managers waiting for a decision.`}{" "}
+          <Link href="/requests" className="underline underline-offset-4">
+            Open the inbox
+          </Link>
+        </p>
+      </section>
 
       <section aria-labelledby="roles" className="flex flex-col gap-3">
         <h2 id="roles" className="text-xl font-semibold">

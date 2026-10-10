@@ -14,6 +14,7 @@ import { eq } from "drizzle-orm";
 import { canEditNode } from "@/domain/editing";
 import { node, outgoing, roles, specializationsOf, targetLabel } from "@/domain/graph";
 import { getGraph, getPractices } from "@/lib/graph-data";
+import { describeAudit } from "@/lib/audit-text";
 import { requireActor } from "@/lib/session";
 import {
   addPathAction,
@@ -350,16 +351,24 @@ export default async function EditRole({ params }: PageProps<"/practices/[slug]/
         ) : (
           <ol className="divide-y text-sm">
             {history.map((h, i) => {
-              const data = (h.after ?? h.before ?? {}) as Record<string, unknown>;
-              const what =
-                h.entity === "edge"
-                  ? `${data.kind === "next_step" ? "path" : "requirement"} ${String(data.source)} → ${String(data.target)}${data.priority ? ` (${String(data.priority)})` : ""}`
-                  : `${String(data.type ?? "node").replace("_", " ")} “${String(data.name)}”`;
+              const a = describeAudit({
+                action: h.action,
+                entity: h.entity,
+                before: h.before as Record<string, unknown> | null,
+                after: h.after as Record<string, unknown> | null,
+              });
               return (
                 <li key={i} className="py-2">
-                  <span className="font-medium">{h.who ?? "Someone"}</span>{" "}
-                  {h.action === "create" ? "added" : h.action === "delete" ? "removed" : "changed"} {what}
-                  {data.emergency ? <span> (emergency edit)</span> : null}
+                  <span className="font-medium">{h.who ?? "Someone"}</span> {a.text}
+                  {a.emergency ? <span> (emergency edit)</span> : null}
+                  {h.requestId ? (
+                    <>
+                      {" "}
+                      <Link href={`/requests/${h.requestId}`} className="underline underline-offset-4">
+                        (via a request)
+                      </Link>
+                    </>
+                  ) : null}
                   <span className="block text-muted-foreground">
                     {h.at.toISOString().slice(0, 16).replace("T", " ")} UTC
                   </span>

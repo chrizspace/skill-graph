@@ -5,6 +5,7 @@ import { PriorityBadge, weightLabel } from "@/components/domain/priority-badge";
 import { RequirementList } from "@/components/domain/requirement-list";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { roleDetail, type PathLink } from "@/domain/browse";
+import { can } from "@/domain/access";
 import { canEditNode } from "@/domain/editing";
 import { getGraph, getPractices } from "@/lib/graph-data";
 import { getActor } from "@/lib/session";
@@ -53,6 +54,9 @@ export default async function RolePage({ params }: PageProps<"/roles/[slug]">) {
   const practice = practices.find((p) => p.id === role.practiceId);
   const actor = await getActor();
   const canEdit = Boolean(actor && practice && canEditNode(actor, graph, role.id));
+  const canSuggest = Boolean(
+    actor && practice && can(actor, "changeRequest:create", { practiceId: practice.id }),
+  );
 
   return (
     <article className="flex flex-col gap-8">
@@ -74,6 +78,11 @@ export default async function RolePage({ params }: PageProps<"/roles/[slug]">) {
         {canEdit && practice && (
           <Button asChild size="sm" variant="outline" className="mt-2">
             <Link href={`/practices/${practice.slug}/roles/${role.slug}/edit`}>Edit this role</Link>
+          </Button>
+        )}
+        {canSuggest && !canEdit && practice && (
+          <Button asChild size="sm" variant="outline" className="mt-2">
+            <Link href={`/requests/new?practice=${practice.slug}&role=${role.slug}`}>Suggest a change</Link>
           </Button>
         )}
         {role.description && (

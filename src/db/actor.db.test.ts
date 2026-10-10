@@ -24,7 +24,7 @@ describe("user types come from the seed data", () => {
   it("Jordan is the Site Lead", async () => {
     const jordan = await actor("seed-jordan");
     expect(jordan.siteLead).toBe(true);
-    expect(await groups("seed-jordan")).toEqual(["Explore", "Me", "Site"]);
+    expect(await groups("seed-jordan")).toEqual(["Explore", "Me", "Requests", "Site"]);
   });
   it("Taylor leads the Frontend Practice", async () => {
     const taylor = await actor("seed-taylor");

@@ -45,7 +45,8 @@ export function navigationFor(actor: Actor): NavGroup[] {
       items: actor.leadOf.map((p) => ({ label: p.name, href: `/practices/${p.slug}` })),
     });
   }
-  if (can(actor, "changeRequest:create", { practiceId: "" })) {
+  // managers and Practice Leads send and review; the Site Lead can step in (docs/PLAN.md §1 permissions)
+  if (can(actor, "changeRequest:create", { practiceId: "" }) || actor.siteLead) {
     groups.push({ label: "Requests", items: [{ label: "Change requests", href: "/requests" }] });
   }
   if (can(actor, "site:manage")) {
