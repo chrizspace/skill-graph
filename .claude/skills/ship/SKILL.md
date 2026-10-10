@@ -8,7 +8,7 @@ Ship the current branch.
 1. **Branch.** `git branch --show-current` must not be `main`. If it is, stop: the work belongs on a feature branch (use the `feature` skill).
 2. **Commit.** Commit anything left, with a Conventional Commit message. Make sure `git status --short` is clean.
 3. **Local checks.** Run `pnpm check`. Fix every failure and run it again until it passes. Never skip a check to get green.
-4. **UI changes.** If the branch changes UI, check it in the browser at 1280 px and 375 px, in light and dark, before going on.
+4. **UI changes.** If the branch changes UI, check it in the browser at 1280 px and 375 px before going on.
 5. **Push.** `git push -u origin <branch>`.
 6. **Open the PR.** `gh pr create --base main --title "<conventional title>" --body-file <file>`. Fill in `.github/pull_request_template.md` and write the body to a temp file. The title becomes the squash commit on `main`, so make it a good one.
 7. **Auto-merge.** `gh pr merge <number> --auto --squash --delete-branch`. GitHub merges once the required `ci` check passes. Never use `--admin`, and never touch the ruleset.
