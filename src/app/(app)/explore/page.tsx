@@ -21,6 +21,8 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
   ]);
   const initial: ExplorerInitial = {
     focus: param(sp.focus) ?? null,
+    from: param(sp.from) ?? null,
+    to: param(sp.to) ?? null,
     hops: Math.min(3, Math.max(1, Number(param(sp.hops)) || 2)),
     practice: param(sp.practice) ?? null,
     types: list(param(sp.type)).filter((t): t is NodeType => NODE_TYPES.includes(t as NodeType)),

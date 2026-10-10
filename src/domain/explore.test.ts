@@ -127,6 +127,11 @@ describe("routeBetween", () => {
     expect(r?.how).toBe("official");
     expect(r!.route.length).toBeGreaterThan(2);
   });
+  it("someone in a specialisation can take their role's official paths", () => {
+    const r = routeBetween(graph, "Frontend Developer: React", "Full-stack Developer")!;
+    expect(r.how).toBe("official");
+    expect(r.route.map((n) => n.name)).toEqual(["Frontend Developer", "Full-stack Developer"]);
+  });
   it("falls back to the shortest route over shared skills", () => {
     const r = routeBetween(graph, "Scrum Master", "Cloud Engineer")!;
     expect(r.how).toBe("shortest");

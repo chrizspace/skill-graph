@@ -17,6 +17,7 @@ import {
   neighbours,
   overview,
   roleView,
+  routeBetween,
   searchNodes,
   weightFor,
   type GraphView,
@@ -39,11 +40,17 @@ import { WEIGHT_LABEL, TYPE_LABEL, layoutFor, toElements } from "@/lib/graph-sty
 export interface ExplorerInitial {
   focus: string | null;
   hops: number;
+  /** path mode: the slugs of the two roles */
+  from: string | null;
+  to: string | null;
   practice: string | null;
   types: NodeType[];
   category: string | null;
   weights: Weight[];
 }
+
+/** Above this many nodes plus links the drawing switches to its fast mode (see GraphCanvas `big`). */
+const BIG_GRAPH = 8000;
 
 const ALL_TYPES = Object.keys(TYPE_LABEL) as NodeType[];
 
@@ -67,6 +74,7 @@ export function Explorer({
   held,
   today,
   initial,
+  webgl,
 }: {
   nodes: GraphNode[];
   edges: GraphEdge[];
@@ -74,6 +82,8 @@ export function Explorer({
   held: (HeldItem & { obtainedOn: string | null; expiresOn: string | null })[] | null;
   today: string;
   initial: ExplorerInitial;
+  /** draw with WebGL (very big graphs) */
+  webgl?: boolean;
 }) {
   const graph = useMemo(() => buildGraph(nodes, edges), [nodes, edges]);
   const startFocus = initial.focus
@@ -81,6 +91,13 @@ export function Explorer({
       null)
     : null;
 
+  const idOfSlug = (slug: string | null) =>
+    slug
+      ? ([...graph.nodes.values()].find((n) => n.slug === slug && n.status === "published")?.id ?? null)
+      : null;
+  const [pathMode, setPathMode] = useState(Boolean(initial.from && initial.to));
+  const [fromId, setFromId] = useState<string | null>(idOfSlug(initial.from));
+  const [toId, setToId] = useState<string | null>(idOfSlug(initial.to));
   const [focusId, setFocusId] = useState<string | null>(startFocus);
   const [selectedId, setSelectedId] = useState<string | null>(startFocus);
   const [selectedSpecs, setSelectedSpecs] = useState<string[]>([]);
@@ -115,7 +132,13 @@ export function Explorer({
   );
 
   const focusNode = focusId ? graph.nodes.get(focusId) : undefined;
+  // path mode shows the whole overview (unfiltered, so the route is never hidden) with the route highlighted
+  const route = useMemo(
+    () => (pathMode && fromId && toId ? routeBetween(graph, fromId, toId) : null),
+    [graph, pathMode, fromId, toId],
+  );
   const view: GraphView = useMemo(() => {
+    if (pathMode) return overview(graph, {});
     if (!focusNode) return overview(graph, filters);
     if (rings && (focusNode.type === "role" || focusNode.type === "specialization")) {
       const roleId = focusNode.type === "role" ? focusNode.id : focusNode.parentRoleId!;
@@ -123,7 +146,7 @@ export function Explorer({
       return roleView(graph, roleId, specs);
     }
     return focusView(graph, focusNode.id, hops, filters);
-  }, [graph, filters, focusNode, rings, hops, selectedSpecs]);
+  }, [graph, filters, focusNode, rings, hops, selectedSpecs, pathMode]);
 
   const heldMap = useMemo(() => new Map((held ?? []).map((h) => [h.nodeId, h])), [held]);
   const states = useMemo(() => {
@@ -136,7 +159,15 @@ export function Explorer({
     return map;
   }, [myView, held, view, heldMap, today]);
 
-  const elements = useMemo(() => toElements(graph, view, { states }), [graph, view, states]);
+  const routeSteps = useMemo(() => new Map((route?.route ?? []).map((n, i) => [n.id, i + 1])), [route]);
+  const elements = useMemo(
+    () => toElements(graph, view, { states, route: routeSteps }),
+    [graph, view, states, routeSteps],
+  );
+  const highlight = useMemo(
+    () => (route ? { nodes: route.route.map((n) => n.id), edges: route.view.edges.map((e) => e.id) } : null),
+    [route],
+  );
   const layout = useMemo(() => layoutFor(view), [view]);
   const categories = useMemo(() => catalogueCategories(graph), [graph]);
   const results = useMemo(() => searchNodes(graph, query), [graph, query]);
@@ -166,6 +197,10 @@ export function Explorer({
     const p = new URLSearchParams();
     if (focusNode) p.set("focus", focusNode.slug);
     if (focusNode && !rings) p.set("hops", String(hops));
+    const from = fromId && graph.nodes.get(fromId);
+    const to = toId && graph.nodes.get(toId);
+    if (pathMode && from) p.set("from", from.slug);
+    if (pathMode && to) p.set("to", to.slug);
     const practice = practices.find((x) => x.id === practiceId);
     if (practice) p.set("practice", practice.slug);
     if (types.length !== ALL_TYPES.length) p.set("type", types.join(","));
@@ -173,7 +208,20 @@ export function Explorer({
     if (weightFilter.length !== 3) p.set("w", weightFilter.join(","));
     const qs = p.toString();
     history_replace(qs ? `?${qs}` : location.pathname);
-  }, [focusNode, rings, hops, practiceId, types, category, weightFilter, practices]);
+  }, [
+    focusNode,
+    rings,
+    hops,
+    practiceId,
+    types,
+    category,
+    weightFilter,
+    practices,
+    pathMode,
+    fromId,
+    toId,
+    graph,
+  ]);
 
   // `/` jumps to the search box from anywhere on the page
   useEffect(() => {
@@ -191,7 +239,8 @@ export function Explorer({
   const onGraphKey = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") {
       e.preventDefault();
-      if (focusId) focus(null);
+      if (pathMode) setPathMode(false);
+      else if (focusId) focus(null);
       else select(null);
     } else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
       if (walk.length === 0) return;
@@ -211,7 +260,8 @@ export function Explorer({
     }
   };
 
-  const rows: TableRow[] = view.nodes.map((vn) => ({
+  const tableNodes = route ? route.view.nodes : view.nodes;
+  const rows: TableRow[] = tableNodes.map((vn) => ({
     id: vn.node.id,
     name:
       vn.node.type === "specialization"
@@ -235,10 +285,25 @@ export function Explorer({
   ]
     .filter(Boolean)
     .join(" ");
-  const caption = focusNode
-    ? `${focusNode.name} and ${view.nodes.length - 1} connected items`
-    : `${view.nodes.length} roles, skills and certifications`;
-  const description = `${view.nodes.length} nodes and ${view.edges.length} links${focusNode ? `, focused on ${focusNode.name}` : ""}`;
+  const caption = route
+    ? `${route.how === "official" ? "Official path" : "Shortest route"} from ${route.route[0].name} to ${route.route[route.route.length - 1].name}, in order`
+    : focusNode
+      ? `${focusNode.name} and ${view.nodes.length - 1} connected items`
+      : `${view.nodes.length} roles, skills and certifications`;
+  const description = route
+    ? `a route of ${route.route.length} steps from ${route.route[0].name} to ${route.route[route.route.length - 1].name}, highlighted in a graph of ${view.nodes.length} nodes`
+    : `${view.nodes.length} nodes and ${view.edges.length} links${focusNode ? `, focused on ${focusNode.name}` : ""}`;
+
+  const roleOptions = roles(graph).flatMap((r) => [
+    <option key={r.id} value={r.id}>
+      {r.name}
+    </option>,
+    ...specializationsOf(graph, r.id).map((s) => (
+      <option key={s.id} value={s.id}>
+        {r.name}: {s.name}
+      </option>
+    )),
+  ]);
 
   const toggle = <T,>(list: T[], v: T) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
 
@@ -306,19 +371,18 @@ export function Explorer({
             onChange={(e) => focus(e.target.value || null)}
           >
             <option value="">Overview</option>
-            {roles(graph).flatMap((r) => [
-              <option key={r.id} value={r.id}>
-                {r.name}
-              </option>,
-              ...specializationsOf(graph, r.id).map((s) => (
-                <option key={s.id} value={s.id}>
-                  {r.name}: {s.name}
-                </option>
-              )),
-            ])}
+            {roleOptions}
           </NativeSelect>
         </div>
-        {focusId && (
+        <Button
+          type="button"
+          variant={pathMode ? "default" : "outline"}
+          aria-pressed={pathMode}
+          onClick={() => setPathMode((m) => !m)}
+        >
+          Path mode
+        </Button>
+        {focusId && !pathMode && (
           <Button type="button" variant="outline" onClick={() => focus(null)}>
             Back to the overview
           </Button>
@@ -336,7 +400,79 @@ export function Explorer({
         )}
       </div>
 
-      <details className="rounded-lg border p-3" open={!focusId}>
+      {pathMode && (
+        <section aria-labelledby="path-heading" className="flex flex-col gap-3 rounded-lg border p-3">
+          <h2 id="path-heading" className="text-sm font-semibold">
+            Path between two roles
+          </h2>
+          <div className="flex flex-wrap items-end gap-3">
+            <div className="grid w-64 max-w-full gap-1.5">
+              <Label htmlFor="path-from">From</Label>
+              <NativeSelect
+                id="path-from"
+                value={fromId ?? ""}
+                onChange={(e) => setFromId(e.target.value || null)}
+              >
+                <option value="">Choose a role…</option>
+                {roleOptions}
+              </NativeSelect>
+            </div>
+            <div className="grid w-64 max-w-full gap-1.5">
+              <Label htmlFor="path-to">To</Label>
+              <NativeSelect id="path-to" value={toId ?? ""} onChange={(e) => setToId(e.target.value || null)}>
+                <option value="">Choose a role…</option>
+                {roleOptions}
+              </NativeSelect>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setFromId(toId);
+                setToId(fromId);
+              }}
+              disabled={!fromId && !toId}
+            >
+              Swap
+            </Button>
+          </div>
+          {fromId && toId && !route && <p role="status">No route connects these two roles.</p>}
+          {route && (
+            <div role="status" className="flex flex-col gap-2 text-sm">
+              <p className="font-medium">
+                {route.how === "official"
+                  ? "Official path: the moves your practices define."
+                  : "No official path. This is the shortest route over skills the roles share."}
+              </p>
+              <ol className="flex flex-col gap-1">
+                {route.route.map((n, i) => {
+                  const next = route.view.edges[i];
+                  return (
+                    <li key={n.id}>
+                      <span className="font-medium">
+                        {i + 1}.{" "}
+                        {n.type === "specialization"
+                          ? `${graph.nodes.get(n.parentRoleId!)!.name}: ${n.name}`
+                          : n.name}
+                      </span>{" "}
+                      <span className="text-muted-foreground">({TYPE_LABEL[n.type]})</span>
+                      {next && (next.typicalMonths || next.note) && (
+                        <span className="block pl-5 text-muted-foreground">
+                          then {next.typicalMonths ? `typically ${next.typicalMonths} months` : ""}
+                          {next.typicalMonths && next.note ? ": " : ""}
+                          {next.note ?? ""}
+                        </span>
+                      )}
+                    </li>
+                  );
+                })}
+              </ol>
+            </div>
+          )}
+        </section>
+      )}
+
+      <details className="rounded-lg border p-3" open={!focusId && !pathMode}>
         <summary className="cursor-pointer text-sm font-semibold">Filters</summary>
         <div className="mt-3 grid content-start items-start gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="grid gap-1.5">
@@ -459,8 +595,11 @@ export function Explorer({
                 elements={elements}
                 layout={layout}
                 selectedId={selectedId}
+                highlight={highlight}
                 onSelect={select}
                 onOpen={focus}
+                webgl={webgl}
+                big={nodes.length + edges.length > BIG_GRAPH}
                 label={`Skill graph: ${description}`}
                 className="h-full"
               />

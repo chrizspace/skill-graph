@@ -36,6 +36,8 @@ export interface ViewEdge {
   priority: Weight | null;
   strength: number;
   note: string | null;
+  /** official paths only: how long the move typically takes */
+  typicalMonths: number | null;
 }
 
 export interface ViewNode {
@@ -64,6 +66,7 @@ const toViewEdge = (e: GraphEdge): ViewEdge => ({
   priority: e.priority,
   strength: e.strength,
   note: e.note,
+  typicalMonths: e.typicalMonths,
 });
 
 const published = (graph: Graph) => [...graph.nodes.values()].filter((n) => n.status === "published");
@@ -178,6 +181,7 @@ export function roleView(graph: Graph, roleId: string, selected: readonly string
       priority: null,
       strength: 3,
       note: null,
+      typicalMonths: null,
     });
   }
   const addRequirements = (ownerId: string, effective: ReturnType<typeof requirementsOf>) => {
@@ -207,9 +211,13 @@ export interface RouteResult {
   route: GraphNode[];
 }
 
-/** A role with its own specialisations: a path can start or end at any of them. */
+/** A role with its own specialisations: a path can end at any of them. */
 const withSpecializations = (graph: Graph, n: GraphNode) =>
   n.type === "role" ? [n, ...specializationsOf(graph, n.id)] : [n];
+
+/** Where a path can start: someone in a specialisation is in its role too, so the role's official paths are theirs. */
+const startingPoints = (graph: Graph, n: GraphNode) =>
+  n.type === "specialization" ? [n, node(graph, n.parentRoleId!)] : withSpecializations(graph, n);
 
 /**
  * The route from one role (or specialisation) to another. The official path (following `next_step` links, any number
@@ -221,7 +229,7 @@ export function routeBetween(graph: Graph, fromId: string, toId: string): RouteR
   const found =
     search(
       graph,
-      withSpecializations(graph, from),
+      startingPoints(graph, from),
       new Set(withSpecializations(graph, to).map((n) => n.id)),
       true,
     ) ?? search(graph, [from], new Set([to.id]), false);
