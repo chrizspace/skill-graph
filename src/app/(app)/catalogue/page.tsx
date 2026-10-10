@@ -5,7 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { browseCatalogue, catalogueCategories } from "@/domain/browse";
 import { catalogueTypes, type CatalogueType } from "@/domain/graph";
+import { can } from "@/domain/access";
 import { getGraph } from "@/lib/graph-data";
+import { getActor } from "@/lib/session";
+import { AddItem } from "./add-item";
 import { hrefWith, param } from "@/lib/query";
 
 export const metadata = { title: "Catalogue · Skill Graph" };
@@ -15,6 +18,7 @@ export default async function Catalogue({ searchParams }: PageProps<"/catalogue"
   const query = param(sp.q);
   const type = catalogueTypes.find((t) => t === param(sp.type));
   const graph = await getGraph();
+  const actor = await getActor();
   const categories = catalogueCategories(graph, type);
   const category = categories.find((c) => c === param(sp.category));
   const current = { q: query, type, category };
@@ -116,6 +120,7 @@ export default async function Catalogue({ searchParams }: PageProps<"/catalogue"
           ))}
         </ul>
       )}
+      {actor && can(actor, "catalogue:add") && <AddItem />}
     </div>
   );
 }

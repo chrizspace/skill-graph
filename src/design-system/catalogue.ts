@@ -21,6 +21,19 @@ export const componentCatalogue: CatalogueEntry[] = [
   },
   {
     group: "App",
+    name: "Action form",
+    file: "src/components/app/action-form.tsx",
+    description: "A form that runs a server action and shows the problems to fix, keeping what was typed.",
+  },
+  {
+    group: "App",
+    name: "Confirm button",
+    file: "src/components/app/confirm-button.tsx",
+    description:
+      "A button for what can't be undone: a window says what will be lost, and only its confirm button acts.",
+  },
+  {
+    group: "App",
     name: "Filter links",
     file: "src/components/app/filter-links.tsx",
     description: "A filter as a row of links that keeps the other filters in the URL.",
@@ -210,6 +223,12 @@ export const componentCatalogue: CatalogueEntry[] = [
     name: "Tabs",
     file: "src/components/ui/tabs.tsx",
     description: "Switch between views of the same content.",
+  },
+  {
+    group: "UI",
+    name: "Textarea",
+    file: "src/components/ui/textarea.tsx",
+    description: "A multi-line text field.",
   },
   {
     group: "UI",
