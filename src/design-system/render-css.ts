@@ -1,18 +1,8 @@
-import {
-  modeNames,
-  motion,
-  opacity,
-  primitives,
-  radius,
-  semanticTokenNames,
-  themeNames,
-  themes,
-  type ThemeName,
-} from "./tokens";
+import { fonts, motion, opacity, primitives, radius, semanticTokenNames, themeNames, themes } from "./tokens";
 
 /**
- * Renders tokens.ts as CSS for Tailwind 4: primitives as theme colours, semantic tokens as CSS variables per
- * theme × mode, mapped to Tailwind utilities (bg-primary, text-critical…). `pnpm tokens` writes the result.
+ * Renders tokens.ts as CSS for Tailwind 4: primitives as theme colours, semantic tokens as CSS variables per theme,
+ * mapped to Tailwind utilities (bg-primary, text-critical…). `pnpm tokens` writes the result.
  */
 export function renderTokensCss() {
   const lines: string[] = [
@@ -26,9 +16,9 @@ export function renderTokensCss() {
     "",
     "@theme inline {",
     ...semanticTokenNames.map((name) => `  --color-${name}: var(--${name});`),
-    "  --font-sans: var(--font-geist-sans, ui-sans-serif, system-ui, sans-serif);",
-    "  --font-mono: var(--font-geist-mono, ui-monospace, monospace);",
-    "  --font-heading: var(--font-geist-sans, ui-sans-serif, system-ui, sans-serif);",
+    `  --font-sans: ${fonts.sans};`,
+    `  --font-heading: ${fonts.sans};`,
+    `  --font-mono: ${fonts.mono};`,
     ...[
       ["sm", 0.6],
       ["md", 0.8],
@@ -43,25 +33,20 @@ export function renderTokensCss() {
     "",
     ":root {",
     `  --radius: ${radius.base};`,
+    `  --radius-button: ${radius.button};`,
     ...Object.entries(motion).map(([name, value]) => `  --${name}: ${value};`),
     ...Object.entries(opacity).map(([name, value]) => `  --opacity-${name}: ${value};`),
     "}",
   ];
-  // Orange light is also the default before a theme is chosen; dark mode is the `dark` class on <html>
-  const selector = (theme: ThemeName, mode: (typeof modeNames)[number]) => {
-    const own = `:root${mode === "dark" ? ".dark" : ""}[data-theme="${theme}"]`;
-    return theme === "orange" ? `:root${mode === "dark" ? ".dark" : ""},\n${own}` : own;
-  };
-  for (const mode of modeNames) {
-    for (const theme of themeNames) {
-      lines.push(
-        "",
-        `${selector(theme, mode)} {`,
-        `  color-scheme: ${mode};`,
-        ...semanticTokenNames.map((name) => `  --${name}: ${themes[theme][mode][name]};`),
-        "}",
-      );
-    }
+  // Orange is the default, so it needs no `data-theme`; a later theme is selected with data-theme="<name>" on <html>
+  for (const theme of themeNames) {
+    lines.push(
+      "",
+      `${theme === "orange" ? ":root,\n" : ""}:root[data-theme="${theme}"] {`,
+      "  color-scheme: light;",
+      ...semanticTokenNames.map((name) => `  --${name}: ${themes[theme][name]};`),
+      "}",
+    );
   }
   return lines.join("\n") + "\n";
 }

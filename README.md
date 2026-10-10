@@ -20,7 +20,7 @@ The plan, data model and milestones are in [docs/PLAN.md](docs/PLAN.md).
 
 ## Design system
 
-Storybook with every primitive and component, in the Orange and Violet themes: https://chrizspace.github.io/skill-graph/ (published from `main`). Locally: `pnpm storybook`.
+Storybook with every primitive and component, in the Orange theme (light only; Violet comes later): https://chrizspace.github.io/skill-graph/ (published from `main`). Locally: `pnpm storybook`.
 
 ## Getting started
 

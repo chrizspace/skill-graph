@@ -3,7 +3,8 @@
 @import "shadcn/tailwind.css";
 @import "../design-system/tokens.css";
 
-/* dark mode is the `dark` class on <html>; the theme is its `data-theme` (see src/design-system/theme.ts) */
+/* There is no dark mode. The `dark:` classes inside the shadcn components must never match, so the variant needs a
+   selector nothing has (Tailwind's default would follow the operating system's setting). */
 @custom-variant dark (&:is(.dark *));
 
 @layer base {

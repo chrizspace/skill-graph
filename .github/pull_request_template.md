@@ -5,7 +5,7 @@
 ## How it was checked
 
 - [ ] `pnpm check` passes
-- [ ] UI checked in the browser at 1280 px and 375 px, light and dark (or: no UI change)
+- [ ] UI checked in the browser at 1280 px and 375 px (or: no UI change)
 - [ ] Tests added or updated for the new behaviour
 
 <!-- Screenshots for UI changes -->

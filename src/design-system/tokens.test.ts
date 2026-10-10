@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { contrastRatio } from "./contrast";
-import { contrastPairs, modeNames, semanticTokenNames, themeNames, themes } from "./tokens";
+import { contrastPairs, semanticTokenNames, themeNames, themes } from "./tokens";
 
 describe("contrastRatio", () => {
   it("matches the WCAG reference values", () => {
@@ -10,20 +10,25 @@ describe("contrastRatio", () => {
   });
 });
 
-describe.each(themeNames.flatMap((theme) => modeNames.map((mode) => [theme, mode] as const)))(
-  "%s / %s",
-  (theme, mode) => {
-    const tokens = themes[theme][mode];
+describe.each(themeNames)("%s theme", (theme) => {
+  const tokens = themes[theme];
 
-    it("defines every semantic token as a hex colour", () => {
-      for (const name of semanticTokenNames) expect(tokens[name], name).toMatch(/^#[0-9a-f]{6}$/);
-    });
+  it("defines every semantic token as a hex colour", () => {
+    for (const name of semanticTokenNames) expect(tokens[name], name).toMatch(/^#[0-9a-f]{6}$/);
+  });
 
-    it.each(contrastPairs)("%s on %s meets %d:1", (fg, bg, min) => {
-      expect(contrastRatio(tokens[fg], tokens[bg])).toBeGreaterThanOrEqual(min);
-    });
-  },
-);
+  it.each(contrastPairs)("%s on %s meets %d:1", (fg, bg, min) => {
+    expect(contrastRatio(tokens[fg], tokens[bg])).toBeGreaterThanOrEqual(min);
+  });
+});
+
+describe("Orange theme", () => {
+  it("is anchored on the brand orange, with near-black ink on it", () => {
+    expect(themes.orange.primary).toBe("#ff5800");
+    expect(themes.orange["primary-foreground"]).toBe("#1a1a1a");
+    expect(themes.orange.foreground).toBe("#333333");
+  });
+});
 
 describe("tokens.css", () => {
   it("is up to date with tokens.ts (run `pnpm tokens` after changing tokens)", async () => {

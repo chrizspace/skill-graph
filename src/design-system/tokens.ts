@@ -3,15 +3,17 @@
  * `pnpm tokens` writes src/design-system/tokens.css from this file; never edit the CSS by hand.
  *
  * Two layers:
- *   - primitives: raw scales (orange, violet, neutral, red, amber, green, blue). Don't use them in components.
- *   - semantic tokens: what components use (background, primary, critical…), defined per theme × mode.
- * Two themes, Orange and Violet, each in light and dark. Contrast pairs are checked in tokens.test.ts.
+ *   - primitives: raw scales (orange, neutral, red, amber, green, blue). Don't use them in components.
+ *   - semantic tokens: what components use (background, primary, critical…), defined per theme.
+ * One theme for now: Orange, light only (no dark mode). A second theme (Violet) comes later: add its scale to
+ * `primitives`, its name to `themeNames`, and its tokens to `themes` (use `buildTheme`). Contrast pairs for every theme
+ * are checked in tokens.test.ts.
  */
 
 export type Scale = Record<50 | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900 | 950, string>;
 
 export const primitives = {
-  // anchored at 500 on a vivid tangerine orange
+  // anchored at 500 on the brand orange #ff5800; the other steps are interpolated around it
   orange: {
     50: "#fff4ed",
     100: "#ffe6d5",
@@ -24,20 +26,6 @@ export const primitives = {
     800: "#8f2f05",
     900: "#742909",
     950: "#421103",
-  },
-  // anchored at 500 on an electric violet
-  violet: {
-    50: "#faf3ff",
-    100: "#f3e3ff",
-    200: "#e7c9ff",
-    300: "#d69eff",
-    400: "#c064ff",
-    500: "#a100ff",
-    600: "#8a00db",
-    700: "#7200b4",
-    800: "#5e0a92",
-    900: "#4d0b77",
-    950: "#2f004d",
   },
   neutral: {
     50: "#fafafa",
@@ -106,12 +94,10 @@ export const primitives = {
   },
 } as const satisfies Record<string, Scale>;
 
-export const themeNames = ["orange", "violet"] as const;
+export const themeNames = ["orange"] as const;
 export type ThemeName = (typeof themeNames)[number];
-export const modeNames = ["light", "dark"] as const;
-export type ModeName = (typeof modeNames)[number];
 
-/** Semantic tokens every theme × mode defines. Names follow shadcn/ui, plus our own (priority, status, node types). */
+/** Semantic tokens every theme defines. Names follow shadcn/ui, plus our own (priority, status, node types). */
 export const semanticTokenNames = [
   "background",
   "foreground",
@@ -170,8 +156,17 @@ export type SemanticTokens = Record<SemanticToken, string>;
 
 const n = primitives.neutral;
 const { red, amber, green, blue } = primitives;
+// text, surfaces and borders as on the reference site: near-black text, soft greys, thin light borders
+const ink = "#333333";
+// text on the brand orange: #333333 is only 4.0:1 there, #1a1a1a is 6.3:1
+const inkOnBrand = "#1a1a1a";
+const inkSecondary = "#555555";
+const surface = "#f2f2f2";
+const surfaceCool = "#f5f7fa";
+const line = "#d1d1d1";
 
-function light(
+/** One theme from a brand scale. Neutrals and status colours are shared by every theme. */
+function buildTheme(
   brand: Scale,
   onPrimary: string,
   primaryShade: 500 | 600,
@@ -180,22 +175,22 @@ function light(
   const primary = brand[primaryShade];
   return {
     background: "#ffffff",
-    foreground: n[950],
+    foreground: ink,
     card: "#ffffff",
-    "card-foreground": n[950],
+    "card-foreground": ink,
     popover: "#ffffff",
-    "popover-foreground": n[950],
+    "popover-foreground": ink,
     primary,
     "primary-foreground": onPrimary,
-    secondary: n[100],
-    "secondary-foreground": n[900],
-    muted: n[100],
-    "muted-foreground": n[600],
+    secondary: surface,
+    "secondary-foreground": ink,
+    muted: surface,
+    "muted-foreground": inkSecondary,
     accent: brand[50],
     "accent-foreground": brand[800],
     destructive: red[600],
     "destructive-foreground": "#ffffff",
-    border: n[200],
+    border: line,
     input: "#8a8a93",
     ring: brand[600],
     link: brand[linkShade],
@@ -220,90 +215,34 @@ function light(
     "chart-3": brand[700],
     "chart-4": n[400],
     "chart-5": n[700],
-    sidebar: n[50],
-    "sidebar-foreground": n[950],
+    sidebar: surfaceCool,
+    "sidebar-foreground": ink,
     "sidebar-primary": primary,
     "sidebar-primary-foreground": onPrimary,
     "sidebar-accent": brand[50],
     "sidebar-accent-foreground": brand[800],
-    "sidebar-border": n[200],
+    "sidebar-border": line,
     "sidebar-ring": brand[600],
   };
 }
 
-function dark(brand: Scale, onPrimary: string, primaryShade: 400 | 500): SemanticTokens {
-  const primary = brand[primaryShade];
-  return {
-    background: n[950],
-    foreground: n[50],
-    card: n[900],
-    "card-foreground": n[50],
-    popover: n[900],
-    "popover-foreground": n[50],
-    primary,
-    "primary-foreground": onPrimary,
-    secondary: n[800],
-    "secondary-foreground": n[50],
-    muted: n[800],
-    "muted-foreground": n[400],
-    accent: brand[950],
-    "accent-foreground": brand[200],
-    destructive: red[500],
-    "destructive-foreground": n[950],
-    border: n[800],
-    input: n[500],
-    ring: brand[400],
-    link: brand[300],
-    brand: brand[500],
-    "brand-subtle": brand[950],
-    critical: red[400],
-    "critical-subtle": red[950],
-    important: amber[400],
-    "important-subtle": amber[950],
-    nice: green[400],
-    "nice-subtle": green[950],
-    success: green[400],
-    warning: amber[400],
-    info: blue[400],
-    "node-role": brand[400],
-    "node-specialization": brand[700],
-    "node-technical": n[400],
-    "node-soft": n[500],
-    "node-certification": n[300],
-    "chart-1": brand[400],
-    "chart-2": brand[600],
-    "chart-3": brand[200],
-    "chart-4": n[500],
-    "chart-5": n[300],
-    sidebar: n[900],
-    "sidebar-foreground": n[50],
-    "sidebar-primary": primary,
-    "sidebar-primary-foreground": onPrimary,
-    "sidebar-accent": brand[950],
-    "sidebar-accent-foreground": brand[200],
-    "sidebar-border": n[800],
-    "sidebar-ring": brand[400],
-  };
-}
-
 /**
- * The vivid orange is too light for white text, so Orange buttons carry near-black text; violet takes white text.
- * Text-coloured brand (links) uses a darker shade in light mode and a lighter one in dark mode.
+ * The brand orange is too light for white text (3.2:1) and for the body ink #333333 (4.0:1), so Orange buttons carry
+ * the darker #1a1a1a (6.3:1). Text-coloured brand (links) uses a darker shade.
  */
-export const themes: Record<ThemeName, Record<ModeName, SemanticTokens>> = {
-  orange: {
-    light: light(primitives.orange, n[950], 500, 700),
-    dark: dark(primitives.orange, n[950], 500),
-  },
-  violet: {
-    light: light(primitives.violet, "#ffffff", 500, 600),
-    dark: dark(primitives.violet, n[950], 400),
-  },
+export const themes: Record<ThemeName, SemanticTokens> = {
+  orange: buildTheme(primitives.orange, inkOnBrand, 500, 700),
 };
 
-export const themeLabels: Record<ThemeName, string> = { orange: "Orange", violet: "Violet" };
+export const themeLabels: Record<ThemeName, string> = { orange: "Orange" };
 
-export const radius = { base: "0.625rem" } as const;
+/** The reference site's font stack; Segoe UI is used where installed, the system font elsewhere. */
+export const fonts = {
+  sans: '"Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, Tahoma, sans-serif',
+  mono: 'ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace',
+} as const;
+
+export const radius = { base: "0.625rem", button: "9999px" } as const;
 export const motion = {
   "duration-fast": "120ms",
   "duration-normal": "200ms",
@@ -313,7 +252,7 @@ export const motion = {
 /** How strongly a held-but-expired certification is faded. */
 export const opacity = { expired: "0.55" } as const;
 
-/** Pairs that must meet WCAG 2.2 AA in every theme and mode: [foreground, background, minimum ratio]. */
+/** Pairs that must meet WCAG 2.2 AA in every theme: [foreground, background, minimum ratio]. */
 export const contrastPairs: [SemanticToken, SemanticToken, number][] = [
   ["foreground", "background", 4.5],
   ["card-foreground", "card", 4.5],

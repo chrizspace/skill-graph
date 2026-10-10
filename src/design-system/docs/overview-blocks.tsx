@@ -4,6 +4,7 @@ import { componentCatalogue, docsId, type ComponentGroup } from "../catalogue";
 import { contrastRatio } from "../contrast";
 import {
   contrastPairs,
+  fonts,
   motion,
   primitives,
   semanticTokenNames,
@@ -41,9 +42,8 @@ export function ColorScales() {
   );
 }
 
-/** Every semantic token in all four theme × mode combinations, plus a live swatch of the current one. */
+/** Every semantic token per theme, plus a live swatch of the current one. */
 export function SemanticTokens() {
-  const combos = themeNames.flatMap((t) => (["light", "dark"] as const).map((m) => [t, m] as const));
   return (
     <div className="not-prose overflow-x-auto">
       <table className="w-full border-collapse text-xs">
@@ -51,9 +51,9 @@ export function SemanticTokens() {
           <tr className="text-left">
             <th className="border-b p-2">Token</th>
             <th className="border-b p-2">Current</th>
-            {combos.map(([t, m]) => (
-              <th key={`${t}-${m}`} className="border-b p-2">
-                {themeLabels[t]} {m}
+            {themeNames.map((t) => (
+              <th key={t} className="border-b p-2">
+                {themeLabels[t]}
               </th>
             ))}
           </tr>
@@ -68,14 +68,14 @@ export function SemanticTokens() {
                   style={{ background: `var(--${name})` }}
                 />
               </td>
-              {combos.map(([t, m]) => (
-                <td key={`${t}-${m}`} className="border-b p-2">
+              {themeNames.map((t) => (
+                <td key={t} className="border-b p-2">
                   <span className="flex items-center gap-1.5 font-mono">
                     <span
                       className="inline-block size-4 rounded border"
-                      style={{ background: themes[t][m][name] }}
+                      style={{ background: themes[t][name] }}
                     />
-                    {themes[t][m][name]}
+                    {themes[t][name]}
                   </span>
                 </td>
               ))}
@@ -89,7 +89,6 @@ export function SemanticTokens() {
 
 /** The contrast pairs checked in tokens.test.ts, with their ratios. */
 export function ContrastTable() {
-  const combos = themeNames.flatMap((t) => (["light", "dark"] as const).map((m) => [t, m] as const));
   return (
     <div className="not-prose overflow-x-auto">
       <table className="w-full border-collapse text-xs">
@@ -97,9 +96,9 @@ export function ContrastTable() {
           <tr className="text-left">
             <th className="border-b p-2">Pair</th>
             <th className="border-b p-2">Minimum</th>
-            {combos.map(([t, m]) => (
-              <th key={`${t}-${m}`} className="border-b p-2">
-                {themeLabels[t]} {m}
+            {themeNames.map((t) => (
+              <th key={t} className="border-b p-2">
+                {themeLabels[t]}
               </th>
             ))}
           </tr>
@@ -111,13 +110,13 @@ export function ContrastTable() {
                 {fg} on {bg}
               </td>
               <td className="border-b p-2">{min}:1</td>
-              {combos.map(([t, m]) => (
-                <td key={`${t}-${m}`} className="border-b p-2">
+              {themeNames.map((t) => (
+                <td key={t} className="border-b p-2">
                   <span
                     className="rounded px-1.5 py-0.5 font-medium"
-                    style={{ color: themes[t][m][fg], background: themes[t][m][bg] }}
+                    style={{ color: themes[t][fg], background: themes[t][bg] }}
                   >
-                    {contrastRatio(themes[t][m][fg], themes[t][m][bg]).toFixed(1)}:1
+                    {contrastRatio(themes[t][fg], themes[t][bg]).toFixed(1)}:1
                   </span>
                 </td>
               ))}
@@ -130,27 +129,30 @@ export function ContrastTable() {
 }
 
 const typeScale = [
-  ["text-4xl", "Heading 1"],
-  ["text-3xl", "Heading 2"],
-  ["text-2xl", "Heading 3"],
-  ["text-xl", "Heading 4"],
-  ["text-lg", "Lead"],
-  ["text-base", "Body"],
-  ["text-sm", "Small: most UI text"],
-  ["text-xs", "Extra small: badges, captions"],
+  ["text-5xl font-bold", "Heading 1: 48 px bold"],
+  ["text-4xl font-bold", "Heading 2: 36 px bold"],
+  ["text-2xl font-semibold", "Heading 3: 24 px semibold"],
+  ["text-xl font-semibold", "Heading 4: 20 px semibold"],
+  ["text-lg", "Lead: 18 px"],
+  ["text-base", "Body: 16 px"],
+  ["text-sm", "Small: 14 px, most UI text"],
+  ["text-xs", "Extra small: 12 px, badges and captions"],
 ] as const;
 
 export function Typography() {
   return (
     <div className="not-prose grid gap-2">
+      <p className="text-sm text-muted-foreground">
+        <code>{fonts.sans}</code>
+      </p>
       {typeScale.map(([cls, label]) => (
         <div key={cls} className="flex items-baseline gap-4">
-          <code className="w-24 shrink-0 text-xs text-muted-foreground">{cls}</code>
+          <code className="w-40 shrink-0 text-xs text-muted-foreground">{cls}</code>
           <span className={cls}>{label}</span>
         </div>
       ))}
       <div className="flex items-baseline gap-4">
-        <code className="w-24 shrink-0 text-xs text-muted-foreground">font-mono</code>
+        <code className="w-40 shrink-0 text-xs text-muted-foreground">font-mono</code>
         <span className="font-mono text-sm">AZ-104 · 2026-11-14</span>
       </div>
     </div>
@@ -189,7 +191,7 @@ export function Motion() {
   );
 }
 
-const groups: ComponentGroup[] = ["Theme", "Domain", "UI"];
+const groups: ComponentGroup[] = ["Domain", "UI"];
 
 /** Every component in the catalogue, with a link to its docs page. */
 export function ComponentIndex() {

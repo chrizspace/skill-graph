@@ -2,7 +2,7 @@
  * Every component in src/components, listed for the Storybook overview (Design system/Overview).
  * catalogue.test.ts fails if a component has no story or isn't listed here: add both when you add a component.
  */
-export type ComponentGroup = "Theme" | "Domain" | "UI";
+export type ComponentGroup = "Domain" | "UI";
 
 export interface CatalogueEntry {
   name: string;
@@ -13,12 +13,6 @@ export interface CatalogueEntry {
 }
 
 export const componentCatalogue: CatalogueEntry[] = [
-  {
-    group: "Theme",
-    name: "Theme switcher",
-    file: "src/components/theme/theme-switcher.tsx",
-    description: "Switches Orange / Violet and light / dark / system; remembered per browser.",
-  },
   {
     group: "Domain",
     name: "Priority badge",

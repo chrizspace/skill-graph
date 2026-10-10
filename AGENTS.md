@@ -24,14 +24,14 @@ An internal tool that shows roles (with specialisations) and what they require (
 
 ## Design system (UI work)
 
-- Themes are **Orange** and **Violet**, each light and dark. Never name a company or brand anywhere.
+- One theme for now: **Orange**, light only. There is **no dark mode**. A second theme, **Violet**, comes later (see the header of `src/design-system/tokens.ts` for how to add it). Never name a company or brand anywhere.
 - Use semantic tokens only (`bg-background`, `text-primary`, `text-critical`…), never raw colours or primitives. Tokens live in `src/design-system/tokens.ts`; run `pnpm tokens` after changing them (tests check contrast and drift).
 - **Every new or changed component gets its story** next to it (`*.stories.tsx`, title `Group/Name`) and an entry in `src/design-system/catalogue.ts`; a test fails otherwise. Storybook: `pnpm storybook`, published at https://chrizspace.github.io/skill-graph/.
 
 ## Definition of done (every PR)
 
 1. `pnpm check` passes (lint, types, unit tests, plus database tests, build and e2e when the change touches them).
-2. UI changes are checked in the browser at 1280 px and 375 px, in light and dark.
+2. UI changes are checked in the browser at 1280 px and 375 px.
 3. New behaviour has tests; Scenarios 1–3 from the plan stay green.
 4. `README.md` and `docs/PLAN.md` are updated if setup, commands or decisions changed. The PR that completes a milestone sets its Status to Done in the table in `docs/PLAN.md` §8.
 

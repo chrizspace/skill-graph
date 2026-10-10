@@ -1,5 +1,4 @@
 import { Meta } from "@storybook/addon-docs/blocks";
-import { ThemeSwitcher } from "../components/theme/theme-switcher";
 import {
   ColorScales,
   ComponentIndex,
@@ -14,11 +13,9 @@ import {
 
 # Skill Graph design system
 
-Two colour themes, **Orange** and **Violet**, each in light and dark. Every page and component uses the **semantic
-tokens** below (`bg-primary`, `text-critical`…), never the raw primitives, so switching the theme recolours
-everything. Tokens live in `src/design-system/tokens.ts`; `pnpm tokens` generates the CSS.
-
-<ThemeSwitcher className="my-4" />
+One theme for now: **Orange**, light only (there is no dark mode). A second theme, **Violet**, comes later. Every page
+and component uses the **semantic tokens** below (`bg-primary`, `text-critical`…), never the raw primitives, so adding
+a theme recolours everything. Tokens live in `src/design-system/tokens.ts`; `pnpm tokens` generates the CSS.
 
 ## Components
 
@@ -29,20 +26,21 @@ from this list (`src/design-system/catalogue.ts`).
 
 ## Colour primitives
 
-Raw scales. Orange and Violet are anchored at 500; neutral, red, amber, green and blue serve every theme.
+Raw scales. Orange is anchored at 500 on the brand orange `#ff5800`; neutral, red, amber, green and blue serve every
+theme. Body text is `#333333`, secondary text `#555555`, surfaces `#f2f2f2`, borders `#d1d1d1`.
 
 <ColorScales />
 
 ## Semantic tokens
 
-What components use, per theme and mode. "Current" follows the switcher above.
+What components use. "Current" is the live theme.
 
 <SemanticTokens />
 
 ## Contrast
 
-WCAG 2.2 AA: 4.5:1 for text, 3:1 for focus rings, field borders and graph nodes. `tokens.test.ts` checks every pair
-in every theme and mode.
+WCAG 2.2 AA: 4.5:1 for text, 3:1 for focus rings, field borders and graph nodes. The brand orange is too light for white
+text and for the body ink, so buttons on it carry a darker near-black (`#1a1a1a`). `tokens.test.ts` checks every pair in every theme.
 
 <ContrastTable />
 
@@ -54,11 +52,13 @@ counts as held.
 
 ## Typography
 
-Geist and Geist Mono.
+Segoe UI where it's installed, the system font elsewhere. Headings are bold: 48 px for Heading 1, 36 px for Heading 2.
 
 <Typography />
 
-## Radius and shadows
+## Shape
+
+Buttons are pills (fully rounded). Cards and fields use the base radius.
 
 <RadiusAndShadows />
 
