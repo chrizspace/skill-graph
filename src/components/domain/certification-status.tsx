@@ -5,7 +5,8 @@ import type { CertificationStatus as Status } from "@/domain/profile";
 const statuses: Record<Status, { label: string; Icon: typeof BadgeCheck; className: string }> = {
   valid: { label: "Valid", Icon: BadgeCheck, className: "text-success" },
   expiring: { label: "Expiring", Icon: CalendarClock, className: "text-warning" },
-  expired: { label: "Expired", Icon: History, className: "text-muted-foreground" },
+  // faded, so the text is the full-strength ink: grey text on top of the fade would drop below 4.5:1
+  expired: { label: "Expired", Icon: History, className: "text-foreground" },
 };
 
 const formatDay = (day: string) =>
@@ -50,7 +51,7 @@ export function CertificationStatus({
       <span className={cn("inline-flex items-center gap-1 text-xs", tone)}>
         <Icon aria-hidden className="size-3.5" />
         {label}
-        <span className="text-muted-foreground">· {when}</span>
+        <span className={status === "expired" ? "text-foreground" : "text-muted-foreground"}>· {when}</span>
       </span>
     </span>
   );

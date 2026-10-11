@@ -269,8 +269,11 @@ export const motion = {
   "duration-slow": "320ms",
   "ease-standard": "cubic-bezier(0.2, 0, 0, 1)",
 } as const;
-/** How strongly a held-but-expired certification is faded. */
-export const opacity = { expired: "0.55" } as const;
+/**
+ * How strongly a held-but-expired certification is faded: visibly, but the text must stay readable (4.5:1). At 0.75 the
+ * body ink is still about 5.7:1 on white; tokens.test.ts checks it.
+ */
+export const opacity = { expired: "0.75" } as const;
 
 /** Pairs that must meet WCAG 2.2 AA in every theme: [foreground, background, minimum ratio]. */
 export const contrastPairs: [SemanticToken, SemanticToken, number][] = [

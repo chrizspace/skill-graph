@@ -16,7 +16,8 @@ const buttonVariants = cva(
         ghost:
           "hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50",
         destructive:
-          "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
+          // red text on the pale red of the design system: a contrast of at least 4.5:1 (checked in tokens.test.ts)
+          "border-critical/30 bg-critical-subtle text-critical hover:bg-critical-subtle/70 focus-visible:border-critical focus-visible:ring-critical/20",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {

@@ -28,7 +28,7 @@ test("a signed-out visitor is sent to sign in and back", async ({ page }) => {
 test("signing out ends the session", async ({ page }) => {
   await signInAs(page, "Alex Rivera");
   await page.getByRole("button", { name: /Account menu/ }).click();
-  await page.getByRole("button", { name: "Sign out" }).click();
+  await page.getByRole("menuitem", { name: "Sign out" }).click();
   await expect(page).toHaveURL(/\/sign-in/);
   await page.goto("/me");
   await expect(page).toHaveURL(/\/sign-in/);
