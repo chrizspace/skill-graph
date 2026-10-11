@@ -2,6 +2,9 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Browser, type Page } from "@playwright/test";
 import { signInAs } from "./helpers";
 
+// each test scans many pages, and a CI runner is slower than a laptop: the default 30 s is not enough
+test.describe.configure({ timeout: 180_000 });
+
 // M13: every page, for the people who can see it, scanned with axe against WCAG 2.2 AA (docs/PLAN.md §6, §8). This spec is
 // read-only and named to run first. A page that only opens after some interaction (a dialog, a menu, search results,
 // the table view) is scanned in that state too.
