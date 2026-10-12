@@ -30,7 +30,7 @@ test("the navigation is reached in order, by Tab, and every stop shows where the
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   const stops: string[] = [];
-  for (let i = 0; i < 17; i++) {
+  for (let i = 0; i < 14; i++) {
     await page.keyboard.press("Tab");
     stops.push(await focusedName(page));
   }
@@ -38,9 +38,9 @@ test("the navigation is reached in order, by Tab, and every stop shows where the
     "Skip to content",
     "Skill Graph",
     expect.stringContaining("Account menu"),
-    "My Skills",
+    "My profile",
   ]);
-  expect(stops).toEqual(expect.arrayContaining(["Roles", "Catalogue", "Graph", "Manage Team"]));
+  expect(stops).toEqual(expect.arrayContaining(["Roles", "Catalogue", "Graph", "My team"]));
 });
 
 test("every interactive element on the main pages shows a visible focus", async ({ page }) => {
@@ -187,28 +187,4 @@ test("the graph can be driven by the keyboard alone and its table says the same"
   await page.getByRole("group", { name: /^Graph:/ }).focus();
   await page.keyboard.press("Escape");
   await expect(page).not.toHaveURL(/focus=/);
-});
-
-test("the menu groups open and close from the keyboard, and a closed group's links leave the tab order", async ({
-  page,
-}) => {
-  await signInAs(page, "Morgan Lee");
-  await page.goto("/roles");
-  const group = page.getByRole("button", { name: "Explore Skills" });
-  await expect(group).toHaveAttribute("aria-expanded", "true");
-  // only the group of the page being viewed is open
-  await expect(page.getByRole("button", { name: "My Skills" })).toHaveAttribute("aria-expanded", "false");
-  await expect(page.getByRole("button", { name: "Manage Team" })).toHaveAttribute("aria-expanded", "false");
-  await expect(async () => {
-    await group.focus();
-    await page.keyboard.press("Enter");
-    await expect(group).toHaveAttribute("aria-expanded", "false", { timeout: 1000 });
-  }).toPass();
-  await expect(page.getByRole("link", { name: "Catalogue", exact: true })).toBeHidden();
-  await page.keyboard.press("Enter");
-  await expect(group).toHaveAttribute("aria-expanded", "true");
-  await expect(page.getByRole("link", { name: "Catalogue", exact: true })).toBeVisible();
-  // Change requests sits with the other ways of exploring
-  const items = page.locator("#nav-explore-items");
-  await expect(items.getByRole("link", { name: "Change requests" })).toBeVisible();
 });

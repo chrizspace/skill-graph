@@ -529,12 +529,11 @@ Seed v2 (M2) holds:
 2. "My role" reads "I'm _role_ in _practice_ practice", with the role and the practice black and bold and the rest grey.
 3. A **Permissions** page for the Site Lead (`/site/permissions`, in the Site menu): the four user types (Employee, Career Advisor, Practice Lead, Site Lead) and a table of what each may do, with ticked boxes. Read-only on purpose: the table is built from `can()` for a typical person of each type (`src/domain/permissions.ts`), so it can't disagree with the app. Making permissions editable would need them in the database, an audit trail and a `can()` that reads them; that is a milestone of its own.
 4. The menu order is Me, Explore Skills (the old "Explore" group, renamed), Change requests, Team, Practice, Site: "Me" comes first and the change requests sit right under Explore Skills.
-5. The sidebar groups open and close (all start open; arriving on a page in a closed group opens it), with an icon each, and are renamed: My Skills, Explore Skills, Manage Team, Lead Practice, Organize Site. "Change requests" is an item of Explore Skills, not a group of its own.
+5. The sidebar groups have an icon each and are renamed: My Skills, Explore Skills, Manage Team, Lead Practice, Organize Site. "Change requests" is an item of Explore Skills, not a group of its own. The groups do not collapse: a title with its links under it (an accordion and a collapsible sidebar were tried and dropped).
 6. Permissions page: the "Own profile" group comes first.
 7. `/site/people` can filter to the career advisors (people with direct reports) and the Practice Leads.
 8. "Manager" is renamed **Career Advisor** everywhere a person reads it (menus, pages, the Permissions table, audit lines, docs). The code keeps `manager` (`isManager`, `manager_id`, `reportCount`), so nothing in the database changes; old audit lines keep the old wording.
 9. My profile: certifications are a third group under My skills, next to the technical and soft skills, with its own icon.
-10. In the sidebar one group is open at a time: the current page's at first, and opening another closes the rest.
 
 **M13-b: going live (needs the owner's Microsoft tenant and Vercel settings; Claude cannot do these).** Done when the last box is ticked.
 
