@@ -37,6 +37,8 @@ test("one expiring within 90 days is flagged", async ({ page }) => {
 test("a date can't be before it was obtained, and what was typed stays", async ({ page }) => {
   await signInAs(page, "Noah Fischer");
   await page.goto("/me");
+  // with no certification yet, the group starts closed like the others
+  await page.locator("summary").filter({ hasText: "Certification" }).click();
   const form = page.locator("form").filter({ has: page.getByRole("button", { name: "Add certification" }) });
   await form.getByLabel("Certification").selectOption({ label: "Azure Fundamentals (AZ-900)" });
   await form.getByLabel("Obtained on").fill("2025-06-01");

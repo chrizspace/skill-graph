@@ -65,3 +65,13 @@ test('the profile reads "I\'m <role> in <practice> practice" and keeps Appearanc
   const headings = await page.locator("main h2").allTextContents();
   expect(headings.at(-1)).toBe("Appearance");
 });
+
+test("certifications are a group under My skills, like the technical and soft skills", async ({ page }) => {
+  await signInAs(page, "Ella Jensen");
+  await page.goto("/me");
+  const skills = page.getByRole("region", { name: "My skills" });
+  const groups = skills.locator(":scope > details > summary, :scope > form > details > summary");
+  await expect(groups).toHaveText([/Technical skill/, /Soft skill/, /Certification/]);
+  await expect(skills.locator('[data-type="certification"]')).toBeVisible();
+  await expect(page.getByRole("heading", { name: "My certifications" })).toHaveCount(0);
+});

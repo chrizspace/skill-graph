@@ -94,7 +94,9 @@ test("Scenario 6: a manager recommends a target, the report accepts it, and it b
 
   // Leo sees it on his home and in his plan, and accepts it
   const leo = await as(browser, "Leo Martins", "/");
-  await expect(leo.page.getByRole("link", { name: /1 new recommendation from your manager/ })).toBeVisible();
+  await expect(
+    leo.page.getByRole("link", { name: /1 new recommendation from your career advisor/ }),
+  ).toBeVisible();
   await leo.page.goto("/me/plan");
   await expect(leo.page.getByText("Morgan Lee suggests a target")).toBeVisible();
   await leo.page.getByRole("button", { name: "Accept as my target" }).click();

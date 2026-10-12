@@ -56,7 +56,7 @@ export default async function PracticePage({ params }: PageProps<"/practices/[sl
         <p className="text-sm text-muted-foreground">
           {waiting.length === 0
             ? "Nothing is waiting for a decision."
-            : `${waiting.length} from managers waiting for a decision.`}{" "}
+            : `${waiting.length} from career advisors waiting for a decision.`}{" "}
           <Link href="/requests" className="underline underline-offset-4">
             Open the inbox
           </Link>
@@ -75,7 +75,7 @@ export default async function PracticePage({ params }: PageProps<"/practices/[sl
               </Button>
             </div>
             <p className="text-sm text-muted-foreground">
-              The people whose home practice this is. You, their manager and they themselves see these
+              The people whose home practice this is. You, their career advisor and they themselves see these
               profiles; nobody else does.
             </p>
             <PeopleList
@@ -151,7 +151,7 @@ export default async function PracticePage({ params }: PageProps<"/practices/[sl
         </>
       ) : (
         <p role="note" className="rounded-lg border p-3 text-sm">
-          Named profiles are visible only to the person, their manager and the Practice Leads of their
+          Named profiles are visible only to the person, their career advisor and the Practice Leads of their
           practice. As Site Lead you see aggregates only.
         </p>
       )}

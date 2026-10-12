@@ -32,7 +32,7 @@ async function SignIn({ searchParams }: Pick<PageProps<"/sign-in">, "searchParam
           const types = [
             ...(actor.siteLead ? ["Site Lead"] : []),
             ...(isPracticeLead(actor) ? ["Practice Lead"] : []),
-            ...(isManager(actor) ? ["Manager"] : []),
+            ...(isManager(actor) ? ["Career Advisor"] : []),
           ];
           return { ...p, types: types.length ? types.join(", ") : "Employee" };
         }),

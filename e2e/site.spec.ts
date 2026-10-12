@@ -283,17 +283,32 @@ test("Permissions: the Site Lead sees the four user types and what each may do, 
   await page.getByRole("link", { name: "Permissions" }).first().click();
   await expect(page.getByRole("heading", { level: 1, name: "Permissions" })).toBeVisible();
   const types = page.getByRole("region", { name: "User types" }).getByRole("listitem");
-  await expect(types).toHaveText([/Employee/, /Manager/, /Practice Lead/, /Site Lead/]);
+  await expect(types).toHaveText([/Employee/, /Career Advisor/, /Practice Lead/, /Site Lead/]);
   const table = page.getByRole("table", { name: "What each type of user may do" });
   await expect(table.getByRole("columnheader")).toHaveText([
     "Can…",
     "Employee",
-    "Manager",
+    "Career Advisor",
     "Practice Lead",
     "Site Lead",
   ]);
   const row = table.getByRole("row", { name: /Read the audit log/ });
   await expect(row.getByRole("img", { name: "Site Lead: allowed" })).toBeVisible();
-  await expect(row.getByRole("img", { name: "Manager: not allowed" })).toBeVisible();
+  await expect(row.getByRole("img", { name: "Career Advisor: not allowed" })).toBeVisible();
   await expect(table.getByRole("checkbox")).toHaveCount(0);
+});
+
+test("People: the Site Lead can list the career advisors and the Practice Leads", async ({ page }) => {
+  await signInAs(page, "Jordan Kim");
+  await page.goto("/site/people");
+  await page.getByRole("link", { name: /^Career advisors/ }).click();
+  await expect(page).toHaveURL(/show=managers$/);
+  // every row's "Reports to" list names everybody, so a person is found by their own Save button
+  const has = (name: string) => page.getByRole("button", { name: `Save ${name}` });
+  await expect(has("Morgan Lee")).toHaveCount(1);
+  await expect(has("Alex Rivera")).toHaveCount(0);
+  await page.getByRole("link", { name: /^Practice Leads/ }).click();
+  await expect(page).toHaveURL(/show=practice-leads$/);
+  await expect(has("Taylor Brooks")).toHaveCount(1);
+  await expect(has("Morgan Lee")).toHaveCount(0);
 });

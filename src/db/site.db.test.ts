@@ -194,7 +194,7 @@ describe("people and reporting lines", () => {
     await setPersonPractice(t.db, jordan, { userId: "new", practiceId: frontend });
     await setPersonManager(t.db, jordan, { userId: "new", managerId: "seed-morgan" });
     expect((await lastAudit()).after).toMatchObject({
-      summary: "made Morgan Lee the manager of Nina Newcomer",
+      summary: "made Morgan Lee the career advisor of Nina Newcomer",
     });
     const nina = (await ctx("new")).actor;
     expect(nina.practiceId).toBe(frontend);

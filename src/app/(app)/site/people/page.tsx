@@ -21,13 +21,19 @@ export default async function SitePeople({ searchParams }: PageProps<"/site/peop
   const sp = await searchParams;
   const filter = param(sp.show);
   const [practices, people] = await Promise.all([getPractices(), listPeople(getDb())]);
-  const shown = people.filter((p) =>
-    filter === "no-practice" ? !p.practiceId : filter === "no-manager" ? !p.managerId : true,
-  );
+  const matches: Record<string, (p: (typeof people)[number]) => boolean> = {
+    "no-practice": (p) => !p.practiceId,
+    "no-manager": (p) => !p.managerId,
+    managers: (p) => p.reports > 0,
+    "practice-leads": (p) => p.leads.length > 0,
+  };
+  const shown = people.filter((p) => (filter && matches[filter] ? matches[filter](p) : true));
   const counts = {
     all: people.length,
     "no-practice": people.filter((p) => !p.practiceId).length,
-    "no-manager": people.filter((p) => !p.managerId).length,
+    "no-manager": people.filter(matches["no-manager"]).length,
+    managers: people.filter(matches.managers).length,
+    "practice-leads": people.filter(matches["practice-leads"]).length,
   };
   const siteLeads = people.filter((p) => p.siteLead);
 
@@ -37,7 +43,7 @@ export default async function SitePeople({ searchParams }: PageProps<"/site/peop
         <h1 className="text-3xl font-bold tracking-tight">People</h1>
         <p className="mt-1 text-muted-foreground">
           Home practice and reporting lines. Wrong lines mean wrong visibility, so people without a practice
-          or a manager are easy to find. You see the organisation here, never anyone&apos;s skills.
+          or a career advisor are easy to find. You see the organisation here, never anyone&apos;s skills.
         </p>
       </header>
 
@@ -103,10 +109,22 @@ export default async function SitePeople({ searchParams }: PageProps<"/site/peop
               count: counts["no-practice"],
             },
             {
-              label: "Without a manager",
+              label: "Without a career advisor",
               href: hrefWith("/site/people", {}, { show: "no-manager" }),
               active: filter === "no-manager",
               count: counts["no-manager"],
+            },
+            {
+              label: "Career advisors",
+              href: hrefWith("/site/people", {}, { show: "managers" }),
+              active: filter === "managers",
+              count: counts.managers,
+            },
+            {
+              label: "Practice Leads",
+              href: hrefWith("/site/people", {}, { show: "practice-leads" }),
+              active: filter === "practice-leads",
+              count: counts["practice-leads"],
             },
           ]}
         />

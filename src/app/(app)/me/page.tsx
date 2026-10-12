@@ -87,7 +87,7 @@ export default async function Me() {
         <p className="text-sm text-muted-foreground">
           Tick what you have. A skill is something you have or don&apos;t: there are no levels.
         </p>
-        <form action={saveSkills} className="flex flex-col gap-4">
+        <form id="skills-form" action={saveSkills} className="flex flex-col gap-4">
           {catalogueTypes
             .filter((t): t is Exclude<CatalogueType, "certification"> => t !== "certification")
             .map((type) => (
@@ -117,51 +117,59 @@ export default async function Me() {
                 </ul>
               </details>
             ))}
-          <Button type="submit" className="w-fit">
-            Save skills
-          </Button>
         </form>
-      </section>
 
-      <section aria-labelledby="certs" className="flex flex-col gap-3">
-        <h2 id="certs" className="text-xl font-semibold">
-          My certifications
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          An expired certification still counts as held. It is shown faded so you remember you earned it.
-        </p>
-        {certifications.length === 0 && <p className="text-sm text-muted-foreground">None yet.</p>}
-        <ul className="divide-y">
-          {certifications.map(({ held: h, node, status }) => (
-            <li key={node.id} className="flex flex-col gap-2 py-3">
-              <CertificationStatus name={node.name} status={status} expiresOn={h.expiresOn} />
-              <details>
-                <summary className="w-fit cursor-pointer text-sm underline underline-offset-4">
-                  Change dates or remove
-                </summary>
-                <div className="mt-3 flex flex-col gap-3">
-                  <CertificationForm
-                    action={saveCertificationAction}
-                    fixed={{ id: node.id, name: node.name }}
-                    defaults={{ obtainedOn: h.obtainedOn, expiresOn: h.expiresOn }}
-                  />
-                  <form action={removeCertification}>
-                    <input type="hidden" name="nodeId" value={node.id} />
-                    <Button type="submit" variant="outline" size="sm">
-                      Remove {node.name}
-                    </Button>
-                  </form>
-                </div>
-              </details>
-            </li>
-          ))}
-        </ul>
-        {addable.length > 0 && (
-          <div className="flex flex-col gap-2 rounded-lg border p-4">
-            <h3 className="text-sm font-semibold">Add a certification</h3>
-            <CertificationForm action={saveCertificationAction} options={addable} />
+        {/* certifications have dates, so they are saved one by one, outside the skills form */}
+        <details open={certifications.length > 0} className="rounded-lg border p-3">
+          <summary className="cursor-pointer text-sm font-semibold">
+            <ItemTypeBadge type="certification" className="inline-flex" />{" "}
+            <span className="font-normal text-muted-foreground">
+              ({certifications.length} of {certifications.length + addable.length})
+            </span>
+          </summary>
+          <div className="mt-3 flex flex-col gap-3">
+            <p className="text-sm text-muted-foreground">
+              An expired certification still counts as held. It is shown faded so you remember you earned it.
+              Each one is saved on its own.
+            </p>
+            {certifications.length === 0 && <p className="text-sm text-muted-foreground">None yet.</p>}
+            <ul className="divide-y">
+              {certifications.map(({ held: h, node, status }) => (
+                <li key={node.id} className="flex flex-col gap-2 py-3">
+                  <CertificationStatus name={node.name} status={status} expiresOn={h.expiresOn} />
+                  <details>
+                    <summary className="w-fit cursor-pointer text-sm underline underline-offset-4">
+                      Change dates or remove
+                    </summary>
+                    <div className="mt-3 flex flex-col gap-3">
+                      <CertificationForm
+                        action={saveCertificationAction}
+                        fixed={{ id: node.id, name: node.name }}
+                        defaults={{ obtainedOn: h.obtainedOn, expiresOn: h.expiresOn }}
+                      />
+                      <form action={removeCertification}>
+                        <input type="hidden" name="nodeId" value={node.id} />
+                        <Button type="submit" variant="outline" size="sm">
+                          Remove {node.name}
+                        </Button>
+                      </form>
+                    </div>
+                  </details>
+                </li>
+              ))}
+            </ul>
+            {addable.length > 0 && (
+              <div className="flex flex-col gap-2 rounded-lg border p-4">
+                <h3 className="text-sm font-semibold">Add a certification</h3>
+                <CertificationForm action={saveCertificationAction} options={addable} />
+              </div>
+            )}
           </div>
-        )}
+        </details>
+
+        <Button type="submit" form="skills-form" className="w-fit">
+          Save skills
+        </Button>
       </section>
 
       <section aria-labelledby="appearance" className="flex flex-col gap-2">
