@@ -38,7 +38,7 @@ test("the navigation is reached in order, by Tab, and every stop shows where the
     "Skip to content",
     "Skill Graph",
     expect.stringContaining("Account menu"),
-    "My Skills",
+    "Collapse sidebar",
   ]);
   expect(stops).toEqual(expect.arrayContaining(["Roles", "Catalogue", "Graph", "Manage Team"]));
 });
@@ -211,4 +211,19 @@ test("the menu groups open and close from the keyboard, and a closed group's lin
   // Change requests sits with the other ways of exploring
   const items = page.locator("#nav-explore-items");
   await expect(items.getByRole("link", { name: "Change requests" })).toBeVisible();
+});
+
+test("the whole sidebar folds away and comes back", async ({ page }) => {
+  await signInAs(page, "Morgan Lee");
+  await page.goto("/roles");
+  const nav = page.getByRole("navigation", { name: "Main" });
+  await expect(nav).toBeVisible();
+  await expect(async () => {
+    await page.getByRole("button", { name: "Collapse sidebar" }).click();
+    await expect(nav).toBeHidden({ timeout: 1000 });
+  }).toPass();
+  await page.getByRole("button", { name: "Expand sidebar" }).click();
+  await expect(nav).toBeVisible();
+  // the group that was open is still open
+  await expect(page.getByRole("button", { name: "Explore Skills" })).toHaveAttribute("aria-expanded", "true");
 });
