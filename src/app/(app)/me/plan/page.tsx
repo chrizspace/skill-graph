@@ -30,7 +30,7 @@ export default async function Plan() {
       {open.length > 0 && (
         <section aria-labelledby="recs" className="flex flex-col gap-3">
           <h2 id="recs" className="text-xl font-semibold">
-            Recommendations from your manager
+            Recommendations from your career advisor
           </h2>
           <ul className="flex flex-col gap-3">
             {open.map((r) => {
@@ -49,7 +49,7 @@ export default async function Plan() {
                   <Card>
                     <CardHeader>
                       <CardTitle className="text-base">
-                        {r.author ?? "Your manager"} suggests {isTarget ? "a target:" : "working on"}{" "}
+                        {r.author ?? "Your career advisor"} suggests {isTarget ? "a target:" : "working on"}{" "}
                         <Link
                           href={
                             isTarget

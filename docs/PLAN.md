@@ -7,7 +7,7 @@ Living document: update it when a decision changes. Milestone status is tracked 
 An internal platform that shows an organisation's competencies as a graph of **roles → technical skills, soft skills and certifications**:
 
 - Employees keep a profile and plan their development towards a target role.
-- Managers follow their team, suggest development steps and send feedback on roles and paths.
+- Career Advisors follow their team, suggest development steps and send feedback on roles and paths.
 - Practice Leads own the roles and development paths of their practice.
 - A Site Lead oversees the practices of the site.
 
@@ -18,8 +18,8 @@ Decisions made at the start: hosting on **Vercel**, **Neon Postgres + Drizzle**,
 - One **site** per installation, led by a **Site Lead**. The Site Lead replaces the "admin" and oversees several practices. The database is ready for more sites later.
 - **Practices** are focused departments, e.g. Frontend Practice or Delivery Management. Each has one or more **Practice Leads** who control it: its roles, specialisations, requirements and development paths.
 - A role has a **core** set of requirements and optional **specialisations** that add their own, e.g. Frontend Developer: React / Angular, or Scrum Master: SAFe / Management 3.0. Each role page also suggests **similar roles** with an overlapping skillset, e.g. Scrum Master ↔ Project Manager.
-- **Managers** work within a practice. They see their direct reports' profiles, **recommend** development steps to them, and send the Practice Lead **change requests**: feedback on roles and paths, and proposals for new roles or specialisations.
-- **Who sees named profiles**: the person, their manager, and the Practice Leads of the person's practice. The Site Lead sees aggregates only.
+- **Career Advisors** (called "managers" in the code and the data: `manager_id`, `isManager`) work within a practice. They see their direct reports' profiles, **recommend** development steps to them, and send the Practice Lead **change requests**: feedback on roles and paths, and proposals for new roles or specialisations.
+- **Who sees named profiles**: the person, their Career Advisor, and the Practice Leads of the person's practice. The Site Lead sees aggregates only.
 - **Catalogue**: three item types: **technical skills** (including tools and platforms), **soft skills** and **certifications**.
 - **Weights only**: a role requires an item as Critical, Important or Nice to have. There are **no proficiency levels**: a person has a skill or doesn't.
 - **Profiles**: explicit and self-declared. Certifications carry the date obtained and the expiry date. An expired certification isn't a gap: it's shown faded and marked as expired, so it's visible that the person once earned it. Nobody confirms profiles in the MVP.
@@ -127,7 +127,7 @@ Another example: in Delivery Management, a manager has a Business Analyst, a Pro
 
 - **User type** is derived from data, not a single setting, so one person can be several at once:
   - everyone is an **Employee**
-  - you're a **Manager** if someone reports to you
+  - you're a **Career Advisor** if someone reports to you
   - you're a **Practice Lead** if you're assigned to a practice
   - you're a **Site Lead** if you're assigned to the site
 
@@ -148,7 +148,7 @@ Another example: in Delivery Management, a manager has a Business Analyst, a Pro
 - Sees the official paths from their role and the suggested ones.
 - Sees only their own profile.
 
-**Manager** (anyone with direct reports; works within a practice)
+**Career Advisor** (anyone with direct reports; works within a practice)
 
 - Everything an employee can do.
 - **Team view**: each direct report with their role, target, readiness and top gaps. Plus aggregated gaps, e.g. "3 of 5 people lack Critical SQL for their role".
@@ -186,7 +186,7 @@ Another example: in Delivery Management, a manager has a Business Analyst, a Pro
 
 ### Permissions
 
-| Capability                                                       | Employee | Manager        | Practice Lead           | Site Lead                  |
+| Capability                                                       | Employee | Career Advisor | Practice Lead           | Site Lead                  |
 | ---------------------------------------------------------------- | -------- | -------------- | ----------------------- | -------------------------- |
 | Own profile, plan, compare, browse roles & graph                 | ✓        | ✓              | ✓                       | ✓                          |
 | Named profiles                                                   | own      | direct reports | members of own practice | – (aggregates only)        |
@@ -527,8 +527,14 @@ Seed v2 (M2) holds:
 
 1. "My profile": the Appearance section goes to the bottom.
 2. "My role" reads "I'm _role_ in _practice_ practice", with the role and the practice black and bold and the rest grey.
-3. A **Permissions** page for the Site Lead (`/site/permissions`, in the Site menu): the four user types (Employee, Manager, Practice Lead, Site Lead) and a table of what each may do, with ticked boxes. Read-only on purpose: the table is built from `can()` for a typical person of each type (`src/domain/permissions.ts`), so it can't disagree with the app. Making permissions editable would need them in the database, an audit trail and a `can()` that reads them; that is a milestone of its own.
+3. A **Permissions** page for the Site Lead (`/site/permissions`, in the Site menu): the four user types (Employee, Career Advisor, Practice Lead, Site Lead) and a table of what each may do, with ticked boxes. Read-only on purpose: the table is built from `can()` for a typical person of each type (`src/domain/permissions.ts`), so it can't disagree with the app. Making permissions editable would need them in the database, an audit trail and a `can()` that reads them; that is a milestone of its own.
 4. The menu order is Me, Explore Skills (the old "Explore" group, renamed), Change requests, Team, Practice, Site: "Me" comes first and the change requests sit right under Explore Skills.
+5. The sidebar groups open and close (all start open; arriving on a page in a closed group opens it), with an icon each, and are renamed: My Skills, Explore Skills, Manage Team, Lead Practice, Organize Site. "Change requests" is an item of Explore Skills, not a group of its own.
+6. Permissions page: the "Own profile" group comes first.
+7. `/site/people` can filter to the career advisors (people with direct reports) and the Practice Leads.
+8. "Manager" is renamed **Career Advisor** everywhere a person reads it (menus, pages, the Permissions table, audit lines, docs). The code keeps `manager` (`isManager`, `manager_id`, `reportCount`), so nothing in the database changes; old audit lines keep the old wording.
+9. My profile: certifications are a third group under My skills, next to the technical and soft skills, with its own icon.
+10. In the sidebar one group is open at a time: the current page's at first, and opening another closes the rest.
 
 **M13-b: going live (needs the owner's Microsoft tenant and Vercel settings; Claude cannot do these).** Done when the last box is ticked.
 

@@ -303,7 +303,9 @@ export async function setPersonManager(
       action: "update",
       entity: "profile",
       entityId: input.userId,
-      summary: managerName ? `made ${managerName} the manager of ${who}` : `took ${who}'s manager away`,
+      summary: managerName
+        ? `made ${managerName} the career advisor of ${who}`
+        : `took ${who}'s career advisor away`,
       after: { person: who, manager: managerName },
     });
   });

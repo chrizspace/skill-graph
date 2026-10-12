@@ -6,7 +6,7 @@ export type UserType = (typeof userTypes)[number];
 
 export const userTypeLabel: Record<UserType, string> = {
   employee: "Employee",
-  manager: "Manager",
+  manager: "Career Advisor",
   practice_lead: "Practice Lead",
   site_lead: "Site Lead",
 };
@@ -14,8 +14,9 @@ export const userTypeLabel: Record<UserType, string> = {
 export const userTypeSummary: Record<UserType, string> = {
   employee: "Everyone who signs in.",
   manager:
-    "Has at least one direct report. The Site Lead makes someone a manager by giving them a direct report.",
-  practice_lead: "Appointed to lead a practice by the Site Lead. A Practice Lead can also be a manager.",
+    "Has at least one direct report. The Site Lead makes someone a Career Advisor by giving them a direct report.",
+  practice_lead:
+    "Appointed to lead a practice by the Site Lead. A Practice Lead can also be a Career Advisor.",
   site_lead: "Oversees all practices and appoints Practice Leads.",
 };
 
@@ -72,15 +73,6 @@ const site: Scope = { kind: "site" };
 export function permissionMatrix(): PermissionGroup[] {
   return [
     {
-      label: "Explore",
-      rows: [
-        {
-          label: "Browse roles, the catalogue and the graph, and compare roles",
-          allowed: everyone(),
-        },
-      ],
-    },
-    {
       label: "Own profile",
       rows: [
         {
@@ -90,6 +82,15 @@ export function permissionMatrix(): PermissionGroup[] {
         {
           label: "Answer recommendations made to me",
           allowed: ask((a) => can(a, "recommendation:answer", { personId: a.userId })),
+        },
+      ],
+    },
+    {
+      label: "Explore",
+      rows: [
+        {
+          label: "Browse roles, the catalogue and the graph, and compare roles",
+          allowed: everyone(),
         },
       ],
     },
@@ -172,8 +173,8 @@ export function permissionMatrix(): PermissionGroup[] {
           allowed: ask((a) => can(a, "catalogue:manage")),
         },
         {
-          label: "Manage practices, appoint Practice Leads and make employees managers",
-          note: "A person becomes a manager when the Site Lead gives them a direct report (reporting lines).",
+          label: "Manage practices, appoint Practice Leads and make employees Career Advisors",
+          note: "A person becomes a Career Advisor when the Site Lead gives them a direct report (reporting lines).",
           allowed: ask((a) => can(a, "site:manage")),
         },
         {

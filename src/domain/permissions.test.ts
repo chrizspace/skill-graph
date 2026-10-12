@@ -13,6 +13,9 @@ describe("the permission matrix", () => {
   it("lists the four user types in order", () => {
     expect(userTypes).toEqual(["employee", "manager", "practice_lead", "site_lead"]);
   });
+  it("starts with the own profile", () => {
+    expect(permissionMatrix()[0].label).toBe("Own profile");
+  });
   it("gives every row an answer for every type", () => {
     for (const r of rows) expect(Object.keys(r.allowed).sort()).toEqual([...userTypes].sort());
   });

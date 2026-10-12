@@ -3,7 +3,7 @@
 An interactive graph of **roles, skills, certifications and technologies**:
 
 - **employees** keep a profile, see how they meet their role, compare roles with their own skills and plan their development
-- **managers** follow their direct reports, recommend next steps and send feedback on roles to the practice
+- **career advisors** follow their direct reports, recommend next steps and send feedback on roles to the practice
 - **Practice Leads** keep their practice's roles, requirements and paths up to date and review change requests
 - **the Site Lead** oversees the practices with numbers only, never named profiles
 

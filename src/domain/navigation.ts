@@ -5,6 +5,7 @@ export interface NavItem {
   href: string;
 }
 export interface NavGroup {
+  id: "me" | "explore" | "team" | "practice" | "site";
   label: string;
   items: NavItem[];
 }
@@ -13,13 +14,15 @@ export interface NavGroup {
 export function navigationFor(actor: Actor): NavGroup[] {
   const groups: NavGroup[] = [
     {
-      label: "Me",
+      id: "me",
+      label: "My Skills",
       items: [
         { label: "My profile", href: "/me" },
         { label: "My development plan", href: "/me/plan" },
       ],
     },
     {
+      id: "explore",
       label: "Explore Skills",
       items: [
         { label: "Home", href: "/" },
@@ -30,13 +33,14 @@ export function navigationFor(actor: Actor): NavGroup[] {
       ],
     },
   ];
-  // managers and Practice Leads send and review; the Site Lead can step in (docs/PLAN.md §1 permissions)
+  // Career Advisors and Practice Leads send and review change requests; the Site Lead can step in (docs/PLAN.md §1)
   if (can(actor, "changeRequest:create", { practiceId: "" }) || actor.siteLead) {
-    groups.push({ label: "Requests", items: [{ label: "Change requests", href: "/requests" }] });
+    groups[1].items.push({ label: "Change requests", href: "/requests" });
   }
   if (isManager(actor)) {
     groups.push({
-      label: "Team",
+      id: "team",
+      label: "Manage Team",
       items: [
         { label: "My team", href: "/team" },
         { label: "Succession", href: "/team/succession" },
@@ -45,13 +49,15 @@ export function navigationFor(actor: Actor): NavGroup[] {
   }
   if (isPracticeLead(actor)) {
     groups.push({
-      label: "Practice",
+      id: "practice",
+      label: "Lead Practice",
       items: actor.leadOf.map((p) => ({ label: p.name, href: `/practices/${p.slug}` })),
     });
   }
   if (can(actor, "site:manage")) {
     groups.push({
-      label: "Site",
+      id: "site",
+      label: "Organize Site",
       items: [
         { label: "Overview", href: "/site" },
         { label: "Practices", href: "/site/practices" },

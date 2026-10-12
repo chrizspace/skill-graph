@@ -112,7 +112,7 @@ export default async function Site() {
         <p className="mt-1 text-muted-foreground">
           {overview.people} people with a profile. Only numbers are shown here: groups of fewer than{" "}
           {thresholds.minGroupSize} people are hidden and nobody is named. Named profiles are for the person,
-          their manager and their practice&apos;s leads.
+          their career advisor and their practice&apos;s leads.
         </p>
       </header>
 

@@ -14,11 +14,13 @@ const base: Actor = {
 const labels = (actor: Actor) => navigationFor(actor).map((g) => g.label);
 
 describe("navigation per user type", () => {
-  it("gives everyone Explore and Me", () => {
-    expect(labels(base)).toEqual(["Me", "Explore Skills"]);
+  it("gives everyone My Skills and Explore Skills", () => {
+    expect(labels(base)).toEqual(["My Skills", "Explore Skills"]);
   });
-  it("adds Team and Requests for a manager", () => {
-    expect(labels({ ...base, reportCount: 3 })).toEqual(["Me", "Explore Skills", "Requests", "Team"]);
+  it("adds Manage Team, and Change requests under Explore Skills, for a manager", () => {
+    const groups = navigationFor({ ...base, reportCount: 3 });
+    expect(groups.map((g) => g.label)).toEqual(["My Skills", "Explore Skills", "Manage Team"]);
+    expect(groups[1].items.at(-1)).toEqual({ label: "Change requests", href: "/requests" });
   });
   it("adds a link per led practice for a Practice Lead", () => {
     const groups = navigationFor({
@@ -28,15 +30,24 @@ describe("navigation per user type", () => {
         { id: "2", slug: "data-ai", name: "Data & AI" },
       ],
     });
-    expect(groups.map((g) => g.label)).toEqual(["Me", "Explore Skills", "Requests", "Practice"]);
-    expect(groups[3].items.map((i) => i.href)).toEqual(["/practices/frontend", "/practices/data-ai"]);
+    expect(groups.map((g) => g.label)).toEqual(["My Skills", "Explore Skills", "Lead Practice"]);
+    expect(groups[2].items.map((i) => i.href)).toEqual(["/practices/frontend", "/practices/data-ai"]);
   });
-  it("adds Requests and Site for the Site Lead, who can step in", () => {
-    expect(labels({ ...base, siteLead: true })).toEqual(["Me", "Explore Skills", "Requests", "Site"]);
+  it("adds Organize Site, and Change requests, for the Site Lead, who can step in", () => {
+    expect(labels({ ...base, siteLead: true })).toEqual(["My Skills", "Explore Skills", "Organize Site"]);
+  });
+  it("gives an employee no Change requests link", () => {
+    expect(navigationFor(base)[1].items.map((i) => i.href)).not.toContain("/requests");
   });
   it("adds up for someone who is all of them", () => {
     const all = { ...base, reportCount: 1, siteLead: true, leadOf: [{ id: "1", slug: "a", name: "A" }] };
-    expect(labels(all)).toEqual(["Me", "Explore Skills", "Requests", "Team", "Practice", "Site"]);
+    expect(labels(all)).toEqual([
+      "My Skills",
+      "Explore Skills",
+      "Manage Team",
+      "Lead Practice",
+      "Organize Site",
+    ]);
   });
 });
 

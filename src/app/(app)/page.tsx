@@ -63,7 +63,7 @@ export default async function Home() {
 
   const types = [
     "Employee",
-    ...(isManager(actor) ? ["Manager"] : []),
+    ...(isManager(actor) ? ["Career Advisor"] : []),
     ...(isPracticeLead(actor) ? ["Practice Lead"] : []),
     ...(actor.siteLead ? ["Site Lead"] : []),
   ];
@@ -92,7 +92,7 @@ export default async function Home() {
         <p className="rounded-lg border p-4">
           <Link href="/me/plan" className="font-medium underline underline-offset-4">
             You have {open.length} new {open.length === 1 ? "recommendation" : "recommendations"} from your
-            manager.
+            career advisor.
           </Link>
         </p>
       )}

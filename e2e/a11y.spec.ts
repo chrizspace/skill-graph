@@ -137,6 +137,7 @@ test("the Site Lead: overview, practices, people, catalogue maintenance with a m
   await visit(page, "/site/practices");
   await visit(page, "/site/people");
   await visit(page, "/site/people?show=no-manager");
+  await visit(page, "/site/people?show=managers");
   await visit(page, "/site/catalogue");
   await visit(page, "/site/permissions");
   await visit(page, "/site/audit");

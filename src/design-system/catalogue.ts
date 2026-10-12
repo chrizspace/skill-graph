@@ -66,7 +66,8 @@ export const componentCatalogue: CatalogueEntry[] = [
     group: "App",
     name: "Navigation",
     file: "src/components/app/nav-links.tsx",
-    description: "The menu groups for a person's user types, with the current page marked.",
+    description:
+      "The menu groups for a person's user types: each opens and closes, only the current page's group starts open, and the current page is marked.",
   },
   {
     group: "Domain",

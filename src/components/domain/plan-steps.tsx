@@ -24,7 +24,7 @@ export function PlanSteps({ steps }: { steps: readonly PlanStep[] }) {
           {s.recommended && (
             <span className="inline-flex items-center gap-1 text-xs font-medium">
               <Star aria-hidden className="size-3.5" />
-              Recommended by your manager
+              Recommended by your career advisor
             </span>
           )}
         </li>
