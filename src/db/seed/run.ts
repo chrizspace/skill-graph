@@ -2,15 +2,17 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { describeUrl } from "../env";
 import * as schema from "../schema";
+import { isDemoDeployment } from "../../lib/demo-mode";
 import { hasGraphData, seed } from "./seed";
 
 /**
- * Production: seeds the site, practices and graph only into an empty database (never demo people, recommendations or
+ * Production (unless it is a demo): seeds the site, practices and graph only into an empty database (never demo people, recommendations or
  * change requests), so it can't undo edits made in the app. Everywhere else (local, previews): the full seed,
  * idempotently, so demo sign-in always has its people.
  */
 export async function runSeed(url: string) {
-  const production = process.env.VERCEL_ENV === "production";
+  // a production that is a demo (ENABLE_DEMO_SIGN_IN=true) is seeded like a preview, so its sign-in has its people
+  const production = !isDemoDeployment();
   const where = `${describeUrl(url)} (${process.env.VERCEL_ENV ?? "local"})`;
   const client = postgres(url, { max: 1, onnotice: () => {} });
   try {
