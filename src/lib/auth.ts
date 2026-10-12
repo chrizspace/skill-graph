@@ -7,11 +7,17 @@ import * as z from "zod";
 import { getDb } from "@/db/client";
 import { DEMO_EMAIL_DOMAIN } from "@/db/actor";
 import * as schema from "@/db/schema";
+import { isDemoDeployment } from "./demo-mode";
 
 const production = process.env.VERCEL_ENV === "production";
 
-/** Demo sign-in picks a seeded person without a password: everywhere except production (docs/PLAN.md §2). */
-export const demoSignInEnabled = !production;
+/**
+ * Demo sign-in picks a seeded person without a password: everywhere except production, unless the owner opts in
+ * (docs/PLAN.md §2). On production it also needs BETTER_AUTH_SECRET: without it sessions would be signed with the
+ * built-in demo secret, which anyone can read in this public repository.
+ */
+export const demoSignInEnabled =
+  isDemoDeployment() && (!production || Boolean(process.env.BETTER_AUTH_SECRET));
 export const microsoftConfigured = Boolean(
   process.env.MICROSOFT_CLIENT_ID && process.env.MICROSOFT_CLIENT_SECRET,
 );
@@ -74,8 +80,8 @@ function createAuth() {
           },
         }
       : {},
-    // where the demo sign-in is open anyway (never on production) the tests sign in dozens of times from one address
-    rateLimit: { enabled: !demoSignInEnabled },
+    // where the demo sign-in is open anyway the tests sign in dozens of times from one address; production keeps its limits
+    rateLimit: { enabled: production || !demoSignInEnabled },
     plugins: [demoSignIn, nextCookies()],
   });
 }

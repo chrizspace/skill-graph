@@ -126,7 +126,7 @@ Local development doesn't use Neon: from M1 it runs Postgres in Docker. `vercel 
 
 ### Sign-in
 
-- **Demo sign-in** (locally and on previews, never in production): the sign-in page offers six of the seeded people, one for each way of using the app (an Employee, a Career Advisor of two people, a Practice Lead, a Practice Lead who is also the Career Advisor of one person, the Site Lead, and a second Site Lead who is also a Practice Lead and a Career Advisor). It needs no setup. The other people are still seeded; the tests sign in as any of them.
+- **Demo sign-in** (locally and on previews; on production only if you set `ENABLE_DEMO_SIGN_IN=true` and `BETTER_AUTH_SECRET`, which makes that deployment a demo: anyone who finds the address can use it as any demo person, and every build seeds the demo people, so use it for fictional data only): the sign-in page offers six of the seeded people, one for each way of using the app (an Employee, a Career Advisor of two people, a Practice Lead, a Practice Lead who is also the Career Advisor of one person, the Site Lead, and a second Site Lead who is also a Practice Lead and a Career Advisor). It needs no setup. The other people are still seeded; the tests sign in as any of them.
 - **Microsoft sign-in** (production): Better Auth with the Microsoft (Entra ID) provider. It is shown when `MICROSOFT_CLIENT_ID` and `MICROSOFT_CLIENT_SECRET` are set.
 
 To set up Microsoft sign-in:
