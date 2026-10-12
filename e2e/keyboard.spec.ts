@@ -40,7 +40,7 @@ test("the navigation is reached in order, by Tab, and every stop shows where the
     expect.stringContaining("Account menu"),
     "My Skills",
   ]);
-  expect(stops).toEqual(expect.arrayContaining(["Roles", "Catalogue", "Graph", "My team"]));
+  expect(stops).toEqual(expect.arrayContaining(["Roles", "Catalogue", "Graph", "Manage Team"]));
 });
 
 test("every interactive element on the main pages shows a visible focus", async ({ page }) => {
@@ -196,6 +196,9 @@ test("the menu groups open and close from the keyboard, and a closed group's lin
   await page.goto("/roles");
   const group = page.getByRole("button", { name: "Explore Skills" });
   await expect(group).toHaveAttribute("aria-expanded", "true");
+  // only the group of the page being viewed is open
+  await expect(page.getByRole("button", { name: "My Skills" })).toHaveAttribute("aria-expanded", "false");
+  await expect(page.getByRole("button", { name: "Manage Team" })).toHaveAttribute("aria-expanded", "false");
   await expect(async () => {
     await group.focus();
     await page.keyboard.press("Enter");

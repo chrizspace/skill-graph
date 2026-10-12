@@ -24,8 +24,8 @@ const icons: Record<NavGroup["id"], LucideIcon> = {
 };
 
 /**
- * The menu groups for a person's user types. Each group opens and closes (all start open); going to a page inside a
- * closed group opens it. The page they are on is marked with aria-current.
+ * The menu groups for a person's user types. Each group opens and closes; only the group of the current page starts
+ * open, and going to a page in another group opens that one and closes the rest. The page they are on is marked with aria-current.
  */
 export function NavLinks({
   groups,
@@ -38,17 +38,16 @@ export function NavLinks({
 }) {
   const pathname = usePathname();
   const active = activeHref(groups, pathname);
-  const [closed, setClosed] = useState<ReadonlySet<NavGroup["id"]>>(new Set());
-  // arriving on a page inside a closed group opens that group
-  const [seen, setSeen] = useState(pathname);
-  if (seen !== pathname) {
-    setSeen(pathname);
-    const holder = groups.find((g) => g.items.some((i) => i.href === active));
-    if (holder && closed.has(holder.id)) {
-      const next = new Set(closed);
-      next.delete(holder.id);
-      setClosed(next);
-    }
+  const holder = groups.find((g) => g.items.some((i) => i.href === active))?.id;
+  // only the group of the current page starts open; the others are one click away
+  const closedExcept = (open?: NavGroup["id"]) =>
+    new Set(groups.filter((g) => g.id !== open).map((g) => g.id));
+  const [closed, setClosed] = useState<ReadonlySet<NavGroup["id"]>>(() => closedExcept(holder));
+  // moving to a page in another group opens that group and closes the rest
+  const [seen, setSeen] = useState(holder);
+  if (seen !== holder) {
+    setSeen(holder);
+    setClosed(closedExcept(holder));
   }
   const toggle = (id: NavGroup["id"]) => {
     const next = new Set(closed);
