@@ -13,7 +13,14 @@ export interface NavGroup {
 export function navigationFor(actor: Actor): NavGroup[] {
   const groups: NavGroup[] = [
     {
-      label: "Explore",
+      label: "Me",
+      items: [
+        { label: "My profile", href: "/me" },
+        { label: "My development plan", href: "/me/plan" },
+      ],
+    },
+    {
+      label: "Explore Skills",
       items: [
         { label: "Home", href: "/" },
         { label: "Roles", href: "/roles" },
@@ -22,14 +29,11 @@ export function navigationFor(actor: Actor): NavGroup[] {
         { label: "Compare", href: "/compare" },
       ],
     },
-    {
-      label: "Me",
-      items: [
-        { label: "My profile", href: "/me" },
-        { label: "My development plan", href: "/me/plan" },
-      ],
-    },
   ];
+  // managers and Practice Leads send and review; the Site Lead can step in (docs/PLAN.md §1 permissions)
+  if (can(actor, "changeRequest:create", { practiceId: "" }) || actor.siteLead) {
+    groups.push({ label: "Requests", items: [{ label: "Change requests", href: "/requests" }] });
+  }
   if (isManager(actor)) {
     groups.push({
       label: "Team",
@@ -45,10 +49,6 @@ export function navigationFor(actor: Actor): NavGroup[] {
       items: actor.leadOf.map((p) => ({ label: p.name, href: `/practices/${p.slug}` })),
     });
   }
-  // managers and Practice Leads send and review; the Site Lead can step in (docs/PLAN.md §1 permissions)
-  if (can(actor, "changeRequest:create", { practiceId: "" }) || actor.siteLead) {
-    groups.push({ label: "Requests", items: [{ label: "Change requests", href: "/requests" }] });
-  }
   if (can(actor, "site:manage")) {
     groups.push({
       label: "Site",
@@ -57,6 +57,7 @@ export function navigationFor(actor: Actor): NavGroup[] {
         { label: "Practices", href: "/site/practices" },
         { label: "People", href: "/site/people" },
         { label: "Catalogue", href: "/site/catalogue" },
+        { label: "Permissions", href: "/site/permissions" },
         { label: "Audit log", href: "/site/audit" },
       ],
     });

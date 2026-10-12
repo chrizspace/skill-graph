@@ -38,21 +38,18 @@ export default async function Me() {
         <h2 id="role" className="text-xl font-semibold">
           My role
         </h2>
-        <p>
-          <span className="font-medium">{targetLabel(graph, current)}</span>
-          {practice && <span className="text-muted-foreground"> · {practice.name}</span>}
+        <p className="text-muted-foreground">
+          I&apos;m <strong className="font-bold text-foreground">{targetLabel(graph, current)}</strong>
+          {practice && (
+            <>
+              {" "}
+              in <strong className="font-bold text-foreground">{practice.name}</strong> practice
+            </>
+          )}
         </p>
         <Button asChild variant="outline" className="w-fit">
           <Link href="/onboarding">Change role</Link>
         </Button>
-      </section>
-
-      <section aria-labelledby="appearance" className="flex flex-col gap-2">
-        <h2 id="appearance" className="text-xl font-semibold">
-          Appearance
-        </h2>
-        <p className="text-sm text-muted-foreground">The colours of the app. Saved on your profile.</p>
-        <ThemeRadios onSave={saveTheme} />
       </section>
 
       <section aria-labelledby="target" className="flex flex-col gap-2">
@@ -165,6 +162,14 @@ export default async function Me() {
             <CertificationForm action={saveCertificationAction} options={addable} />
           </div>
         )}
+      </section>
+
+      <section aria-labelledby="appearance" className="flex flex-col gap-2">
+        <h2 id="appearance" className="text-xl font-semibold">
+          Appearance
+        </h2>
+        <p className="text-sm text-muted-foreground">The colours of the app. Saved on your profile.</p>
+        <ThemeRadios onSave={saveTheme} />
       </section>
     </div>
   );

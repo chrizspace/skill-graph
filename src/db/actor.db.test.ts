@@ -24,20 +24,20 @@ describe("user types come from the seed data", () => {
   it("Jordan is the Site Lead", async () => {
     const jordan = await actor("seed-jordan");
     expect(jordan.siteLead).toBe(true);
-    expect(await groups("seed-jordan")).toEqual(["Explore", "Me", "Requests", "Site"]);
+    expect(await groups("seed-jordan")).toEqual(["Me", "Explore Skills", "Requests", "Site"]);
   });
   it("Taylor leads the Frontend Practice", async () => {
     const taylor = await actor("seed-taylor");
     expect(taylor.leadOf.map((p) => p.slug)).toEqual(["frontend"]);
-    expect(await groups("seed-taylor")).toEqual(["Explore", "Me", "Practice", "Requests"]);
+    expect(await groups("seed-taylor")).toEqual(["Me", "Explore Skills", "Requests", "Practice"]);
   });
   it("Morgan and Riley manage five people each", async () => {
     expect((await actor("seed-morgan")).reportCount).toBe(5);
     expect((await actor("seed-riley")).reportCount).toBe(5);
-    expect(await groups("seed-morgan")).toEqual(["Explore", "Me", "Team", "Requests"]);
+    expect(await groups("seed-morgan")).toEqual(["Me", "Explore Skills", "Requests", "Team"]);
   });
   it("Alex is an employee only", async () => {
-    expect(await groups("seed-alex")).toEqual(["Explore", "Me"]);
+    expect(await groups("seed-alex")).toEqual(["Me", "Explore Skills"]);
   });
   it("returns null for someone unknown", async () => {
     expect(await loadActor(t.db, "nobody")).toBeNull();

@@ -55,3 +55,13 @@ test("the account menu has no theme choice", async ({ page }) => {
   await expect(page.getByRole("menuitem", { name: "Sign out" })).toBeVisible();
   await expect(page.getByRole("menuitemradio")).toHaveCount(0);
 });
+
+test('the profile reads "I\'m <role> in <practice> practice" and keeps Appearance last', async ({ page }) => {
+  await signInAs(page, "Alex Rivera");
+  await page.goto("/me");
+  const role = page.getByRole("region", { name: "My role" });
+  await expect(role).toContainText(/I'm .+ in .+ practice/);
+  await expect(role.locator("strong")).toHaveCount(2);
+  const headings = await page.locator("main h2").allTextContents();
+  expect(headings.at(-1)).toBe("Appearance");
+});
