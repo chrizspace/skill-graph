@@ -212,18 +212,3 @@ test("the menu groups open and close from the keyboard, and a closed group's lin
   const items = page.locator("#nav-explore-items");
   await expect(items.getByRole("link", { name: "Change requests" })).toBeVisible();
 });
-
-test("the whole sidebar folds away and comes back", async ({ page }) => {
-  await signInAs(page, "Morgan Lee");
-  await page.goto("/roles");
-  const nav = page.getByRole("navigation", { name: "Main" });
-  await expect(nav).toBeVisible();
-  await expect(async () => {
-    await page.getByRole("button", { name: "Collapse sidebar" }).click();
-    await expect(nav).toBeHidden({ timeout: 1000 });
-  }).toPass();
-  await page.getByRole("button", { name: "Expand sidebar" }).click();
-  await expect(nav).toBeVisible();
-  // the group that was open is still open
-  await expect(page.getByRole("button", { name: "Explore Skills" })).toHaveAttribute("aria-expanded", "true");
-});

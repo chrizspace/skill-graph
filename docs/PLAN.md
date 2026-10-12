@@ -534,7 +534,7 @@ Seed v2 (M2) holds:
 7. `/site/people` can filter to the career advisors (people with direct reports) and the Practice Leads.
 8. "Manager" is renamed **Career Advisor** everywhere a person reads it (menus, pages, the Permissions table, audit lines, docs). The code keeps `manager` (`isManager`, `manager_id`, `reportCount`), so nothing in the database changes; old audit lines keep the old wording.
 9. My profile: certifications are a third group under My skills, next to the technical and soft skills, with its own icon.
-10. In the sidebar one group is open at a time (the current page's at first; opening another closes the rest), and the whole sidebar folds to a narrow rail with a button at the bottom, "Collapse" with its icon and then only the icon (remembered in the browser).
+10. In the sidebar one group is open at a time: the current page's at first, and opening another closes the rest.
 
 **M13-b: going live (needs the owner's Microsoft tenant and Vercel settings; Claude cannot do these).** Done when the last box is ticked.
 

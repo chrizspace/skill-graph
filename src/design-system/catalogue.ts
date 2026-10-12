@@ -64,12 +64,6 @@ export const componentCatalogue: CatalogueEntry[] = [
   },
   {
     group: "App",
-    name: "Sidebar",
-    file: "src/components/app/sidebar.tsx",
-    description: "The navigation from 768px, with a button that folds it to a narrow rail and back.",
-  },
-  {
-    group: "App",
     name: "Navigation",
     file: "src/components/app/nav-links.tsx",
     description:

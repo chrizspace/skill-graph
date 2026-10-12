@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MobileNav } from "./mobile-nav";
-import { Sidebar } from "./sidebar";
+import { NavLinks } from "./nav-links";
 
 const initials = (name: string) =>
   name
@@ -79,7 +79,9 @@ export function AppShell({
         </div>
       </header>
       <div className="flex flex-1">
-        <Sidebar groups={groups} />
+        <aside className="hidden w-60 shrink-0 border-r p-4 md:block">
+          <NavLinks groups={groups} />
+        </aside>
         <main id="content" className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:px-8">
           {children}
         </main>
