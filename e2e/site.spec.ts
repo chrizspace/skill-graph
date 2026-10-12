@@ -86,7 +86,14 @@ test("a practice always keeps a lead: the last one can't be removed until anothe
 test("only the Site Lead manages practices, people, the catalogue and the audit log", async ({ browser }) => {
   for (const who of ["Taylor Brooks", "Morgan Lee", "Alex Rivera"]) {
     const s = await as(browser, who, "/site/practices");
-    for (const path of ["/site/practices", "/site/people", "/site/catalogue", "/site/audit", "/site"]) {
+    for (const path of [
+      "/site/practices",
+      "/site/people",
+      "/site/catalogue",
+      "/site/permissions",
+      "/site/audit",
+      "/site",
+    ]) {
       await s.page.goto(path);
       await expect(notFound(s.page), `${who} ${path}`).toBeVisible();
     }
@@ -266,4 +273,27 @@ test("the audit log pages through everything, newest first, and can be filtered"
   );
   await expect(main(page)).toContainText("removed Ben Carter as Practice Lead of “Platform Engineering”");
   await expect(main(page)).not.toContainText("created the practice");
+});
+
+test("Permissions: the Site Lead sees the four user types and what each may do, read-only", async ({
+  page,
+}) => {
+  await signInAs(page, "Jordan Kim");
+  await page.goto("/site");
+  await page.getByRole("link", { name: "Permissions" }).first().click();
+  await expect(page.getByRole("heading", { level: 1, name: "Permissions" })).toBeVisible();
+  const types = page.getByRole("region", { name: "User types" }).getByRole("listitem");
+  await expect(types).toHaveText([/Employee/, /Manager/, /Practice Lead/, /Site Lead/]);
+  const table = page.getByRole("table", { name: "What each type of user may do" });
+  await expect(table.getByRole("columnheader")).toHaveText([
+    "Can…",
+    "Employee",
+    "Manager",
+    "Practice Lead",
+    "Site Lead",
+  ]);
+  const row = table.getByRole("row", { name: /Read the audit log/ });
+  await expect(row.getByRole("img", { name: "Site Lead: allowed" })).toBeVisible();
+  await expect(row.getByRole("img", { name: "Manager: not allowed" })).toBeVisible();
+  await expect(table.getByRole("checkbox")).toHaveCount(0);
 });

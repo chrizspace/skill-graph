@@ -70,6 +70,12 @@ export const componentCatalogue: CatalogueEntry[] = [
   },
   {
     group: "Domain",
+    name: "Permissions table",
+    file: "src/components/domain/permissions-table.tsx",
+    description: "What each type of user may do: a read-only table of ticked boxes, one column per type.",
+  },
+  {
+    group: "Domain",
     name: "Priority badge",
     file: "src/components/domain/priority-badge.tsx",
     description: "A requirement's weight: Critical, Important or Nice to have, with icon and label.",

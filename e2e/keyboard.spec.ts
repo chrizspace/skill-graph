@@ -38,7 +38,7 @@ test("the navigation is reached in order, by Tab, and every stop shows where the
     "Skip to content",
     "Skill Graph",
     expect.stringContaining("Account menu"),
-    "Home",
+    "My profile",
   ]);
   expect(stops).toEqual(expect.arrayContaining(["Roles", "Catalogue", "Graph", "My team"]));
 });

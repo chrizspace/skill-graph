@@ -519,8 +519,16 @@ Seed v2 (M2) holds:
 | M12   | Site Lead: practices and leads, people and reporting lines, site overview and bench strength, catalogue merge, audit log                                                                                                                                                                               | A Site Lead creates a practice and appoints its lead; aggregates hide groups under 5; no named profiles                                              | Done              |
 | M13   | Accessibility (axe on every page), keyboard pass, README, deployment smoke check                                                                                                                                                                                                                       | Zero axe violations; `pnpm smoke` passes against production                                                                                          | Done              |
 | M13-b | Go live (owner): Microsoft sign-in on production, first Site Lead, smoke test with a real account                                                                                                                                                                                                      | Production works with Microsoft sign-in; the by-hand checks below pass                                                                               | Waiting for owner |
+| M14   | Fixes: profile layout and wording, and a read-only Permissions page for the Site Lead                                                                                                                                                                                                                  | The Permissions page is built from `can()` and axe-clean; the profile reads "I'm <role> in <practice> practice" with Appearance last                 | Done              |
 
 **M13: done.** Axe on every page for every kind of user, in both themes and at phone width, with menus and windows open (`e2e/a11y.spec.ts`, zero violations of any kind); the keyboard pass (`e2e/keyboard.spec.ts`); `pnpm smoke` for a deployed copy; the README's "Going live".
+
+**M14: fixes.** Collected one by one with the owner, done in one go.
+
+1. "My profile": the Appearance section goes to the bottom.
+2. "My role" reads "I'm _role_ in _practice_ practice", with the role and the practice black and bold and the rest grey.
+3. A **Permissions** page for the Site Lead (`/site/permissions`, in the Site menu): the four user types (Employee, Manager, Practice Lead, Site Lead) and a table of what each may do, with ticked boxes. Read-only on purpose: the table is built from `can()` for a typical person of each type (`src/domain/permissions.ts`), so it can't disagree with the app. Making permissions editable would need them in the database, an audit trail and a `can()` that reads them; that is a milestone of its own.
+4. The menu order is Me, Explore Skills (the old "Explore" group, renamed), Change requests, Team, Practice, Site: "Me" comes first and the change requests sit right under Explore Skills.
 
 **M13-b: going live (needs the owner's Microsoft tenant and Vercel settings; Claude cannot do these).** Done when the last box is ticked.
 
