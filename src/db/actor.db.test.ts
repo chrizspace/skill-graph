@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { can } from "../domain/access";
 import { navigationFor } from "../domain/navigation";
-import { listDemoPeople, loadActor } from "./actor";
+import { DEMO_ACCOUNTS, listDemoAccounts, listDemoPeople, loadActor } from "./actor";
 import { seed } from "./seed/seed";
 import { createTestDb } from "./testing";
 
@@ -31,9 +31,19 @@ describe("user types come from the seed data", () => {
     expect(taylor.leadOf.map((p) => p.slug)).toEqual(["frontend"]);
     expect(await groups("seed-taylor")).toEqual(["My Skills", "Explore Skills", "Lead Practice"]);
   });
-  it("Morgan and Riley manage five people each", async () => {
+  it("offers six demo accounts, one for each way of using the app", async () => {
+    const accounts = await listDemoAccounts(t.db);
+    expect(accounts.map((a) => a.email)).toEqual([...DEMO_ACCOUNTS]);
+    const [alex, riley, taylor, casey, jordan, robin] = await Promise.all(accounts.map((a) => actor(a.id)));
+    expect([alex.reportCount, alex.leadOf.length, alex.siteLead]).toEqual([0, 0, false]);
+    expect([riley.reportCount, riley.leadOf.length, riley.siteLead]).toEqual([2, 0, false]);
+    expect([taylor.reportCount, taylor.leadOf.length, taylor.siteLead]).toEqual([0, 1, false]);
+    expect([casey.reportCount, casey.leadOf.length, casey.siteLead]).toEqual([1, 1, false]);
+    expect([jordan.reportCount, jordan.leadOf.length, jordan.siteLead]).toEqual([0, 0, true]);
+    expect([robin.reportCount, robin.leadOf.length, robin.siteLead]).toEqual([2, 1, true]);
+  });
+  it("Morgan manages five people", async () => {
     expect((await actor("seed-morgan")).reportCount).toBe(5);
-    expect((await actor("seed-riley")).reportCount).toBe(5);
     expect(await groups("seed-morgan")).toEqual(["My Skills", "Explore Skills", "Manage Team"]);
   });
   it("Alex is an employee only", async () => {

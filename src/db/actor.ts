@@ -39,3 +39,23 @@ export async function listDemoPeople(db: Database) {
 }
 
 export const DEMO_EMAIL_DOMAIN = "@example.com";
+
+/**
+ * The accounts offered on the demo sign-in, one for each way of using the app: an Employee, a Career Advisor with two
+ * direct reports, a Practice Lead, a Practice Lead who is also the Career Advisor of one person, the Site Lead, and a second Site Lead who is also a
+ * Practice Lead and a Career Advisor.
+ * The seed holds more people; any of them can still sign in by address (the tests do).
+ */
+export const DEMO_ACCOUNTS = [
+  "alex.rivera@example.com",
+  "riley.nowak@example.com",
+  "taylor.brooks@example.com",
+  "casey.lin@example.com",
+  "jordan.kim@example.com",
+  "robin.weiss@example.com",
+] as const;
+
+export async function listDemoAccounts(db: Database) {
+  const people = await listDemoPeople(db);
+  return DEMO_ACCOUNTS.flatMap((email) => people.filter((p) => p.email === email));
+}

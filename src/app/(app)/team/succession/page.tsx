@@ -5,7 +5,7 @@ import { param } from "@/lib/query";
 import { requireTeam } from "@/lib/session";
 import { Succession } from "../succession";
 
-export const metadata = { title: "Succession · Skill Graph" };
+export const metadata = { title: "Succession · Skill Navigator" };
 
 export default async function TeamSuccession({ searchParams }: PageProps<"/team/succession">) {
   const actor = await requireTeam();

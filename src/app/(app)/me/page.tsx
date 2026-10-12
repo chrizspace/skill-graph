@@ -13,7 +13,7 @@ import { loadMe } from "@/lib/me";
 import { TargetSelect } from "../target-select";
 import { removeCertification, saveCertificationAction, saveSkills, saveTarget, saveTheme } from "./actions";
 
-export const metadata = { title: "My profile · Skill Graph" };
+export const metadata = { title: "My profile · Skill Navigator" };
 
 export default async function Me() {
   const { graph, practices, mine, today } = await loadMe();

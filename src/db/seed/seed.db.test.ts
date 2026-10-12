@@ -347,11 +347,11 @@ describe("requirements fixed by the scenarios", () => {
 });
 
 describe("demo people", () => {
-  it("seeds the Site Lead, a Practice Lead per practice and two managers with five reports each", async () => {
+  it("seeds the Site Lead, a Practice Lead per practice and career advisors: Morgan with five reports, Riley with two, Casey (also a lead) with one", async () => {
     const people = await t.db.select().from(user);
     expect(people.length).toBeGreaterThanOrEqual(16);
     for (const p of people) expect(p.email).toMatch(/@example\.com$/);
-    expect((await t.db.select().from(siteLeads)).map((l) => l.userId)).toEqual(["seed-jordan"]);
+    expect((await t.db.select().from(siteLeads)).map((l) => l.userId)).toEqual(["seed-jordan", "seed-robin"]);
     const leads = await t.db.select().from(practiceLeads);
     expect(new Set(leads.map((l) => l.practiceId)).size).toBe(5);
     const ps = await t.db.select().from(profiles);
@@ -359,7 +359,9 @@ describe("demo people", () => {
     const frontend = (await t.db.select().from(practices)).find((p) => p.slug === "frontend")!.id;
     expect(reportsOf("seed-morgan")).toHaveLength(5);
     for (const r of reportsOf("seed-morgan")) expect(r.practiceId).toBe(frontend);
-    expect(reportsOf("seed-riley")).toHaveLength(5);
+    expect(reportsOf("seed-riley")).toHaveLength(2);
+    expect(reportsOf("seed-casey").map((r) => r.userId)).toEqual(["seed-ben"]);
+    expect(reportsOf("seed-robin")).toHaveLength(2);
     // the Site Lead's aggregates hide groups under 5: two practices are big enough
     const members = (practiceId: string) => ps.filter((p) => p.practiceId === practiceId).length;
     expect((await t.db.select().from(practices)).filter((p) => members(p.id) >= 5)).toHaveLength(2);

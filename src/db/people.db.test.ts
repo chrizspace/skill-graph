@@ -69,13 +69,9 @@ describe("loading people", () => {
       "seed-noah",
       "seed-zoe",
     ]);
-    expect((await directReportIds(t.db, "seed-riley")).sort()).toEqual([
-      "seed-ben",
-      "seed-ella",
-      "seed-lena",
-      "seed-omar",
-      "seed-sam",
-    ]);
+    expect((await directReportIds(t.db, "seed-riley")).sort()).toEqual(["seed-ella", "seed-sam"]);
+    expect(await directReportIds(t.db, "seed-casey")).toEqual(["seed-ben"]);
+    expect((await directReportIds(t.db, "seed-robin")).sort()).toEqual(["seed-lena", "seed-omar"]);
     expect(await directReportIds(t.db, "seed-alex")).toEqual([]);
     const frontend = actors.taylor.leadOf[0].id;
     expect((await memberIds(t.db, frontend)).length).toBe(7); // Taylor, Morgan and the five

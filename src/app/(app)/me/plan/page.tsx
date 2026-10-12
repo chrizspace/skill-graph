@@ -11,7 +11,7 @@ import { slugOfTarget } from "@/domain/profile-input";
 import { loadMe } from "@/lib/me";
 import { answerRecommendationAction } from "../actions";
 
-export const metadata = { title: "My development plan · Skill Graph" };
+export const metadata = { title: "My development plan · Skill Navigator" };
 
 export default async function Plan() {
   const { graph, mine, recommendations, today } = await loadMe();

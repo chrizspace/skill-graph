@@ -26,7 +26,7 @@ import {
 } from "../../../../actions";
 import { RequirementsEditor } from "./requirements-editor";
 
-export const metadata = { title: "Edit role · Skill Graph" };
+export const metadata = { title: "Edit role · Skill Navigator" };
 
 export default async function EditRole({ params }: PageProps<"/practices/[slug]/roles/[role]/edit">) {
   const { slug, role: roleSlug } = await params;

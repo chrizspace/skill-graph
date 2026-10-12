@@ -48,7 +48,7 @@ export function AppShell({
         <MobileNav groups={groups} />
         <Link href="/" className="font-semibold whitespace-nowrap">
           <span aria-hidden className="mr-2 inline-block size-3 rounded-sm bg-brand" />
-          Skill Graph
+          Skill Navigator
         </Link>
         <form id="sign-out-form" action={signOut} />
         <div className="ml-auto">

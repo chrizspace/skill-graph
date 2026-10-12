@@ -2,7 +2,7 @@ import { PermissionsTable } from "@/components/domain/permissions-table";
 import { permissionMatrix, userTypeLabel, userTypeSummary, userTypes } from "@/domain/permissions";
 import { requireCan } from "@/lib/session";
 
-export const metadata = { title: "Permissions · Skill Graph" };
+export const metadata = { title: "Permissions · Skill Navigator" };
 
 /** What each type of user may do. Read-only: the table is built from the same rules the app enforces. */
 export default async function Permissions() {

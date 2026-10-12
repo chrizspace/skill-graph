@@ -4,7 +4,7 @@ import { param } from "@/lib/query";
 import { requireActor } from "@/lib/session";
 import { Explorer } from "../explorer";
 
-export const metadata = { title: "Graph performance · Skill Graph" };
+export const metadata = { title: "Graph performance · Skill Navigator" };
 
 /**
  * The explorer on a synthetic graph (2,000 nodes and 20,000 links by default), for the performance test

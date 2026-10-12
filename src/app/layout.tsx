@@ -4,7 +4,7 @@ import { defaultTheme, themeInitScript } from "@/design-system/theme";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Skill Graph",
+  title: "Skill Navigator",
   description: "Roles, skills and technologies as a graph: find the gap to the role you want.",
 };
 

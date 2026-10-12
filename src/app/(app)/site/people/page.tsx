@@ -10,7 +10,7 @@ import { hrefWith, param } from "@/lib/query";
 import { requireCan } from "@/lib/session";
 import { addSiteLeadAction, removeSiteLeadAction, setPersonAction } from "../actions";
 
-export const metadata = { title: "People · Skill Graph" };
+export const metadata = { title: "People · Skill Navigator" };
 
 /**
  * Who is in which practice and who reports to whom, the part of a person the Site Lead keeps (until it comes from the

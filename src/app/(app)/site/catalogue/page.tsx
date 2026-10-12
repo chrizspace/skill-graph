@@ -11,7 +11,7 @@ import { param } from "@/lib/query";
 import { requireCan } from "@/lib/session";
 import { mergeAction, renameCategoryAction, setItemCategoryAction } from "../actions";
 
-export const metadata = { title: "Catalogue maintenance · Skill Graph" };
+export const metadata = { title: "Catalogue maintenance · Skill Navigator" };
 
 const TYPES = ["technical_skill", "soft_skill", "certification"] as const;
 

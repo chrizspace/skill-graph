@@ -9,7 +9,7 @@ import { getPractices } from "@/lib/graph-data";
 import { requireCan } from "@/lib/session";
 import { appointLeadAction, createPracticeAction, removeLeadAction, updatePracticeAction } from "../actions";
 
-export const metadata = { title: "Practices · Skill Graph" };
+export const metadata = { title: "Practices · Skill Navigator" };
 
 export default async function SitePractices() {
   await requireCan("site:manage");

@@ -65,6 +65,8 @@ test("certifications to watch: an expired one is still held, an expiring one is 
   await expect(certs.locator('[data-status="expired"]')).toContainText("Power BI Data Analyst (PL-300)");
   await expect(certs.locator('[data-status="expired"]')).toContainText("expired on");
   await expect(certs).toContainText("still counts as held");
+  // Omar reports to Robin
+  await signInAs(page, "Robin Weiss");
   await page.goto("/team");
   await page.getByRole("link", { name: "Omar Haddad" }).click();
   await expect(section(page, "Certifications to watch").locator('[data-status="expiring"]')).toContainText(

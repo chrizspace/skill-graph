@@ -7,7 +7,7 @@ import { browseRoles } from "@/domain/browse";
 import { getGraph, getPractices } from "@/lib/graph-data";
 import { hrefWith, param } from "@/lib/query";
 
-export const metadata = { title: "Roles · Skill Graph" };
+export const metadata = { title: "Roles · Skill Navigator" };
 
 export default async function Roles({ searchParams }: PageProps<"/roles">) {
   const sp = await searchParams;

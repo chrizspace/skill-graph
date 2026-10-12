@@ -8,7 +8,7 @@ import { getGraph } from "@/lib/graph-data";
 import { requireTeam } from "@/lib/session";
 import { PeopleList } from "./people-list";
 
-export const metadata = { title: "My team · Skill Graph" };
+export const metadata = { title: "My team · Skill Navigator" };
 
 export default async function Team() {
   const actor = await requireTeam();

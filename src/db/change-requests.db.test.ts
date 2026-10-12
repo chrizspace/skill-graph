@@ -159,7 +159,7 @@ describe("who sees a request", () => {
     expect(await loadRequest(t.db, alex, seeded.id)).toBeNull(); // an employee
     expect(await loadRequest(t.db, riley, seeded.id)).toBeNull(); // another manager
     expect(await loadRequest(t.db, casey, seeded.id)).toBeNull(); // another practice's lead
-    expect(await loadRequest(t.db, robin, seeded.id)).toBeNull();
+    expect(await loadRequest(t.db, robin, seeded.id)).not.toBeNull(); // the second Site Lead, also a lead of another practice
     expect(await loadRequest(t.db, taylor, "00000000-0000-4000-8000-0000000000aa")).toBeNull();
   });
 

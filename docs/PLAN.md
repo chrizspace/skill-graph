@@ -1,4 +1,4 @@
-# Skill Graph: plan
+# Skill Navigator: plan
 
 Living document: update it when a decision changes. Milestone status is tracked in the table in §8.
 
@@ -534,6 +534,9 @@ Seed v2 (M2) holds:
 7. `/site/people` can filter to the career advisors (people with direct reports) and the Practice Leads.
 8. "Manager" is renamed **Career Advisor** everywhere a person reads it (menus, pages, the Permissions table, audit lines, docs). The code keeps `manager` (`isManager`, `manager_id`, `reportCount`), so nothing in the database changes; old audit lines keep the old wording.
 9. My profile: certifications are a third group under My skills, next to the technical and soft skills, with its own icon.
+10. The product is called **Skill Navigator** (it was "Skill Graph"; the repository, package and URLs keep their names).
+11. The demo sign-in offers six accounts, not eighteen: an Employee (Alex Rivera), a Career Advisor of two (Riley Nowak), a Practice Lead (Taylor Brooks), a Practice Lead who is the Career Advisor of one person (Casey Lin), the Site Lead (Jordan Kim), and a second Site Lead who is also a Practice Lead and a Career Advisor of two (Robin Weiss). To make the shapes exist, reporting lines moved (Omar and Lena report to Robin, Ben to Casey, so Riley has Sam and Ella). The other people stay in the seed.
+12. The tests sign in through the sign-in endpoint (`e2e/helpers.ts`), because the picker no longer lists everyone; rate limiting is off wherever demo sign-in is on (never on production).
 
 **M13-b: going live (needs the owner's Microsoft tenant and Vercel settings; Claude cannot do these).** Done when the last box is ticked.
 

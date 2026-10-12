@@ -9,7 +9,7 @@ import type { Group } from "@/domain/aggregates";
 import { getGraph, getPractices } from "@/lib/graph-data";
 import { requireCan } from "@/lib/session";
 
-export const metadata = { title: "Site overview · Skill Graph" };
+export const metadata = { title: "Site overview · Skill Navigator" };
 
 /** A count, or "fewer than 5" where it was withheld so it can't point at a person. */
 const count = (n: number | null) => (n === null ? `fewer than ${thresholds.minGroupSize}` : String(n));

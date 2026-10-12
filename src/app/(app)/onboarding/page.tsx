@@ -8,7 +8,7 @@ import { loadMe } from "@/lib/me";
 import { hrefWith, param } from "@/lib/query";
 import { saveRole } from "../me/actions";
 
-export const metadata = { title: "Choose your role · Skill Graph" };
+export const metadata = { title: "Choose your role · Skill Navigator" };
 
 const stepLink =
   "block rounded-lg border p-4 hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none";

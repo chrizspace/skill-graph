@@ -1096,6 +1096,7 @@ export const people: SeedPerson[] = [
     practice: "backend-architecture",
     role: "Solution Architect",
     leads: ["backend-architecture"],
+    siteLead: true,
   },
   {
     id: "seed-avery",
@@ -1216,7 +1217,7 @@ export const people: SeedPerson[] = [
     practice: "delivery",
     role: "Scrum Master",
     specialization: "SAFe",
-    manager: "seed-riley",
+    manager: "seed-robin",
     certifications: [
       { name: "Professional Scrum Master I (PSM I)", obtainedDaysAgo: 900, expiresInDays: null },
       { name: "SAFe Scrum Master (SSM)", obtainedDaysAgo: 330, expiresInDays: 35 },
@@ -1228,7 +1229,7 @@ export const people: SeedPerson[] = [
     email: "lena.hoffmann@example.com",
     practice: "delivery",
     role: "Product Owner",
-    manager: "seed-riley",
+    manager: "seed-robin",
     certifications: [
       { name: "Professional Scrum Product Owner I (PSPO I)", obtainedDaysAgo: 600, expiresInDays: null },
     ],
@@ -1239,7 +1240,7 @@ export const people: SeedPerson[] = [
     email: "ben.carter@example.com",
     practice: "delivery",
     role: "Scrum Master",
-    manager: "seed-riley",
+    manager: "seed-casey",
     certifications: [
       { name: "Professional Scrum Master I (PSM I)", obtainedDaysAgo: 200, expiresInDays: null },
     ],

@@ -36,7 +36,7 @@ test("the navigation is reached in order, by Tab, and every stop shows where the
   }
   expect(stops.slice(0, 4)).toEqual([
     "Skip to content",
-    "Skill Graph",
+    "Skill Navigator",
     expect.stringContaining("Account menu"),
     "My profile",
   ]);
