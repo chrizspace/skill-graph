@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { commentAction, decideAction, withdrawAction } from "../actions";
 import { namesFrom, roleLabel, StatusBadge } from "../request-list";
 
-export const metadata = { title: "Change request · Skill Graph" };
+export const metadata = { title: "Change request · Skill Navigator" };
 
 const when = (d: Date) => `${d.toISOString().slice(0, 16).replace("T", " ")} UTC`;
 

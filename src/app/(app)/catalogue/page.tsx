@@ -11,7 +11,7 @@ import { getActor } from "@/lib/session";
 import { AddItem } from "./add-item";
 import { hrefWith, param } from "@/lib/query";
 
-export const metadata = { title: "Catalogue · Skill Graph" };
+export const metadata = { title: "Catalogue · Skill Navigator" };
 
 export default async function Catalogue({ searchParams }: PageProps<"/catalogue">) {
   const sp = await searchParams;

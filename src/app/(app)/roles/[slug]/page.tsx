@@ -12,7 +12,7 @@ import { getActor } from "@/lib/session";
 import { Button } from "@/components/ui/button";
 
 // a static title: reading the graph here would need the database while the app is built
-export const metadata: Metadata = { title: "Role · Skill Graph" };
+export const metadata: Metadata = { title: "Role · Skill Navigator" };
 
 const percent = (score: number) => `${Math.round(score * 100)}%`;
 

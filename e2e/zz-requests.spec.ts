@@ -237,12 +237,12 @@ test("who can see a request: the author, the practice's leads and the Site Lead"
     return { page, close: () => context.close() };
   };
   const path = `/requests/${approvedId}`;
-  for (const who of ["Alex Rivera", "Riley Nowak", "Casey Lin", "Robin Weiss"]) {
+  for (const who of ["Alex Rivera", "Riley Nowak", "Casey Lin", "Avery Chen"]) {
     const s = await open(who, path);
     await expect(notFound(s.page), who).toBeVisible();
     await s.close();
   }
-  for (const who of ["Morgan Lee", "Taylor Brooks", "Jordan Kim"]) {
+  for (const who of ["Morgan Lee", "Taylor Brooks", "Jordan Kim", "Robin Weiss"]) {
     const s = await open(who, path);
     await expect(s.page.getByRole("heading", { level: 1 }), who).toContainText("UX Developer");
     await s.close();

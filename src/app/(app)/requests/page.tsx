@@ -9,7 +9,7 @@ import { getGraph } from "@/lib/graph-data";
 import { requireActor } from "@/lib/session";
 import { RequestList } from "./request-list";
 
-export const metadata = { title: "Change requests · Skill Graph" };
+export const metadata = { title: "Change requests · Skill Navigator" };
 
 export default async function Requests() {
   const actor = await requireActor();

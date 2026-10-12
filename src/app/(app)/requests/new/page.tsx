@@ -9,7 +9,7 @@ import { param } from "@/lib/query";
 import { requireCan } from "@/lib/session";
 import { createRequestAction } from "../actions";
 
-export const metadata = { title: "New change request · Skill Graph" };
+export const metadata = { title: "New change request · Skill Navigator" };
 
 const step =
   "block rounded-lg border p-4 hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none";

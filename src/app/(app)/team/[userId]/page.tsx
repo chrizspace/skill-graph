@@ -8,7 +8,7 @@ import { getGraph, getPractices } from "@/lib/graph-data";
 import { requireActor } from "@/lib/session";
 import { PersonProfile } from "../person-profile";
 
-export const metadata = { title: "Profile · Skill Graph" };
+export const metadata = { title: "Profile · Skill Navigator" };
 
 /** A person's profile (Scenario 3): for their manager and the Practice Leads of their practice; nobody else. */
 export default async function PersonPage({ params }: PageProps<"/team/[userId]">) {

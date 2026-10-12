@@ -235,6 +235,7 @@ describe("people and reporting lines", () => {
     await reject(addSiteLead(t.db, jordan, "seed-casey"));
     expect((await ctx("seed-casey")).actor.siteLead).toBe(true);
     await removeSiteLead(t.db, jordan, "seed-casey");
+    await removeSiteLead(t.db, jordan, "seed-robin"); // the second seeded Site Lead: Jordan is the last
     expect((await reject(removeSiteLead(t.db, jordan, "seed-jordan"))).message).toContain(
       "at least one Site Lead",
     );

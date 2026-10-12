@@ -74,6 +74,8 @@ function createAuth() {
           },
         }
       : {},
+    // where the demo sign-in is open anyway (never on production) the tests sign in dozens of times from one address
+    rateLimit: { enabled: !demoSignInEnabled },
     plugins: [demoSignIn, nextCookies()],
   });
 }

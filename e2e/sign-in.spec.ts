@@ -1,19 +1,38 @@
 import { expect, test } from "@playwright/test";
 import { signInAs } from "./helpers";
 
-test("every demo person can sign in", async ({ browser }) => {
-  test.setTimeout(90_000); // 18 sign-ins
+test("the demo sign-in offers six accounts, one for each way of using the app, and each works", async ({
+  browser,
+}) => {
+  test.setTimeout(60_000);
+  const expected = [
+    ["Alex Rivera", "Employee"],
+    ["Riley Nowak", "Career Advisor of 2 people"],
+    ["Taylor Brooks", "Practice Lead"],
+    ["Casey Lin", "Practice Lead, Career Advisor of 1 person"],
+    ["Jordan Kim", "Site Lead"],
+    ["Robin Weiss", "Site Lead, Practice Lead, Career Advisor of 2 people"],
+  ];
   const context = await browser.newContext();
   const page = await context.newPage();
   await page.goto("/sign-in");
   const buttons = page.getByRole("list").getByRole("button");
-  await expect(buttons).toHaveCount(18);
-  const names = (await buttons.allInnerTexts()).map((t) => t.split("\n")[0]);
+  await expect(buttons).toHaveCount(6);
+  const rows = (await buttons.allInnerTexts()).map((t) =>
+    t
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean),
+  );
+  expect(rows).toEqual(expected);
   await context.close();
 
-  for (const name of names) {
+  for (const [name] of expected) {
     const fresh = await browser.newContext();
-    await signInAs(await fresh.newPage(), name);
+    const p = await fresh.newPage();
+    await p.goto("/sign-in");
+    await p.getByRole("button", { name: new RegExp(`^${name}`) }).click();
+    await expect(p.getByRole("heading", { level: 1, name: `Welcome, ${name.split(" ")[0]}` })).toBeVisible();
     await fresh.close();
   }
 });

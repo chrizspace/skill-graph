@@ -6,7 +6,7 @@ import { param } from "@/lib/query";
 import { requireActor } from "@/lib/session";
 import { Succession } from "../../../team/succession";
 
-export const metadata = { title: "Succession · Skill Graph" };
+export const metadata = { title: "Succession · Skill Navigator" };
 
 export default async function PracticeSuccession({
   params,

@@ -1,17 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  BuildingIcon,
-  ChevronDownIcon,
-  CompassIcon,
-  FlagIcon,
-  UserIcon,
-  UsersIcon,
-  type LucideIcon,
-} from "lucide-react";
+import { BuildingIcon, CompassIcon, FlagIcon, UserIcon, UsersIcon, type LucideIcon } from "lucide-react";
 import { activeHref, type NavGroup } from "@/domain/navigation";
 import { cn } from "@/lib/utils";
 
@@ -23,10 +14,7 @@ const icons: Record<NavGroup["id"], LucideIcon> = {
   site: BuildingIcon,
 };
 
-/**
- * The menu groups for a person's user types. Only one group is open at a time: the group of the current page
- * at first, then whichever one is opened (opening a group closes the others). The page they are on is marked with aria-current.
- */
+/** The menu groups for a person's user types: a title with its links under it. The page they are on is marked with aria-current. */
 export function NavLinks({
   groups,
   onNavigate,
@@ -36,53 +24,21 @@ export function NavLinks({
   onNavigate?: () => void;
   className?: string;
 }) {
-  const pathname = usePathname();
-  const active = activeHref(groups, pathname);
-  const holder = groups.find((g) => g.items.some((i) => i.href === active))?.id;
-  // only the group of the current page starts open; the others are one click away
-  const closedExcept = (open?: NavGroup["id"]) =>
-    new Set(groups.filter((g) => g.id !== open).map((g) => g.id));
-  const [closed, setClosed] = useState<ReadonlySet<NavGroup["id"]>>(() => closedExcept(holder));
-  // moving to a page in another group opens that group and closes the rest
-  const [seen, setSeen] = useState(holder);
-  if (seen !== holder) {
-    setSeen(holder);
-    setClosed(closedExcept(holder));
-  }
-  // opening a group closes the others; closing one just closes it
-  const toggle = (id: NavGroup["id"]) =>
-    setClosed(closed.has(id) ? closedExcept(id) : new Set(closed).add(id));
-
+  const active = activeHref(groups, usePathname());
   return (
-    <nav aria-label="Main" className={cn("flex flex-col gap-1", className)}>
+    <nav aria-label="Main" className={cn("flex flex-col gap-5", className)}>
       {groups.map((group) => {
-        const open = !closed.has(group.id);
         const Icon = icons[group.id];
-        const holdsActive = group.items.some((i) => i.href === active);
         return (
           <div key={group.id} role="group" aria-labelledby={`nav-${group.id}`}>
-            <button
-              type="button"
+            <p
               id={`nav-${group.id}`}
-              aria-expanded={open}
-              aria-controls={`nav-${group.id}-items`}
-              onClick={() => toggle(group.id)}
-              className={cn(
-                "flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
-                holdsActive && !open && "bg-accent text-accent-foreground",
-              )}
+              className="mb-1 flex items-center gap-3 px-3 py-1 text-sm font-semibold"
             >
               <Icon aria-hidden className="size-5 shrink-0" />
-              <span className="flex-1">{group.label}</span>
-              <ChevronDownIcon
-                aria-hidden
-                className={cn(
-                  "size-4 shrink-0 text-muted-foreground transition-transform",
-                  !open && "-rotate-90",
-                )}
-              />
-            </button>
-            <ul id={`nav-${group.id}-items`} hidden={!open} className="mt-0.5 mb-2 flex flex-col gap-0.5">
+              {group.label}
+            </p>
+            <ul className="flex flex-col gap-0.5">
               {group.items.map((item) => (
                 <li key={item.href}>
                   <Link

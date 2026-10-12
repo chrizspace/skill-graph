@@ -6,7 +6,7 @@ import { getGraphRows, getPractices } from "@/lib/graph-data";
 import { param } from "@/lib/query";
 import { requireActor } from "@/lib/session";
 
-export const metadata = { title: "Graph · Skill Graph" };
+export const metadata = { title: "Graph · Skill Navigator" };
 
 const NODE_TYPES: NodeType[] = ["role", "specialization", ...catalogueTypes];
 const list = (value: string | undefined) => value?.split(",").filter(Boolean) ?? [];

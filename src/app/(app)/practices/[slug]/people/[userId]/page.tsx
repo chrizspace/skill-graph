@@ -8,7 +8,7 @@ import { getGraph, getPractices } from "@/lib/graph-data";
 import { requireActor } from "@/lib/session";
 import { PersonProfile } from "../../../../team/person-profile";
 
-export const metadata = { title: "Profile · Skill Graph" };
+export const metadata = { title: "Profile · Skill Navigator" };
 
 /** A member of the practice, for its Practice Leads. The Site Lead gets nothing here: aggregates only. */
 export default async function MemberPage({ params }: PageProps<"/practices/[slug]/people/[userId]">) {

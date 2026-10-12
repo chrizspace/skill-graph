@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
-import { listDemoPeople, loadActor } from "@/db/actor";
+import { listDemoAccounts, loadActor } from "@/db/actor";
 import { getDb } from "@/db/client";
 import { MicrosoftButton } from "@/components/app/microsoft-button";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { authConfigured, demoSignInEnabled, microsoftConfigured } from "@/lib/au
 import { getActor, safeNext } from "@/lib/session";
 import { signInAsDemo } from "../actions";
 
-export const metadata = { title: "Sign in · Skill Graph" };
+export const metadata = { title: "Sign in · Skill Navigator" };
 
 export default function SignInPage({ searchParams }: PageProps<"/sign-in">) {
   return (
@@ -27,12 +27,14 @@ async function SignIn({ searchParams }: Pick<PageProps<"/sign-in">, "searchParam
   const db = getDb();
   const people = demoSignInEnabled
     ? await Promise.all(
-        (await listDemoPeople(db)).map(async (p) => {
+        (await listDemoAccounts(db)).map(async (p) => {
           const actor = (await loadActor(db, p.id))!;
           const types = [
             ...(actor.siteLead ? ["Site Lead"] : []),
             ...(isPracticeLead(actor) ? ["Practice Lead"] : []),
-            ...(isManager(actor) ? ["Career Advisor"] : []),
+            ...(isManager(actor)
+              ? [`Career Advisor of ${actor.reportCount} ${actor.reportCount === 1 ? "person" : "people"}`]
+              : []),
           ];
           return { ...p, types: types.length ? types.join(", ") : "Employee" };
         }),
@@ -42,7 +44,7 @@ async function SignIn({ searchParams }: Pick<PageProps<"/sign-in">, "searchParam
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center gap-6 px-4 py-12">
       <div>
-        <h1 className="text-4xl font-bold tracking-tight">Skill Graph</h1>
+        <h1 className="text-4xl font-bold tracking-tight">Skill Navigator</h1>
         <p className="mt-2 text-muted-foreground">
           See how roles, skills and certifications connect, find the gap to the role you want, and plan your
           next step.
@@ -57,7 +59,8 @@ async function SignIn({ searchParams }: Pick<PageProps<"/sign-in">, "searchParam
           <CardHeader>
             <CardTitle>Demo sign-in</CardTitle>
             <CardDescription>
-              Pick a fictional person to try the app as. This is only available outside production.
+              Pick a fictional person to try the app as: one for each way of using it. This is only available
+              outside production.
             </CardDescription>
           </CardHeader>
           <CardContent>

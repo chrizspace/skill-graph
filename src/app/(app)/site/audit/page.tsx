@@ -6,7 +6,7 @@ import { describeAudit } from "@/lib/audit-text";
 import { hrefWith, param } from "@/lib/query";
 import { requireCan } from "@/lib/session";
 
-export const metadata = { title: "Audit log · Skill Graph" };
+export const metadata = { title: "Audit log · Skill Navigator" };
 
 const KINDS = [
   ["node", "Roles and catalogue"],

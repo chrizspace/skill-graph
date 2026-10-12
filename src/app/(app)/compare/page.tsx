@@ -9,7 +9,7 @@ import { loadMe } from "@/lib/me";
 import { param } from "@/lib/query";
 import { TargetSelect } from "../target-select";
 
-export const metadata = { title: "Compare roles · Skill Graph" };
+export const metadata = { title: "Compare roles · Skill Navigator" };
 
 export default async function Compare({ searchParams }: PageProps<"/compare">) {
   const sp = await searchParams;

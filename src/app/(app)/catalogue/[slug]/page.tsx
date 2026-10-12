@@ -8,7 +8,7 @@ import { weights, type CatalogueType, type GraphNode } from "@/domain/graph";
 import { getGraph } from "@/lib/graph-data";
 
 // a static title: reading the graph here would need the database while the app is built
-export const metadata: Metadata = { title: "Catalogue item · Skill Graph" };
+export const metadata: Metadata = { title: "Catalogue item · Skill Navigator" };
 
 function ItemLinks({ title, items }: { title: string; items: GraphNode[] }) {
   if (items.length === 0) return null;

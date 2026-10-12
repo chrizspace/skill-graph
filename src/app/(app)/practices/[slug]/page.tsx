@@ -17,7 +17,7 @@ import { readinessPerRole, summarize, teamGaps } from "@/domain/people";
 import { PriorityBadge } from "@/components/domain/priority-badge";
 import { PeopleList } from "../../team/people-list";
 
-export const metadata = { title: "Practice · Skill Graph" };
+export const metadata = { title: "Practice · Skill Navigator" };
 
 /** A practice's page for its Practice Leads (and the Site Lead): its roles, drafts included, and a place to add one. */
 export default async function PracticePage({ params }: PageProps<"/practices/[slug]">) {
