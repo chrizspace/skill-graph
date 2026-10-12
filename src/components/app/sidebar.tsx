@@ -10,7 +10,7 @@ import { NavLinks } from "./nav-links";
 const KEY = "sidebar-collapsed";
 
 /**
- * The sidebar from 768px: the navigation with a button that folds it away to a narrow rail and back. The choice is
+ * The sidebar from 768px: the navigation, with a button at the bottom ("Collapse", then only its icon) that folds it away to a narrow rail and back. The choice is
  * kept in this browser. The navigation stays in the page while folded (hidden), so its open groups are remembered.
  */
 export function Sidebar({ groups }: { groups: NavGroup[] }) {
@@ -33,21 +33,21 @@ export function Sidebar({ groups }: { groups: NavGroup[] }) {
     }
   };
   return (
-    <aside className={cn("hidden shrink-0 border-r p-4 md:block", collapsed ? "w-16" : "w-60")}>
+    <aside className={cn("hidden shrink-0 flex-col border-r p-4 md:flex", collapsed ? "w-16" : "w-60")}>
+      <div id="sidebar-nav" hidden={collapsed}>
+        <NavLinks groups={groups} />
+      </div>
       <Button
         variant="ghost"
-        size="icon"
         aria-expanded={!collapsed}
         aria-controls="sidebar-nav"
         aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         onClick={() => set(!collapsed)}
-        className={cn("mb-2", !collapsed && "ml-auto flex")}
+        className={cn("mt-auto", collapsed ? "w-full px-0" : "w-fit gap-3 px-3 text-muted-foreground")}
       >
         {collapsed ? <PanelLeftOpenIcon aria-hidden /> : <PanelLeftCloseIcon aria-hidden />}
+        {!collapsed && <span>Collapse</span>}
       </Button>
-      <div id="sidebar-nav" hidden={collapsed}>
-        <NavLinks groups={groups} />
-      </div>
     </aside>
   );
 }

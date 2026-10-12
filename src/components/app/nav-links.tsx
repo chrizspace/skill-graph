@@ -24,8 +24,8 @@ const icons: Record<NavGroup["id"], LucideIcon> = {
 };
 
 /**
- * The menu groups for a person's user types. Each group opens and closes; only the group of the current page starts
- * open, and going to a page in another group opens that one and closes the rest. The page they are on is marked with aria-current.
+ * The menu groups for a person's user types. Only one group is open at a time: the group of the current page
+ * at first, then whichever one is opened (opening a group closes the others). The page they are on is marked with aria-current.
  */
 export function NavLinks({
   groups,
@@ -49,11 +49,9 @@ export function NavLinks({
     setSeen(holder);
     setClosed(closedExcept(holder));
   }
-  const toggle = (id: NavGroup["id"]) => {
-    const next = new Set(closed);
-    if (!next.delete(id)) next.add(id);
-    setClosed(next);
-  };
+  // opening a group closes the others; closing one just closes it
+  const toggle = (id: NavGroup["id"]) =>
+    setClosed(closed.has(id) ? closedExcept(id) : new Set(closed).add(id));
 
   return (
     <nav aria-label="Main" className={cn("flex flex-col gap-1", className)}>
